@@ -59,6 +59,11 @@ As this dataset has not yet been released, there is no published work on this da
 
 To the extent of our knowledge, little is known about *what content* has prospered on the platform through the years, as well as how *the process of creating content* for YouTube has evolved. Thus the current approach of studying the longitudinal data of YouTube is inherently original. We propose additional sketch of visualizations in part 3 of the [DataOverview notebook](notebooks/DataOverview.ipynb).
 
+**Some ideas:**
+- [Stacked area in D3](https://www.d3-graph-gallery.com/stackedarea.html): The main way of representing the evolution of categories with time
+- [Ridgeline in D3](https://www.d3-graph-gallery.com/ridgeline.html): Maybe an idea to show the difference of some distributions per year
+- [Interactivity in D3](https://www.d3-graph-gallery.com/interactivity.html): As one of the main concern is interactivity, how to add it to D3. We also know that we will need to look into the `brush` effect to zoom in.
+
 
 ### Questions to the reviewer
 
