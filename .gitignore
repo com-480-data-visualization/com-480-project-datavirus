@@ -1,3 +1,3 @@
 .DS_Store
-.ipynb_checkpoints/*
-youtube_big.feather
+*.ipynb_checkpoints*
+data
