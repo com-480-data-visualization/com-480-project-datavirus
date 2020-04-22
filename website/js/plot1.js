@@ -1,6 +1,5 @@
 (function(window) {
   'use strict';
-
   var App = window.App || {};
   let Plot1 = (function() {
 
@@ -9,15 +8,10 @@
     const svgWidth = containerDIV.clientWidth
     const svgHeight = containerDIV.clientHeight
 
-
-
-
-      const contextWidth = svgWidth;
-
-
+    //add the svg element inside the container
     const svg = d3.select("#plot1-container").append("svg")
-      .attr("width", svgWidth)
-      .attr("height", svgHeight);
+    .attr("width", svgWidth)
+    .attr("height", svgHeight);
 
     d3.csv("/data/plot1data.csv",function(data) {
       console.log("Just logged the data for the plot 1");
@@ -88,27 +82,26 @@
           showBottomAxis: (i == countries.length - 1)
         }));
 
-      }
+      }//end of create plot function
 
 
       //-----------------------CREATION OF THE TIME SLIDER----------------------------
-      const contextHeight = 120
+      const contextHeight = 60
       const sliderWidth = containerDIV.clientWidth * 0.9
       const tickHeight = 10
       const niceAxis = false
       const selectedRectHeight = 50
 
 
-
       //1)First we add the context and we draw a horizontal line so we see it well
       let context = svg.append("g")
       .attr("class", "context")
       .attr("transform", "translate(" + 0 + "," + (svgHeight - contextHeight) + ")")
-      context.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", svgWidth) .attr("y2", 0);
+      context.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", svgWidth) .attr("y2", 0).attr("class", "separationLine");
 
       //2) Now will add the slider
       var startDate = new Date(2005,7,14)
-      var endDate = new Date(2019,8,20)
+      var endDate = new Date(2019,11,20)
 
       // Create a context for a brush
       var contextXScale = d3.scaleTime()
@@ -171,18 +164,14 @@
       ])
       .on("brush", onBrush);
 
-      console.log(contextXScale.invert(0))
-      console.log(contextXScale(contextXScale.invert(9)))
-      console.log(contextXScale)
+
 
       //The selection rectangle
       context.append("g")
       .attr("class", "xbrush")
       .call(brush)
-      /*
       .selectAll("rect")
-      .attr("y", 0)
-      .attr("height", contextHeight);*/
+      .attr("rx",5)
 
       //Display some text "Click and drag above to zoom / pan the data" on screen
       /*context.append("text")
@@ -192,10 +181,9 @@
 
       // Brush handler. Get time-range from a brush and pass it to the charts.
       function onBrush() {
-        console.log("onbrush")
         //d3.event.selection looks like [622,698] for example
+        //b is then an array of 2 dates: [from, to]
         var b = d3.event.selection === null ? contextXScale.domain() : d3.event.selection.map(contextXScale.invert);
-        console.log(d3.event.selection.map(contextXScale.invert))
         for (var i = 0; i < countriesCount-3; i++) {
           charts[i].showOnly(b);
         }
@@ -270,48 +258,48 @@
         this.xAxisBottom = d3.axisTop(this.xScale);
         // show only the top axis
         /*if (this.id == 0) {
-          this.chartContainer.append("g")
-          .attr("class", "x axis top")
-          .attr("transform", "translate(0,0)")
-          .call(this.xAxisTop);
-        }*/
+        this.chartContainer.append("g")
+        .attr("class", "x axis top")
+        .attr("transform", "translate(0,0)")
+        .call(this.xAxisTop);
+      }*/
 
-        // show only the bottom axis
-        /*if (this.showBottomAxis) {
-          this.chartContainer.append("g")
-          .attr("class", "x axis bottom")
-          .attr("transform", "translate(0," + this.height + ")")
-          .call(this.xAxisBottom);
-        }*/
+      // show only the bottom axis
+      /*if (this.showBottomAxis) {
+      this.chartContainer.append("g")
+      .attr("class", "x axis bottom")
+      .attr("transform", "translate(0," + this.height + ")")
+      .call(this.xAxisBottom);
+    }*/
 
-        this.yAxis = d3.axisLeft(this.yScale).ticks(5);
+    this.yAxis = d3.axisLeft(this.yScale).ticks(5);
 
-        //the y axis on the left
-        /*this.chartContainer.append("g")
-        .attr("class", "y axis")
-        .attr("transform", "translate(-15,0)")
-        .call(this.yAxis);
+    //the y axis on the left
+    /*this.chartContainer.append("g")
+    .attr("class", "y axis")
+    .attr("transform", "translate(-15,0)")
+    .call(this.yAxis);
 
-        //the name of the countries
-        /*this.chartContainer.append("text")
-        .attr("class", "country-title")
-        .attr("transform", "translate(15,40)")
-        .text(this.name);*/
+    //the name of the countries
+    /*this.chartContainer.append("text")
+    .attr("class", "country-title")
+    .attr("transform", "translate(15,40)")
+    .text(this.name);*/
 
-      }
-    }
+  }
+}
 
-    Chart.prototype.showOnly = function(b) {
-      this.xScale.domain(b);
-      this.chartContainer.select("path").data([this.chartData]).attr("d", this.area);
-      this.chartContainer.select(".x.axis.top").call(this.xAxisTop);
-      this.chartContainer.select(".x.axis.bottom").call(this.xAxisBottom);
-    }
+Chart.prototype.showOnly = function(b) {
+  this.xScale.domain(b);
+  this.chartContainer.select("path").data([this.chartData]).attr("d", this.area);
+  this.chartContainer.select(".x.axis.top").call(this.xAxisTop);
+  this.chartContainer.select(".x.axis.bottom").call(this.xAxisBottom);
+}
 
-    return {
-      //  playVideo:showVideo,
-    }
-  })();
-  App.Plot1 = Plot1;
-  window.App = App;
+return {
+  //  playVideo:showVideo,
+}
+})();
+App.Plot1 = Plot1;
+window.App = App;
 })(window);

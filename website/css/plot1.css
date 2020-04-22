@@ -25,50 +25,51 @@ g.chile path.chart {
 }
 
 
-.axis path, .axis line {
+/*.axis path, .axis line {
 	fill: none;
 	stroke: #aaa;
 	shape-rendering: crispEdges;
-}
+}*/
 
 
 
 /*------------AXIS OF THE TIME SLIDER-------------------*/
 /*The line that divides the context from the above graph*/
 g.context>line{
-  stroke: black;
+  stroke: blue;
   stroke-opacity: 1;
-  stroke-width: 2;
+  stroke-width: 1;
 }
 
+/*The end ticks if the time interval displayed is not .nice()*/
 g.context .outerTick{
   stroke: black;
   stroke-opacity: 1;
   stroke-width: 1;
 }
 
-/*horizontal line*/
+/*horizontal axis line*/
 g.context g.axis path {
 	stroke-opacity: 1;
-  stroke: purple;
+  stroke: black;
 }
 
 /*vertical ticks*/
 g.context g.axis line {
 	stroke-opacity: 1;
   /*stroke-width: 3;*/
-  stroke: red;
+  stroke: black;
 }
 
-/*text*/
+/*text of axis (temporal labels)*/
 g.context g.axis text {
-  /*stroke-width: 1;*/
-  stroke: blue;
+  stroke-width: 0.3;
+  stroke: black;
   text-anchor: middle;/* middle or start or end */
 }
 /*------------BRUSH-------------------*/
 g.context g.xbrush rect.selection{
 	fill: yellow;
   cursor: ew-resize;
-  /*height: 20px;*/
+  stroke: black;
 }
