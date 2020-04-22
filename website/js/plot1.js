@@ -109,7 +109,7 @@
       //.tickSize(10)//height of a tick
       .tickPadding(0)//height of the date on the axis
       .tickSizeInner(15)
-      .tickSizeOuter(60)
+      .tickSizeOuter(100)
       //.tickFormat(d3.timeFormat('%Y'))
       //.tickValues([2006, 2008, 2010,2012, 2014, 2016, 2018])
       //.tickArguments([29])
@@ -130,8 +130,10 @@
 
       var brush = d3.brushX()
       .extent([
+        //sets the brushable part
+        //idea use this to avoid selecting outside the range when nice axis is displayed
         [contextXScale.range()[0], 0],
-        [contextXScale.range()[1], contextHeight]
+        [contextXScale.range()[1]/2, contextHeight/2]
       ])
       .on("brush", onBrush);
 

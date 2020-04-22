@@ -24,17 +24,6 @@ g.chile path.chart {
 	fill: #6f6a6a;
 }
 
-g.china path.chart {
-	fill:  #ffc707;
-}
-
-g.switzerland path.chart {
-	fill: #fd4a2b;
-}
-
-g.usa path.chart {
-	fill: #00c992;
-}
 
 .axis path, .axis line {
 	fill: none;
@@ -42,29 +31,18 @@ g.usa path.chart {
 	shape-rendering: crispEdges;
 }
 
-.brush .extent {
-	fill-opacity: .125;
-}
-
-.x_brush{
-  /*fill: rgba(200,200,150,0.2);*/
-}
-
-g.context g.brush rect.background {
-	fill: #a86b32;
-}
-
+/*------------AXIS OF THE TIME SLIDER-------------------*/
 /*horizontal line*/
 g.context g.axis path {
 	stroke-opacity: 1;
-  stroke: rgba(0,255,0,1);
+  stroke: purple;
 }
 
 /*vertical ticks*/
 g.context g.axis line {
 	stroke-opacity: 1;
   /*stroke-width: 3;*/
-  stroke: rgba(255, 0, 0, 1);
+  stroke: red;
 }
 
 /*text*/
@@ -72,4 +50,9 @@ g.context g.axis text {
   /*stroke-width: 1;*/
   stroke: blue;
   text-anchor: middle;/* middle or start or end */
+}
+/*------------BRUSH-------------------*/
+g.context g.xbrush rect.selection{
+	fill: yellow;
+  /*height: 20px;*/
 }
