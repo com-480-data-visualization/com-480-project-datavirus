@@ -44,7 +44,7 @@ g.context>line{
 g.context .outerTick{
   stroke: black;
   stroke-opacity: 1;
-  stroke-width: 1.5;
+  stroke-width: 1;
 }
 
 /*horizontal line*/
@@ -69,5 +69,6 @@ g.context g.axis text {
 /*------------BRUSH-------------------*/
 g.context g.xbrush rect.selection{
 	fill: yellow;
+  cursor: ew-resize;
   /*height: 20px;*/
 }

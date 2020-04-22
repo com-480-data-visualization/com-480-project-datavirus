@@ -96,6 +96,7 @@
       const sliderWidth = containerDIV.clientWidth * 0.9
       const tickHeight = 10
       const niceAxis = false
+      const selectedRectHeight = 50
 
 
 
@@ -107,7 +108,7 @@
 
       //2) Now will add the slider
       var startDate = new Date(2005,7,14)
-      var endDate = new Date(2019,11,20)
+      var endDate = new Date(2019,8,20)
 
       // Create a context for a brush
       var contextXScale = d3.scaleTime()
@@ -155,43 +156,33 @@
         context.append("line") .attr("x1", xRight) .attr("y1", yTop).attr("x2", xRight) .attr("y2", yBottom).attr("class", "outerTick")
       }
 
+      //Now we do the brush
 
-
-      /*var contextArea = d3.area()
-      .x(function(d) {
-        return contextXScale(d.date);
-      })
-      .y0(contextHeight)
-      .y1(0)
-      .curve(d3.curveLinear);*/
-
+      const minYBrushable = (contextHeight-selectedRectHeight)/2
+      const maxYBrushable = (contextHeight+selectedRectHeight)/2
+      const minXBrushable = contextXScale(startDate) + (svgWidth -sliderWidth)/2
+      const maxXBrushable = contextXScale(endDate) + (svgWidth -sliderWidth)/2
       var brush = d3.brushX()
       .extent([
         //sets the brushable part
         //idea use this to avoid selecting outside the range when nice axis is displayed
-        [contextXScale.range()[0], 0],
-        [contextXScale.range()[1]/2, contextHeight/2]
+        [minXBrushable, minYBrushable],
+        [maxXBrushable, maxYBrushable]
       ])
       .on("brush", onBrush);
 
+      console.log(contextXScale.invert(0))
+      console.log(contextXScale(contextXScale.invert(9)))
+      console.log(contextXScale)
 
-
-
-
-
-
-
-
-
-
-
-//The gray rect when a period of time is selected
+      //The selection rectangle
       context.append("g")
       .attr("class", "xbrush")
       .call(brush)
+      /*
       .selectAll("rect")
       .attr("y", 0)
-      .attr("height", contextHeight);
+      .attr("height", contextHeight);*/
 
       //Display some text "Click and drag above to zoom / pan the data" on screen
       /*context.append("text")
@@ -204,7 +195,7 @@
         console.log("onbrush")
         //d3.event.selection looks like [622,698] for example
         var b = d3.event.selection === null ? contextXScale.domain() : d3.event.selection.map(contextXScale.invert);
-        console.log(contextXScale.invert)
+        console.log(d3.event.selection.map(contextXScale.invert))
         for (var i = 0; i < countriesCount-3; i++) {
           charts[i].showOnly(b);
         }
