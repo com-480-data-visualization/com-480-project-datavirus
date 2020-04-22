@@ -11,11 +11,10 @@
     //define the position of the rect that will contain the stacked graphs
     const stackedAreaMargin = {
       top: 30,
-      left: 10,
+      left: 50,
       width: svgWidth*0.8,
       height: 300
     }
-
 
     //add the svg element inside the container
     const svg = d3.select("#plot1-container").append("svg")
@@ -224,48 +223,26 @@
         .attr("class", "chart")
         .attr("clip-path", "url(#clip-" + this.id + ")")
         .attr("d", this.area)
-        .attr("fill", colorForIndex(localId));
+        .attr("fill", colorForIndex(localId))
+        .on("mousemove", function(d,i) {
+          let coordinateX= d3.mouse(this)[0];
+          //let dateSelected = xS(coordinateX)
+          let dateSelected =xS.invert(coordinateX)
+          onHover(localId, dateSelected)
+        })//.bind(this))
 
-        //this.xAxisTop = d3.axisBottom(this.xScale);
-        this.xAxisBottom = d3.axisTop(this.xScale);
+
+
         // show only the top axis
         if (this.id == 0) {
 
           var xAxis = d3.axisBottom(xS)
-          /*.tickPadding(5)//height of the date on the axis
-          .tickSizeInner(30)
-          .tickSizeOuter(0)*/
-          //.tickFormat(d3.timeFormat('%Y'))
-          //.tickValues([2006, 2008, 2010,2012, 2014, 2016, 2018])
-          //.tickArguments([29])
-          //.ticks(30)
-          //.ticks(15, d3.timeFormat('%Y'))
-
           this.chartContainer.append("g")
           .attr("class", "xAxis")
           .attr("transform", "translate(0,"+this.margin.height+")")
           .call(xAxis);
-
-
-
-
-
-
-
-
-        /*this.chartContainer.append("g")
-        .attr("class", "x axis top")
-        .attr("transform", "translate(0,0)")
-        .call(this.xAxisTop);*/
       }
 
-      // show only the bottom axis
-      /*if (this.showBottomAxis) {
-      this.chartContainer.append("g")
-      .attr("class", "x axis bottom")
-      .attr("transform", "translate(0," + this.height + ")")
-      .call(this.xAxisBottom);
-    }*/
 
     //this.yAxis = d3.axisLeft(this.yScale).ticks(5);
 
@@ -338,6 +315,10 @@ function prepareData(csvData){
     smallestDate:smallestDate,
     biggestDate:biggestDate,
   }
+}
+
+function onHover(elmx, date){
+  console.log("over In elem "+ elmx + " for the date " + date)
 }
 
 function colorForIndex(index){
