@@ -8,78 +8,75 @@
     const svgWidth = containerDIV.clientWidth
     const svgHeight = containerDIV.clientHeight
 
+    //define the position of the rect that will contain the stacked graphs
+    const chartAreaMargin = {
+      top: 30,
+      left: 10,
+      width: svgWidth*0.8,
+      height: 500
+    }
+
+
     //add the svg element inside the container
     const svg = d3.select("#plot1-container").append("svg")
     .attr("width", svgWidth)
     .attr("height", svgHeight);
 
+    //load the csv file and call createPlot() when done
     d3.csv("/data/plot1data.csv",function(data) {
-      console.log("Just logged the data for the plot 1");
       createPlot(data)
+      /*data is a 2D array in the one each line represent the values for a certain time*/
     });
 
 
     function createPlot(data) {
-      let countries = [];
+      let categories = [];
       let charts = [];
-      let maxDataPoint = 0;
-      let minDataPoint = 100; // the init value just have to be big enough to be less than the highest temperature
+      let maxScore = Number.MIN_VALUE;
 
-      // Get countries
+      // Get all the different categories
       for (let prop in data[0]) {
         if (data[0].hasOwnProperty(prop)) {
           if (prop != 'Year') {
-            countries.push(prop);
+            categories.push(prop);
           }
         }
       };
 
-      let countriesCount = countries.length;
+      let categoriesCount = categories.length;
       let startYear = data[0].Year;
       let endYear = data[data.length - 1].Year;
-      let chartHeight = svgHeight * (1 / countriesCount);
-      //so it seems a chart is a bit a lign...
 
-      // Get max and min temperature bounds for Y-scale.
+      // Get max popularity bounds for Y-scale.
       data.map(d => {
+        //for each date:
+        let localMax = 0
+        //for each category:
         for (let prop in d) {
           if (d.hasOwnProperty(prop) && prop != 'Year') {
             d[prop] = parseFloat(d[prop]);
-
-            if (d[prop] > maxDataPoint) {
-              maxDataPoint = d[prop];
-            }
-
-            if (d[prop] < minDataPoint) {
-              minDataPoint = d[prop];
-            }
+            localMax += d[prop]
           }
         }
-
+        if (localMax > maxScore) {
+          maxScore = localMax;
+        }
         /* Convert "Year" column to Date format to benefit
         from built-in D3 mechanisms for handling dates. */
         d.Year = new Date(d.Year, 0, 1);
       });
 
-      const margin = {
-        top: 10,
-        right: 40,
-        bottom: 150,
-        left: 60
-      }
 
-      for (let i = 0; i < countriesCount-3; i++) {
+
+      for (let i = 0; i < 1; i++) {
         charts.push(new Chart({
           data: data.slice(),
           id: i,
-          name: countries[i],
-          width: svgWidth,
-          height: svgHeight * (1 / countriesCount),
-          maxDataPoint: maxDataPoint,
-          minDataPoint: minDataPoint,
+          name: categories[i],
+          maxScore: maxScore,
           svg: svg,
-          margin: margin,
-          showBottomAxis: (i == countries.length - 1)
+          margin: chartAreaMargin,
+          showBottomAxis: (i == categories.length - 1)
         }));
 
       }//end of create plot function
@@ -97,13 +94,14 @@
       let context = svg.append("g")
       .attr("class", "context")
       .attr("transform", "translate(" + 0 + "," + (svgHeight - contextHeight) + ")")
+      //drawing the line
       context.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", svgWidth) .attr("y2", 0).attr("class", "separationLine");
 
       //2) Now will add the slider
       var startDate = new Date(2005,7,14)
       var endDate = new Date(2019,11,20)
 
-      // Create a context for a brush
+      // Create a domain
       var contextXScale = d3.scaleTime()
       .range([0, sliderWidth])//length of the slider
       .domain([startDate, endDate])
@@ -111,8 +109,7 @@
         contextXScale = contextXScale.nice()
       }
 
-
-      // a function thag geneates a bunch of SVG elements.
+      // a function thag generates a bunch of SVG elements.
       var contextAxis = d3.axisBottom(contextXScale)
       .tickPadding(5)//height of the date on the axis
       .tickSizeInner(tickHeight)
@@ -150,7 +147,6 @@
       }
 
       //Now we do the brush
-
       const minYBrushable = (contextHeight-selectedRectHeight)/2
       const maxYBrushable = (contextHeight+selectedRectHeight)/2
       const minXBrushable = contextXScale(startDate) + (svgWidth -sliderWidth)/2
@@ -163,8 +159,6 @@
         [maxXBrushable, maxYBrushable]
       ])
       .on("brush", onBrush);
-
-
 
       //The selection rectangle
       context.append("g")
@@ -184,29 +178,19 @@
         //d3.event.selection looks like [622,698] for example
         //b is then an array of 2 dates: [from, to]
         var b = d3.event.selection === null ? contextXScale.domain() : d3.event.selection.map(contextXScale.invert);
-        for (var i = 0; i < countriesCount-3; i++) {
+        for (var i = 0; i < categoriesCount; i++) {
           charts[i].showOnly(b);
         }
       }
     }
 
-    class MyStackedGraph{
-      constructor(options) {
-
-      }
-
-    }
-
     class Chart {
       constructor(options) {
         this.chartData = options.data;
-        this.width = options.width;
-        this.height = options.height;
-        this.maxDataPoint = options.maxDataPoint;
-        this.minDataPoint = options.minDataPoint;
-        this.svg = options.svg;
         this.id = options.id;
         this.name = options.name;
+        this.maxDataPoint = options.maxDataPoint;
+        this.svg = options.svg;
         this.margin = options.margin;
         this.showBottomAxis = options.showBottomAxis;
 
@@ -218,15 +202,16 @@
         .domain(d3.extent(this.chartData.map(function(d) {
           return d.Year;
         })));
+        //console.log(this.xScale)
 
         // Bound yScale using minDataPoint and maxDataPoint
         this.yScale = d3.scaleLinear()
         .range([this.height, 0])
-        .domain([this.minDataPoint, this.maxDataPoint]);
+        .domain([0, this.maxDataPoint]);
         let xS = this.xScale;
         let yS = this.yScale;
+        //console.log(this.yScale)
 
-        //console.log(d3.scaleTime().domain())
 
         /*
         Create the chart.
@@ -243,10 +228,15 @@
         })
         .curve(d3.curveLinear);
 
+        console.log(this.area)
+
+        console.log(this.chartData)
+
+
         // Add the chart to the HTML page
         this.chartContainer = svg.append("g")
         .attr('class', this.name.toLowerCase())
-        .attr("transform", "translate(" + this.margin.left + "," + (this.margin.top + (this.height * this.id) + (10 * this.id)) + ")");
+        .attr("transform", "translate(" + this.margin.left + "," + (this.margin.top) + ")");
 
         this.chartContainer.append("path")
         .data([this.chartData])
@@ -272,7 +262,7 @@
       .call(this.xAxisBottom);
     }*/
 
-    this.yAxis = d3.axisLeft(this.yScale).ticks(5);
+    //this.yAxis = d3.axisLeft(this.yScale).ticks(5);
 
     //the y axis on the left
     /*this.chartContainer.append("g")
@@ -286,7 +276,7 @@
     .attr("transform", "translate(15,40)")
     .text(this.name);*/
 
-  }
+  }//end of constructor
 }
 
 Chart.prototype.showOnly = function(b) {

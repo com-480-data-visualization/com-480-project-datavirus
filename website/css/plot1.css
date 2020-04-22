@@ -72,4 +72,6 @@ g.context g.xbrush rect.selection{
 	fill: yellow;
   cursor: ew-resize;
   stroke: black;
+  /*height:16px;
+  transform: translate(0px,17px)*/
 }
