@@ -8,11 +8,10 @@
     const containerDIV = document.getElementById("plot1-container");
     const svgWidth = containerDIV.clientWidth
     const svgHeight = containerDIV.clientHeight
-    const sliderWidth = containerDIV.clientWidth * 0.8
 
 
 
-      const contextHeight = 60
+
       const contextWidth = svgWidth;
 
 
@@ -93,30 +92,68 @@
 
 
       //-----------------------CREATION OF THE TIME SLIDER----------------------------
+      const contextHeight = 120
+      const sliderWidth = containerDIV.clientWidth * 0.9
+      const tickHeight = 10
+      const niceAxis = false
+
+
+
+      //1)First we add the context and we draw a horizontal line so we see it well
+      let context = svg.append("g")
+      .attr("class", "context")
+      .attr("transform", "translate(" + 0 + "," + (svgHeight - contextHeight) + ")")
+      context.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", svgWidth) .attr("y2", 0);
+
+      //2) Now will add the slider
       var startDate = new Date(2005,7,14)
-      var endDate = new Date(endYear,0,1)
-      endDate = new Date(2019,11,20)
+      var endDate = new Date(2019,11,20)
 
       // Create a context for a brush
       var contextXScale = d3.scaleTime()
       .range([0, sliderWidth])//length of the slider
       .domain([startDate, endDate])
-      //.nice()
-      //console.log(contextXScale)
+      if(niceAxis){
+        contextXScale = contextXScale.nice()
+      }
+
 
       // a function thag geneates a bunch of SVG elements.
       var contextAxis = d3.axisBottom(contextXScale)
-      //.tickSize(10)//height of a tick
-      .tickPadding(0)//height of the date on the axis
-      .tickSizeInner(15)
-      .tickSizeOuter(100)
+      .tickPadding(5)//height of the date on the axis
+      .tickSizeInner(tickHeight)
+      .tickSizeOuter(0)
       //.tickFormat(d3.timeFormat('%Y'))
       //.tickValues([2006, 2008, 2010,2012, 2014, 2016, 2018])
       //.tickArguments([29])
-      .ticks(30)
+      //.ticks(30)
       .ticks(15, d3.timeFormat('%Y'))
       //.tickFormat(x => /[AEIOUY]/.test(x) ? x : "")
-      //console.log(contextAxis)
+
+      //append the axis to the svg element
+      context.append("g")
+      .attr("class", "x axis top")
+      .attr("transform", "translate("+(svgWidth -sliderWidth)/2+","+contextHeight/2+")")
+      .call(contextAxis)
+
+      //move the ticks to position them in the middle of the horizontal line
+      context.selectAll(".tick line")
+      .attr("transform", "translate(0,-"+tickHeight/2+")");
+
+      //moves the text accordingly
+      context.selectAll(".tick text")
+      .attr("transform", "translate(0,-"+tickHeight/2+")");
+
+      if(!niceAxis){
+        //then draw line at end of axis
+        const outerTickSize = tickHeight * 1.5
+        const yTop = (contextHeight - outerTickSize)/2
+        const yBottom = (contextHeight + outerTickSize)/2
+        const xLeft = (svgWidth -sliderWidth)/2
+        const xRight = xLeft + sliderWidth
+        context.append("line") .attr("x1", xLeft) .attr("y1", yTop).attr("x2", xLeft) .attr("y2", yBottom).attr("class", "outerTick")
+        context.append("line") .attr("x1", xRight) .attr("y1", yTop).attr("x2", xRight) .attr("y2", yBottom).attr("class", "outerTick")
+      }
 
 
 
@@ -137,23 +174,14 @@
       ])
       .on("brush", onBrush);
 
-      let context = svg.append("g")
-      .attr("class", "context")
-      .attr("transform", "translate(" + margin.left + "," + svgHeight/2 + ")")
 
 
-      context.append("g")
-      .attr("class", "x axis top")
-      .attr("transform", "translate(0,0)")
-      .call(contextAxis)
 
-      //move arbitrarily the veritcal inside ticks
-      context.selectAll(".tick line")
-      .attr("transform", "translate(0,-5)");
 
-      //moves arbitrarily the text
-      context.selectAll(".tick text")
-      .attr("transform", "translate(0,5)");
+
+
+
+
 
 
 

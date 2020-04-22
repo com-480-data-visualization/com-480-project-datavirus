@@ -31,7 +31,22 @@ g.chile path.chart {
 	shape-rendering: crispEdges;
 }
 
+
+
 /*------------AXIS OF THE TIME SLIDER-------------------*/
+/*The line that divides the context from the above graph*/
+g.context>line{
+  stroke: black;
+  stroke-opacity: 1;
+  stroke-width: 2;
+}
+
+g.context .outerTick{
+  stroke: black;
+  stroke-opacity: 1;
+  stroke-width: 1.5;
+}
+
 /*horizontal line*/
 g.context g.axis path {
 	stroke-opacity: 1;
