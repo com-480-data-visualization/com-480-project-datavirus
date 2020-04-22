@@ -165,10 +165,10 @@
         this.svg = options.svg;
         this.margin = options.margin;
 
-        console.log(this.data)
-        console.log(this.id)
-        console.log(this.svg)
-        console.log(this.margin)
+        //console.log(this.data)
+        //console.log(this.id)
+        //console.log(this.svg)
+        //console.log(this.margin)
 
         // Associate xScale with time
         this.xScale = d3.scaleTime()
@@ -181,8 +181,8 @@
         let xS = this.xScale;
         let yS = this.yScale;
 
-        console.log(xS(new Date(2019,0,1)))
-        console.log(yS(50))
+        //console.log(xS(new Date(2019,0,1)))
+        //console.log(yS(50))
 
         let localName = this.data.categories[this.id]
         let localId = this.id
@@ -210,7 +210,7 @@
         })
         .curve(d3.curveLinear);
 
-        console.log(this.area)
+        //console.log(this.area)
 
 
 
@@ -229,12 +229,35 @@
         //this.xAxisTop = d3.axisBottom(this.xScale);
         this.xAxisBottom = d3.axisTop(this.xScale);
         // show only the top axis
-        /*if (this.id == 0) {
-        this.chartContainer.append("g")
+        if (this.id == 0) {
+
+          var xAxis = d3.axisBottom(xS)
+          /*.tickPadding(5)//height of the date on the axis
+          .tickSizeInner(30)
+          .tickSizeOuter(0)*/
+          //.tickFormat(d3.timeFormat('%Y'))
+          //.tickValues([2006, 2008, 2010,2012, 2014, 2016, 2018])
+          //.tickArguments([29])
+          //.ticks(30)
+          //.ticks(15, d3.timeFormat('%Y'))
+
+          this.chartContainer.append("g")
+          .attr("class", "xAxis")
+          .attr("transform", "translate(0,"+this.margin.height+")")
+          .call(xAxis);
+
+
+
+
+
+
+
+
+        /*this.chartContainer.append("g")
         .attr("class", "x axis top")
         .attr("transform", "translate(0,0)")
-        .call(this.xAxisTop);
-      }*/
+        .call(this.xAxisTop);*/
+      }
 
       // show only the bottom axis
       /*if (this.showBottomAxis) {
