@@ -45,7 +45,7 @@
 
     function createPlot(data) {
       let charts = [];
-      for (let i = 0; i < 1; i++) {
+      for (let i = 0; i < data.categories.length; i++) {
         charts.push(new Chart({
           data: data,
           id: i,
@@ -195,9 +195,18 @@
         .x(function(d) {
           return xS(d.date);
         })
-        .y0(this.margin.height)
+        .y0(function(d) {
+          let values = d.values.slice(0, localId)
+          let previousSum = values.reduce((a,b) => a + b, 0)
+          //y0(this.margin.height)
+          //return yS(d.values[localId]);
+          return yS(previousSum)
+        }.bind(this))
         .y1(function(d) {
-          return yS(d.values[localId]);
+          let values = d.values.slice(0, localId+1)
+          let previousSum = values.reduce((a,b) => a + b, 0)
+          //return yS(d.values[localId]);
+          return yS(previousSum)
         })
         .curve(d3.curveLinear);
 
@@ -309,7 +318,7 @@ function prepareData(csvData){
 }
 
 function colorForIndex(index){
-  var colors = ["#fcf803", "#fc0303","#03fc07","#00fff7","#a70ee8","#e30eb8","#52304b","#2b4a30","#734f37"]
+  var colors = ["#52304b","#2b4a30","#a70ee8","#e30eb8","#734f37","#fcf803", "#fc0303","#03fc07","#00fff7"]
   return colors[index%colors.length]
 }
 
