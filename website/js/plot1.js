@@ -37,7 +37,9 @@
 
     //load the csv file and call createPlot() when done
     d3.csv("/data/plot1data.csv",function(data) {
-      createPlot(prepareData(data))
+      let preparedData = prepareData(data)
+      createPlot(preparedData)
+      createSlider(preparedData)
       /*data is a 2D array in the one each line represent the values for a certain time*/
     });
 
@@ -51,111 +53,113 @@
           svg: svg,
           margin: stackedAreaMargin,
         }));
-
-      }//end of create plot function
-
-
-      //-----------------------CREATION OF THE TIME SLIDER----------------------------
-      const contextHeight = 60
-      const sliderWidth = containerDIV.clientWidth * 0.9
-      const tickHeight = 10
-      const niceAxis = false
-      const selectedRectHeight = 50
-
-
-      //1)First we add the context and we draw a horizontal line so we see it well
-      let context = svg.append("g")
-      .attr("class", "context")
-      .attr("transform", "translate(" + 0 + "," + (svgHeight - contextHeight) + ")")
-      //drawing the line
-      context.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", svgWidth) .attr("y2", 0).attr("class", "separationLine");
-
-      //2) Now will add the slider
-      var startDate = new Date(2005,7,14)
-      var endDate = new Date(2019,11,20)
-
-      // Create a domain
-      var contextXScale = d3.scaleTime()
-      .range([0, sliderWidth])//length of the slider
-      .domain([startDate, endDate])
-      if(niceAxis){
-        contextXScale = contextXScale.nice()
       }
+    }//end of create plot function
 
-      // a function thag generates a bunch of SVG elements.
-      var contextAxis = d3.axisBottom(contextXScale)
-      .tickPadding(5)//height of the date on the axis
-      .tickSizeInner(tickHeight)
-      .tickSizeOuter(0)
-      //.tickFormat(d3.timeFormat('%Y'))
-      //.tickValues([2006, 2008, 2010,2012, 2014, 2016, 2018])
-      //.tickArguments([29])
-      //.ticks(30)
-      .ticks(15, d3.timeFormat('%Y'))
-      //.tickFormat(x => /[AEIOUY]/.test(x) ? x : "")
+function createSlider(data) {
+    //-----------------------CREATION OF THE TIME SLIDER----------------------------
+    const contextHeight = 60
+    const sliderWidth = containerDIV.clientWidth * 0.9
+    const tickHeight = 10
+    const niceAxis = false
+    const selectedRectHeight = 50
 
-      //append the axis to the svg element
-      context.append("g")
-      .attr("class", "x axis top")
-      .attr("transform", "translate("+(svgWidth -sliderWidth)/2+","+contextHeight/2+")")
-      .call(contextAxis)
 
-      //move the ticks to position them in the middle of the horizontal line
-      context.selectAll(".tick line")
-      .attr("transform", "translate(0,-"+tickHeight/2+")");
+    //1)First we add the context and we draw a horizontal line so we see it well
+    let context = svg.append("g")
+    .attr("class", "context")
+    .attr("transform", "translate(" + 0 + "," + (svgHeight - contextHeight) + ")")
+    //drawing the line
+    context.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", svgWidth) .attr("y2", 0).attr("class", "separationLine");
 
-      //moves the text accordingly
-      context.selectAll(".tick text")
-      .attr("transform", "translate(0,-"+tickHeight/2+")");
+    //2) Now will add the slider
+    var startDate = data.smallestDate
+    var endDate = data.biggestDate
 
-      if(!niceAxis){
-        //then draw line at end of axis
-        const outerTickSize = tickHeight * 1.5
-        const yTop = (contextHeight - outerTickSize)/2
-        const yBottom = (contextHeight + outerTickSize)/2
-        const xLeft = (svgWidth -sliderWidth)/2
-        const xRight = xLeft + sliderWidth
-        context.append("line") .attr("x1", xLeft) .attr("y1", yTop).attr("x2", xLeft) .attr("y2", yBottom).attr("class", "outerTick")
-        context.append("line") .attr("x1", xRight) .attr("y1", yTop).attr("x2", xRight) .attr("y2", yBottom).attr("class", "outerTick")
-      }
+    // Create a domain
+    var contextXScale = d3.scaleTime()
+    .range([0, sliderWidth])//length of the slider
+    .domain([startDate, endDate])
+    if(niceAxis){
+      contextXScale = contextXScale.nice()
+    }
 
-      //Now we do the brush
-      const minYBrushable = (contextHeight-selectedRectHeight)/2
-      const maxYBrushable = (contextHeight+selectedRectHeight)/2
-      const minXBrushable = contextXScale(startDate) + (svgWidth -sliderWidth)/2
-      const maxXBrushable = contextXScale(endDate) + (svgWidth -sliderWidth)/2
-      var brush = d3.brushX()
-      .extent([
-        //sets the brushable part
-        //idea use this to avoid selecting outside the range when nice axis is displayed
-        [minXBrushable, minYBrushable],
-        [maxXBrushable, maxYBrushable]
-      ])
-      .on("brush", onBrush);
+    // a function thag generates a bunch of SVG elements.
+    var contextAxis = d3.axisBottom(contextXScale)
+    .tickPadding(5)//height of the date on the axis
+    .tickSizeInner(tickHeight)
+    .tickSizeOuter(0)
+    //.tickFormat(d3.timeFormat('%Y'))
+    //.tickValues([2006, 2008, 2010,2012, 2014, 2016, 2018])
+    //.tickArguments([29])
+    //.ticks(30)
+    .ticks(15, d3.timeFormat('%Y'))
+    //.tickFormat(x => /[AEIOUY]/.test(x) ? x : "")
 
-      //The selection rectangle
-      context.append("g")
-      .attr("class", "xbrush")
-      .call(brush)
-      .selectAll("rect")
-      .attr("rx",5)
+    //append the axis to the svg element
+    context.append("g")
+    .attr("class", "x axis top")
+    .attr("transform", "translate("+(svgWidth -sliderWidth)/2+","+contextHeight/2+")")
+    .call(contextAxis)
 
-      //Display some text "Click and drag above to zoom / pan the data" on screen
-      /*context.append("text")
-      .attr("class", "instructions")
-      .attr("transform", "translate(0," + (contextHeight + 20) + ")")
-      .text('Click and drag above to zoom / pan the data');*/
+    //move the ticks to position them in the middle of the horizontal line
+    context.selectAll(".tick line")
+    .attr("transform", "translate(0,-"+tickHeight/2+")");
 
-      // Brush handler. Get time-range from a brush and pass it to the charts.
-      function onBrush() {
-        //d3.event.selection looks like [622,698] for example
-        //b is then an array of 2 dates: [from, to]
-        var b = d3.event.selection === null ? contextXScale.domain() : d3.event.selection.map(contextXScale.invert);
-        for (var i = 0; i < categoriesCount; i++) {
-          charts[i].showOnly(b);
-        }
+    //moves the text accordingly
+    context.selectAll(".tick text")
+    .attr("transform", "translate(0,-"+tickHeight/2+")");
+
+    if(!niceAxis){
+      //then draw line at end of axis
+      const outerTickSize = tickHeight * 1.5
+      const yTop = (contextHeight - outerTickSize)/2
+      const yBottom = (contextHeight + outerTickSize)/2
+      const xLeft = (svgWidth -sliderWidth)/2
+      const xRight = xLeft + sliderWidth
+      context.append("line") .attr("x1", xLeft) .attr("y1", yTop).attr("x2", xLeft) .attr("y2", yBottom).attr("class", "outerTick")
+      context.append("line") .attr("x1", xRight) .attr("y1", yTop).attr("x2", xRight) .attr("y2", yBottom).attr("class", "outerTick")
+    }
+
+    //Now we do the brush
+    const minYBrushable = (contextHeight-selectedRectHeight)/2
+    const maxYBrushable = (contextHeight+selectedRectHeight)/2
+    const minXBrushable = contextXScale(startDate) + (svgWidth -sliderWidth)/2
+    const maxXBrushable = contextXScale(endDate) + (svgWidth -sliderWidth)/2
+    var brush = d3.brushX()
+    .extent([
+      //sets the brushable part
+      //idea use this to avoid selecting outside the range when nice axis is displayed
+      [minXBrushable, minYBrushable],
+      [maxXBrushable, maxYBrushable]
+    ])
+    .on("brush", onBrush);
+
+    //The selection rectangle
+    context.append("g")
+    .attr("class", "xbrush")
+    .call(brush)
+    .selectAll("rect")
+    .attr("rx",5)
+
+  }//end of createSlider
+
+    //Display some text "Click and drag above to zoom / pan the data" on screen
+    /*context.append("text")
+    .attr("class", "instructions")
+    .attr("transform", "translate(0," + (contextHeight + 20) + ")")
+    .text('Click and drag above to zoom / pan the data');*/
+
+    // Brush handler. Get time-range from a brush and pass it to the charts.
+    function onBrush() {
+      //d3.event.selection looks like [622,698] for example
+      //b is then an array of 2 dates: [from, to]
+      var b = d3.event.selection === null ? contextXScale.domain() : d3.event.selection.map(contextXScale.invert);
+      for (var i = 0; i < categoriesCount; i++) {
+        charts[i].showOnly(b);
       }
     }
+
 
     class Chart {
       constructor(options) {
@@ -241,95 +245,95 @@
           .attr("class", "xAxis")
           .attr("transform", "translate(0,"+this.margin.height+")")
           .call(xAxis);
-      }
+        }
 
 
-    //this.yAxis = d3.axisLeft(this.yScale).ticks(5);
+        //this.yAxis = d3.axisLeft(this.yScale).ticks(5);
 
-    //the y axis on the left
-    /*this.chartContainer.append("g")
-    .attr("class", "y axis")
-    .attr("transform", "translate(-15,0)")
-    .call(this.yAxis);
+        //the y axis on the left
+        /*this.chartContainer.append("g")
+        .attr("class", "y axis")
+        .attr("transform", "translate(-15,0)")
+        .call(this.yAxis);
 
-    //the name of the countries
-    /*this.chartContainer.append("text")
-    .attr("class", "country-title")
-    .attr("transform", "translate(15,40)")
-    .text(this.name);*/
+        //the name of the countries
+        /*this.chartContainer.append("text")
+        .attr("class", "country-title")
+        .attr("transform", "translate(15,40)")
+        .text(this.name);*/
 
-  }//end of constructor
-}
+      }//end of constructor
+    }
 
-Chart.prototype.showOnly = function(b) {
-  this.xScale.domain(b);
-  this.chartContainer.select("path").data([this.chartData]).attr("d", this.area);
-  this.chartContainer.select(".x.axis.top").call(this.xAxisTop);
-  this.chartContainer.select(".x.axis.bottom").call(this.xAxisBottom);
-}
+    Chart.prototype.showOnly = function(b) {
+      this.xScale.domain(b);
+      this.chartContainer.select("path").data([this.chartData]).attr("d", this.area);
+      this.chartContainer.select(".x.axis.top").call(this.xAxisTop);
+      this.chartContainer.select(".x.axis.bottom").call(this.xAxisBottom);
+    }
 
-/**/
-function prepareData(csvData){
-  //getting all the categories
-  let categories = []
-  for (let prop in csvData[0]) {
-    if (csvData[0].hasOwnProperty(prop)) {
-      if (prop != 'Year') {
-        categories.push(prop);
+    /**/
+    function prepareData(csvData){
+      //getting all the categories
+      let categories = []
+      for (let prop in csvData[0]) {
+        if (csvData[0].hasOwnProperty(prop)) {
+          if (prop != 'Year') {
+            categories.push(prop);
+          }
+        }
+      };
+
+      let maxScore =  Number.MIN_VALUE;
+
+      //mapping each line to an array
+      let arrayData = csvData.map(d => {
+        //for each date:
+        let values = []
+        for (let prop in d) {
+          //for each category:
+          if (d.hasOwnProperty(prop) && prop != 'Year') {
+            values.push(parseFloat(d[prop]))
+          }
+        }
+        /* Convert "Year" column to Date format to benefit
+        from built-in D3 mechanisms for handling dates. */
+        let date = new Date(d.Year, 0, 1);
+        let localMax = values.reduce((a,b) => a + b, 0)
+        if(localMax>maxScore){
+          maxScore = localMax
+        }
+        return {
+          date : date,
+          values : values
+        }
+      });
+
+      let smallestDate = arrayData[0].date;
+      let biggestDate = arrayData[arrayData.length - 1].date;
+
+      return{
+        categories:categories,
+        maxScore:maxScore,
+        values:arrayData,
+        smallestDate:smallestDate,
+        biggestDate:biggestDate,
       }
     }
-  };
 
-  let maxScore =  Number.MIN_VALUE;
+    function onHover(elmx, date){
+      console.log("over In elem "+ elmx + " for the date " + date)
+    }
 
-  //mapping each line to an array
-  let arrayData = csvData.map(d => {
-    //for each date:
-    let values = []
-    for (let prop in d) {
-      //for each category:
-      if (d.hasOwnProperty(prop) && prop != 'Year') {
-        values.push(parseFloat(d[prop]))
-      }
+    function colorForIndex(index){
+      var colors = ["#52304b","#2b4a30","#a70ee8","#e30eb8","#734f37","#fcf803", "#fc0303","#03fc07","#00fff7"]
+      return colors[index%colors.length]
     }
-    /* Convert "Year" column to Date format to benefit
-    from built-in D3 mechanisms for handling dates. */
-    let date = new Date(d.Year, 0, 1);
-    let localMax = values.reduce((a,b) => a + b, 0)
-    if(localMax>maxScore){
-      maxScore = localMax
-    }
+
     return {
-      date : date,
-      values : values
+      //  playVideo:showVideo,
     }
-  });
-
-  let smallestDate = arrayData[0].date;
-  let biggestDate = arrayData[arrayData.length - 1].date;
-
-  return{
-    categories:categories,
-    maxScore:maxScore,
-    values:arrayData,
-    smallestDate:smallestDate,
-    biggestDate:biggestDate,
-  }
-}
-
-function onHover(elmx, date){
-  console.log("over In elem "+ elmx + " for the date " + date)
-}
-
-function colorForIndex(index){
-  var colors = ["#52304b","#2b4a30","#a70ee8","#e30eb8","#734f37","#fcf803", "#fc0303","#03fc07","#00fff7"]
-  return colors[index%colors.length]
-}
-
-return {
-  //  playVideo:showVideo,
-}
-})();
-App.Plot1 = Plot1;
-window.App = App;
+  })();
+  App.Plot1 = Plot1;
+  window.App = App;
 })(window);
