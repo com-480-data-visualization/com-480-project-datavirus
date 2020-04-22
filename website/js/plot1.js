@@ -1,5 +1,6 @@
 (function(window) {
   'use strict';
+
   var App = window.App || {};
   let Plot1 = (function() {
 
@@ -92,26 +93,40 @@
 
 
       //-----------------------CREATION OF THE TIME SLIDER----------------------------
-      var startDate = new Date(startYear,0,1)
+      var startDate = new Date(2005,7,14)
       var endDate = new Date(endYear,0,1)
+      endDate = new Date(2019,11,20)
 
       // Create a context for a brush
       var contextXScale = d3.scaleTime()
       .range([0, sliderWidth])//length of the slider
       .domain([startDate, endDate])
+      //.nice()
       //console.log(contextXScale)
 
+      // a function thag geneates a bunch of SVG elements.
       var contextAxis = d3.axisBottom(contextXScale)
-      .tickSize(10)//height of a tick
-      .tickPadding(0);//height of the date on the axis
+      //.tickSize(10)//height of a tick
+      .tickPadding(0)//height of the date on the axis
+      .tickSizeInner(15)
+      .tickSizeOuter(60)
+      //.tickFormat(d3.timeFormat('%Y'))
+      //.tickValues([2006, 2008, 2010,2012, 2014, 2016, 2018])
+      //.tickArguments([29])
+      .ticks(30)
+      .ticks(15, d3.timeFormat('%Y'))
+      //.tickFormat(x => /[AEIOUY]/.test(x) ? x : "")
+      //console.log(contextAxis)
 
-      var contextArea = d3.area()
+
+
+      /*var contextArea = d3.area()
       .x(function(d) {
         return contextXScale(d.date);
       })
       .y0(contextHeight)
       .y1(0)
-      .curve(d3.curveLinear);
+      .curve(d3.curveLinear);*/
 
       var brush = d3.brushX()
       .extent([
@@ -124,18 +139,29 @@
       .attr("class", "context")
       .attr("transform", "translate(" + margin.left + "," + svgHeight/2 + ")")
 
+
       context.append("g")
       .attr("class", "x axis top")
       .attr("transform", "translate(0,0)")
       .call(contextAxis)
 
+      //move arbitrarily the veritcal inside ticks
+      context.selectAll(".tick line")
+      .attr("transform", "translate(0,-5)");
+
+      //moves arbitrarily the text
+      context.selectAll(".tick text")
+      .attr("transform", "translate(0,5)");
+
+
+
 //The gray rect when a period of time is selected
-      /*context.append("g")
+      context.append("g")
       .attr("class", "xbrush")
       .call(brush)
       .selectAll("rect")
       .attr("y", 0)
-      .attr("height", contextHeight);*/
+      .attr("height", contextHeight);
 
       //Display some text "Click and drag above to zoom / pan the data" on screen
       /*context.append("text")

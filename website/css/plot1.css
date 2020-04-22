@@ -63,12 +63,13 @@ g.context g.axis path {
 /*vertical ticks*/
 g.context g.axis line {
 	stroke-opacity: 1;
-  stroke-width: 3;
+  /*stroke-width: 3;*/
   stroke: rgba(255, 0, 0, 1);
 }
 
 /*text*/
 g.context g.axis text {
-  stroke-width: 1;
+  /*stroke-width: 1;*/
   stroke: blue;
+  text-anchor: middle;/* middle or start or end */
 }
