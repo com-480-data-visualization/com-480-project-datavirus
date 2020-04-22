@@ -24,57 +24,19 @@
 
     //load the csv file and call createPlot() when done
     d3.csv("/data/plot1data.csv",function(data) {
-      createPlot(data)
+      createPlot(prepareData(data))
       /*data is a 2D array in the one each line represent the values for a certain time*/
     });
 
 
     function createPlot(data) {
-      let categories = [];
       let charts = [];
-      let maxScore = Number.MIN_VALUE;
-
-      // Get all the different categories
-      for (let prop in data[0]) {
-        if (data[0].hasOwnProperty(prop)) {
-          if (prop != 'Year') {
-            categories.push(prop);
-          }
-        }
-      };
-
-      let categoriesCount = categories.length;
-      let startYear = data[0].Year;
-      let endYear = data[data.length - 1].Year;
-
-      // Get max popularity bounds for Y-scale.
-      data.map(d => {
-        //for each date:
-        let localMax = 0
-        //for each category:
-        for (let prop in d) {
-          if (d.hasOwnProperty(prop) && prop != 'Year') {
-            d[prop] = parseFloat(d[prop]);
-            localMax += d[prop]
-          }
-        }
-        if (localMax > maxScore) {
-          maxScore = localMax;
-        }
-        /* Convert "Year" column to Date format to benefit
-        from built-in D3 mechanisms for handling dates. */
-        d.Year = new Date(d.Year, 0, 1);
-      });
-
       for (let i = 0; i < 1; i++) {
         charts.push(new Chart({
-          data: data.slice(),
+          data: data,
           id: i,
-          name: categories[i],
-          maxScore: maxScore,
           svg: svg,
           margin: chartAreaMargin,
-          showBottomAxis: (i == categories.length - 1)
         }));
 
       }//end of create plot function
@@ -186,34 +148,31 @@
       constructor(options) {
         this.data = options.data;
         this.id = options.id;
-        this.name = options.name;
-        this.maxScore = options.maxScore;
         this.svg = options.svg;
         this.margin = options.margin;
-        this.showBottomAxis = options.showBottomAxis;
+
         console.log(this.data)
         console.log(this.id)
-        console.log(this.name)
-        console.log(this.maxScore)
         console.log(this.svg)
         console.log(this.margin)
-        console.log(this.showBottomAxis)
 
         // Associate xScale with time
         this.xScale = d3.scaleTime()
-        .range([this.margin.width, 0])
-        .domain(d3.extent(this.data.map(function(d) {
-          return d.Year;
-        })));
-
+        .range([0, this.margin.width])
+        .domain([this.data.smallestDate, this.data.biggestDate]);
         // Bound yScale using maxDataPoint
         this.yScale = d3.scaleLinear()
         .range([0, this.margin.height])
-        .domain([0, this.maxScore]);
+        .domain([0, this.data.maxScore]);
         let xS = this.xScale;
         let yS = this.yScale;
 
-        let localName = this.name
+        console.log(xS(new Date(2019,0,1)))
+        console.log(yS(50))
+
+        let localName = this.data.categories[this.id]
+        let localId = this.id
+        console.log(localName)
         /*
         Create the chart.
         Here we use 'curveLinear' interpolation.
@@ -221,11 +180,11 @@
         */
         this.area = d3.area()
         .x(function(d) {
-          return xS(d.Year);
+          return xS(d.date);
         })
         .y0(this.margin.height)
         .y1(function(d) {
-          return yS(d[localName]);
+          return yS(d.values[localId]);
         })
         .curve(d3.curveLinear);
 
@@ -235,11 +194,11 @@
 
         // Add the chart to the HTML page
         this.chartContainer = svg.append("g")
-        .attr('class', this.name.toLowerCase())
+        .attr('class', localName.toLowerCase())
         .attr("transform", "translate(" + this.margin.left + "," + (this.margin.top) + ")");
 
         this.chartContainer.append("path")
-        .data([this.data])
+        .data([this.data.values])
         .attr("class", "chart")
         .attr("clip-path", "url(#clip-" + this.id + ")")
         .attr("d", this.area);
@@ -284,6 +243,57 @@ Chart.prototype.showOnly = function(b) {
   this.chartContainer.select("path").data([this.chartData]).attr("d", this.area);
   this.chartContainer.select(".x.axis.top").call(this.xAxisTop);
   this.chartContainer.select(".x.axis.bottom").call(this.xAxisBottom);
+}
+
+/**/
+function prepareData(csvData){
+  //getting all the categories
+  let categories = []
+  for (let prop in csvData[0]) {
+    if (csvData[0].hasOwnProperty(prop)) {
+      if (prop != 'Year') {
+        categories.push(prop);
+      }
+    }
+  };
+
+  let maxScore =  Number.MIN_VALUE;
+
+  //mapping each line to an array
+  let arrayData = csvData.map(d => {
+    //for each date:
+    let values = []
+    for (let prop in d) {
+      //for each category:
+      if (d.hasOwnProperty(prop) && prop != 'Year') {
+        values.push(parseFloat(d[prop]))
+      }
+    }
+    /* Convert "Year" column to Date format to benefit
+    from built-in D3 mechanisms for handling dates. */
+    let date = new Date(d.Year, 0, 1);
+    let localMax = values.reduce((a,b) => a + b, 0)
+    if(localMax>maxScore){
+      maxScore = localMax
+    }
+    return {
+      date : date,
+      values : values
+    }
+  });
+
+  let smallestDate = arrayData[0].date;
+  let biggestDate = arrayData[arrayData.length - 1].date;
+
+  return{
+    categories:categories,
+    maxScore:maxScore,
+    values:arrayData,
+    smallestDate:smallestDate,
+    biggestDate:biggestDate,
+  }
+
+
 }
 
 return {
