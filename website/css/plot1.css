@@ -20,19 +20,11 @@ body {
 }
 
 
-
-
-text.country-title {
-	font-size: 18px;
-}
-
-g.australia path.chart {
+/*g.australia path.chart {
 	fill:  #dddddd;
-}
+}*/
 
-g.chile path.chart {
-	fill: #6f6a6a;
-}
+
 
 
 /*.axis path, .axis line {

@@ -176,7 +176,7 @@
         .domain([this.data.smallestDate, this.data.biggestDate]);
         // Bound yScale using maxDataPoint
         this.yScale = d3.scaleLinear()
-        .range([0, this.margin.height])
+        .range([this.margin.height,0])
         .domain([0, this.data.maxScore]);
         let xS = this.xScale;
         let yS = this.yScale;
@@ -186,7 +186,6 @@
 
         let localName = this.data.categories[this.id]
         let localId = this.id
-        console.log(localName)
         /*
         Create the chart.
         Here we use 'curveLinear' interpolation.
@@ -209,15 +208,16 @@
         // Add the chart to the HTML page
         this.chartContainer = svg.append("g")
         .attr('class', localName.toLowerCase())
-        .attr("transform", "translate(" + this.margin.left + "," + (this.margin.top) + ")");
+        .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
 
         this.chartContainer.append("path")
         .data([this.data.values])
         .attr("class", "chart")
         .attr("clip-path", "url(#clip-" + this.id + ")")
-        .attr("d", this.area);
+        .attr("d", this.area)
+        .attr("fill", colorForIndex(localId));
 
-        this.xAxisTop = d3.axisBottom(this.xScale);
+        //this.xAxisTop = d3.axisBottom(this.xScale);
         this.xAxisBottom = d3.axisTop(this.xScale);
         // show only the top axis
         /*if (this.id == 0) {
@@ -306,8 +306,11 @@ function prepareData(csvData){
     smallestDate:smallestDate,
     biggestDate:biggestDate,
   }
+}
 
-
+function colorForIndex(index){
+  var colors = ["#fcf803", "#fc0303","#03fc07","#00fff7","#a70ee8","#e30eb8","#52304b","#2b4a30","#734f37"]
+  return colors[index%colors.length]
 }
 
 return {
