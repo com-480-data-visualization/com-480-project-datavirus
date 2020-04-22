@@ -66,8 +66,6 @@
         d.Year = new Date(d.Year, 0, 1);
       });
 
-
-
       for (let i = 0; i < 1; i++) {
         charts.push(new Chart({
           data: data.slice(),
@@ -186,33 +184,36 @@
 
     class Chart {
       constructor(options) {
-        this.chartData = options.data;
+        this.data = options.data;
         this.id = options.id;
         this.name = options.name;
-        this.maxDataPoint = options.maxDataPoint;
+        this.maxScore = options.maxScore;
         this.svg = options.svg;
         this.margin = options.margin;
         this.showBottomAxis = options.showBottomAxis;
-
-        let localName = this.name;
+        console.log(this.data)
+        console.log(this.id)
+        console.log(this.name)
+        console.log(this.maxScore)
+        console.log(this.svg)
+        console.log(this.margin)
+        console.log(this.showBottomAxis)
 
         // Associate xScale with time
         this.xScale = d3.scaleTime()
-        .range([0, this.width])
-        .domain(d3.extent(this.chartData.map(function(d) {
+        .range([this.margin.width, 0])
+        .domain(d3.extent(this.data.map(function(d) {
           return d.Year;
         })));
-        //console.log(this.xScale)
 
-        // Bound yScale using minDataPoint and maxDataPoint
+        // Bound yScale using maxDataPoint
         this.yScale = d3.scaleLinear()
-        .range([this.height, 0])
-        .domain([0, this.maxDataPoint]);
+        .range([0, this.margin.height])
+        .domain([0, this.maxScore]);
         let xS = this.xScale;
         let yS = this.yScale;
-        //console.log(this.yScale)
 
-
+        let localName = this.name
         /*
         Create the chart.
         Here we use 'curveLinear' interpolation.
@@ -222,7 +223,7 @@
         .x(function(d) {
           return xS(d.Year);
         })
-        .y0(this.height)
+        .y0(this.margin.height)
         .y1(function(d) {
           return yS(d[localName]);
         })
@@ -230,7 +231,6 @@
 
         console.log(this.area)
 
-        console.log(this.chartData)
 
 
         // Add the chart to the HTML page
@@ -239,7 +239,7 @@
         .attr("transform", "translate(" + this.margin.left + "," + (this.margin.top) + ")");
 
         this.chartContainer.append("path")
-        .data([this.chartData])
+        .data([this.data])
         .attr("class", "chart")
         .attr("clip-path", "url(#clip-" + this.id + ")")
         .attr("d", this.area);
