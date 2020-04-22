@@ -12,6 +12,16 @@ body {
   bottom: 5px;
 }
 
+/*The border of the stacked area*/
+#plot1-container svg .stackedArea line{
+  stroke-opacity: 1;
+  stroke: black;
+  stroke-width: 1;
+}
+
+
+
+
 text.country-title {
 	font-size: 18px;
 }

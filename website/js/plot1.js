@@ -9,11 +9,11 @@
     const svgHeight = containerDIV.clientHeight
 
     //define the position of the rect that will contain the stacked graphs
-    const chartAreaMargin = {
+    const stackedAreaMargin = {
       top: 30,
       left: 10,
       width: svgWidth*0.8,
-      height: 500
+      height: 300
     }
 
 
@@ -21,6 +21,20 @@
     const svg = d3.select("#plot1-container").append("svg")
     .attr("width", svgWidth)
     .attr("height", svgHeight);
+
+    //adding the element that will contain the stacked areas
+    let stackedArea = svg.append("g")
+    .attr("class", "stackedArea")
+    .attr("transform", "translate(" + stackedAreaMargin.left + "," + stackedAreaMargin.top + ")")
+    //drawing the 4 border lines (top, bottom left, right)
+    stackedArea.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", stackedAreaMargin.width) .attr("y2", 0).attr("class", "stackedAreaBorder");
+    stackedArea.append("line") .attr("x1", 0) .attr("y1", stackedAreaMargin.height).attr("x2", stackedAreaMargin.width) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
+    stackedArea.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", 0) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
+    stackedArea.append("line") .attr("x1", stackedAreaMargin.width) .attr("y1", 0).attr("x2", stackedAreaMargin.width) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
+
+
+
+
 
     //load the csv file and call createPlot() when done
     d3.csv("/data/plot1data.csv",function(data) {
@@ -36,7 +50,7 @@
           data: data,
           id: i,
           svg: svg,
-          margin: chartAreaMargin,
+          margin: stackedAreaMargin,
         }));
 
       }//end of create plot function
