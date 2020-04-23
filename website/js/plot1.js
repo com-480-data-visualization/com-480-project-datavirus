@@ -55,6 +55,16 @@
       //right
       stackedArea.append("line") .attr("x1", stackedAreaMargin.width) .attr("y1", 0).attr("x2", stackedAreaMargin.width) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
 
+      //now create the clipped path
+      svg.append("clipPath")
+    .attr("id", "stackedArea-clip")
+    .append("rect")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("height", stackedAreaMargin.height)
+    .attr("width", stackedAreaMargin.width)
+
+
 
       for (let i = 0; i < data.categories.length; i++) {
       charts.push(new Chart({
@@ -235,6 +245,7 @@ class Chart {
     .data([this.data.values])
     .attr("class", "chart")
     .attr("d", this.area)
+    .attr("clip-path", "url(#stackedArea-clip)")
     .attr("fill", colorForIndex(localId))
     .on("mousemove", function(d,i) {
       let coordinateX= d3.mouse(this)[0];
