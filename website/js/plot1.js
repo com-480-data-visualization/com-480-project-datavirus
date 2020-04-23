@@ -171,7 +171,14 @@ function createSlider(startDate, endDate) {
   function onBrush() {
     //d3.event.selection looks like [622,698] for example
     //b is then an array of 2 dates: [from, to]
-    var b = d3.event.selection === null ? contextXScale.domain() : d3.event.selection.map(contextXScale.invert);
+    console.log(d3.event.selection)//[70, 151]
+    var b = d3.event.selection === null ? contextXScale.domain() : d3.event.selection.map(x=>{
+      //console.log(minXBrushable)
+      return contextXScale.invert(x-(svgWidth -sliderWidth)/2)
+    });
+    //var b = d3.event.selection === null ? contextXScale.domain() : d3.event.selection.map(contextXScale.invert);
+    console.log(b)
+
     for (var i = 0; i < charts.length; i++) {
       //console.log(charts[i])
       //console.log(b)
