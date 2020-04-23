@@ -12,8 +12,8 @@
     const stackedAreaMargin = {
       top: 30,
       left: 50,
-      width: svgWidth*0.8,
-      height: 300
+      width: svgWidth*0.9,
+      height: 350
     }
 
     //add the svg element inside the container
@@ -21,18 +21,19 @@
     .attr("width", svgWidth)
     .attr("height", svgHeight);
 
-    //adding the element that will contain the stacked areas
+    //adding the g element in the svg that will contain the stacked areas
     let stackedArea = svg.append("g")
     .attr("class", "stackedArea")
     .attr("transform", "translate(" + stackedAreaMargin.left + "," + stackedAreaMargin.top + ")")
-    //drawing the 4 border lines (top, bottom left, right)
+    //drawing the 4 border lines
+    //top
     stackedArea.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", stackedAreaMargin.width) .attr("y2", 0).attr("class", "stackedAreaBorder");
+    //bottom
     stackedArea.append("line") .attr("x1", 0) .attr("y1", stackedAreaMargin.height).attr("x2", stackedAreaMargin.width) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
+    //left
     stackedArea.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", 0) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
+    //right
     stackedArea.append("line") .attr("x1", stackedAreaMargin.width) .attr("y1", 0).attr("x2", stackedAreaMargin.width) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
-
-
-
 
 
     //load the csv file and call createPlot() when done
@@ -40,7 +41,6 @@
       let preparedData = prepareData(data)
       createPlot(preparedData)
       createSlider(preparedData)
-      /*data is a 2D array in the one each line represent the values for a certain time*/
     });
 
 
@@ -120,7 +120,8 @@ function createSlider(data) {
       context.append("line") .attr("x1", xLeft) .attr("y1", yTop).attr("x2", xLeft) .attr("y2", yBottom).attr("class", "outerTick")
       context.append("line") .attr("x1", xRight) .attr("y1", yTop).attr("x2", xRight) .attr("y2", yBottom).attr("class", "outerTick")
     }
-
+console.log(contextXScale)
+console.log(data)
     //Now we do the brush
     const minYBrushable = (contextHeight-selectedRectHeight)/2
     const maxYBrushable = (contextHeight+selectedRectHeight)/2
@@ -133,7 +134,7 @@ function createSlider(data) {
       [minXBrushable, minYBrushable],
       [maxXBrushable, maxYBrushable]
     ])
-    .on("brush", onBrush);
+    .on("brush", onBrush(contextAxis,data));
 
     //The selection rectangle
     context.append("g")
@@ -151,11 +152,11 @@ function createSlider(data) {
     .text('Click and drag above to zoom / pan the data');*/
 
     // Brush handler. Get time-range from a brush and pass it to the charts.
-    function onBrush() {
+    function onBrush(contextXScale, data) {
       //d3.event.selection looks like [622,698] for example
       //b is then an array of 2 dates: [from, to]
       var b = d3.event.selection === null ? contextXScale.domain() : d3.event.selection.map(contextXScale.invert);
-      for (var i = 0; i < categoriesCount; i++) {
+      for (var i = 0; i < data.categories.length; i++) {
         charts[i].showOnly(b);
       }
     }
