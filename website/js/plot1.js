@@ -55,9 +55,6 @@
       //right
       stackedArea.append("line") .attr("x1", stackedAreaMargin.width) .attr("y1", 0).attr("x2", stackedAreaMargin.width) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
 
-      //drawing the bottom time indicator
-
-
 
       for (let i = 0; i < data.categories.length; i++) {
       charts.push(new Chart({
@@ -68,13 +65,10 @@
       isLastElem:i==data.categories.length-1
     }));
   }
+  //drawing the bottom time indicator
+  //TODO
+
 }//end of create plot function
-
-
-
-
-
-
 
 
 
@@ -171,22 +165,14 @@ function createSlider(startDate, endDate) {
   function onBrush() {
     //d3.event.selection looks like [622,698] for example
     //b is then an array of 2 dates: [from, to]
-    console.log(d3.event.selection)//[70, 151]
     var b = d3.event.selection === null ? contextXScale.domain() : d3.event.selection.map(x=>{
-      //console.log(minXBrushable)
       return contextXScale.invert(x-(svgWidth -sliderWidth)/2)
     });
-    //var b = d3.event.selection === null ? contextXScale.domain() : d3.event.selection.map(contextXScale.invert);
-    console.log(b)
 
     for (var i = 0; i < charts.length; i++) {
-      //console.log(charts[i])
-      //console.log(b)
       charts[i].showOnly(b);
     }
-
   }
-
 }//end of createSlider
 
 
@@ -196,11 +182,6 @@ class Chart {
     this.id = options.id;
     this.svg = options.svg;
     this.margin = options.margin;
-
-    //console.log(this.data)
-    //console.log(this.id)
-    //console.log(this.svg)
-    //console.log(this.margin)
 
     // Associate xScale with time
     this.xScale = d3.scaleTime()
@@ -214,9 +195,6 @@ class Chart {
     let yS = this.yScale;
 
 
-
-    //console.log(xS(new Date(2019,0,1)))
-    //console.log(yS(50))
 
     let localName = this.data.categories[this.id]
     let localId = this.id
@@ -268,14 +246,14 @@ class Chart {
 
 
     // the draw the horizontal axis
-    //if (options.isLastElem == 0) {
+    if (this.id == this.data.categories.length-1) {
       this.xAxis = d3.axisBottom(xS)
 
       this.chartContainer.append("g")
       .attr("class", "xAxis")
       .attr("transform", "translate(0,"+this.margin.height+")")
       .call(this.xAxis);
-  //  }
+   }
 
 
     //this.yAxis = d3.axisLeft(this.yScale).ticks(5);
@@ -298,7 +276,9 @@ class Chart {
 Chart.prototype.showOnly = function(b) {
   this.xScale.domain(b);
   this.chartContainer.select("path").data([this.data.values]).attr("d", this.area);
+  if (this.id == this.data.categories.length-1) {
   this.chartContainer.select(".xAxis").call(this.xAxis);
+  }
 
 
 
