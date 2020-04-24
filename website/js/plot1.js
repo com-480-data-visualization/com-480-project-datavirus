@@ -158,7 +158,7 @@ function createSlider(startDate, endDate) {
     [minXBrushable, minYBrushable],
     [maxXBrushable, maxYBrushable]
   ])
-  .on("brush", onBrush);
+  .on("brush", onBrush)
 
   //The selection rectangle
   context.append("g")
@@ -167,6 +167,10 @@ function createSlider(startDate, endDate) {
   .selectAll("rect")
   .attr("rx",5)
 
+
+function onClick() {
+  console.log("clicked")
+}
   //Display some text "Click and drag above to zoom / pan the data" on screen
   /*context.append("text")
   .attr("class", "instructions")
@@ -205,9 +209,25 @@ function createSlider(startDate, endDate) {
         let small_date = new Date(lowerDate)
         let big_date = new Date(upperDate)
         b = [small_date,big_date]
-        console.log(b)
-
       }
+      let small_date = b[0]
+      let big_date = b[1]
+      //now we should adapt the brush!!
+
+      let brushSelected = context.select(".xbrush")
+      let selection = brushSelected.select(".selection")
+      let leftSlider = brushSelected.select(".handle--w")
+      let rightSlider = brushSelected.select(".handle--e")
+
+      let widthForBrush = contextXScale(big_date)-contextXScale(small_date)
+      let leftSliderWidth = leftSlider.attr("width")
+      let xForLeft = contextXScale(small_date) + (svgWidth -sliderWidth - leftSliderWidth)/2
+      let xForRight = xForLeft + widthForBrush
+
+      selection.attr("width",widthForBrush)
+      selection.style("x", (xForLeft+leftSliderWidth/2))
+      leftSlider.style("x", xForLeft)
+      rightSlider.style("x", xForRight)
 
     }
 

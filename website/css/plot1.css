@@ -77,3 +77,10 @@ g.context g.xbrush rect.selection{
   /*height:16px;
   transform: translate(0px,17px)*/
 }
+
+g.context g.xbrush rect.handle{
+  /*cursor: ew-resize;
+  stroke: black;
+  height:16px;
+  transform: translate(0px,17px)*/
+}
