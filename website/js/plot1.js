@@ -40,6 +40,7 @@
       let preparedData = prepareData(data)
       createPlot(preparedData)
       createSlider(preparedData.smallestDate, preparedData.biggestDate)
+      getIndexes(preparedData)
     });
 
     function createPlot(data) {
@@ -423,6 +424,66 @@ function prepareData(csvData){
     smallestDate:smallestDate,
     biggestDate:biggestDate,
   }
+}
+
+function getIndexes(data){
+  let values = data.values.slice()
+  let valuesSorted = values.map(vs =>{
+    let array = vs.values
+    let arrayExtended = array.map((value, index)=>{
+      return [value, index]
+    })
+    return arrayExtended.sort((b,a)=>{
+      return a[0]-b[0]
+    })
+  })
+  let indexesBeforeChanges = []
+  let indicesOfEqualities = []
+  let previousOrder = valuesSorted[0].map(x=>{return x[1]})
+  for(let i = 1; i < valuesSorted.length; i++){
+    let actualValues = valuesSorted[i].map(x=>{return x[0]})
+    let actualOrder = valuesSorted[i].map(x=>{return x[1]})
+    if(findDuplicates(actualValues).length > 0){
+      indicesOfEqualities.push(i)
+    }else{
+      if(!arraysEqual(actualOrder,previousOrder)){
+        indexesBeforeChanges.push(i-1)
+      }
+    }
+    previousOrder = actualOrder
+  }//end of for loop
+  console.log(indicesOfEqualities)
+  console.log(indexesBeforeChanges)
+
+}
+
+function findDuplicates(arr){
+  let sorted_arr = arr.slice().sort((a,b)=>{
+    return a-b
+  });
+  let results = [];
+  for (let i = 0; i < sorted_arr.length - 1; i++) {
+    if (sorted_arr[i + 1] == sorted_arr[i]) {
+      results.push(sorted_arr[i]);
+    }
+  }
+  return results;
+}
+
+function arraysEqual(a, b) {
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (a.length != b.length) return false;
+
+  // If you don't care about the order of the elements inside
+  // the array, you should sort both arrays here.
+  // Please note that calling sort on an array will modify that array.
+  // you might want to clone your array first.
+
+  for (var i = 0; i < a.length; ++i) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
 }
 
 function onHover(elmx, date){
