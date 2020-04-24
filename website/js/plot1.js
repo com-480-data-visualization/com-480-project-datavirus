@@ -26,6 +26,7 @@
       tickHeight:10,
       displayNiceAxis:false,
       selectedRectHeight:50,
+      minBrushableNumberOfDay:365*2,//cannot zoom more than over one year
     }
 
 
@@ -37,7 +38,6 @@
     //load the csv file and call createPlot(),createSlider() when done
     d3.csv("/data/plot1data2.csv",function(data) {
       let preparedData = prepareData(data)
-      console.log(preparedData)
       createPlot(preparedData)
       createSlider(preparedData.smallestDate, preparedData.biggestDate)
     });
@@ -175,11 +175,44 @@ function createSlider(startDate, endDate) {
 
   // Brush handler. Get time-range from a brush and pass it to the charts.
   function onBrush() {
+
     //d3.event.selection looks like [622,698] for example
     //b is then an array of 2 dates: [from, to]
     var b = d3.event.selection === null ? contextXScale.domain() : d3.event.selection.map(x=>{
       return contextXScale.invert(x-(svgWidth -sliderWidth)/2)
     });
+
+    //first we make sure that we cannot zoom too much
+    if(sliderBoxPreferences.minBrushableNumberOfDay>0){
+      //in case we have a limit
+      let differenceInTime = b[1].getTime() - b[0].getTime();
+      let  differenceInDays = differenceInTime / (1000 * 3600 * 24);
+      if(differenceInDays<sliderBoxPreferences.minBrushableNumberOfDay){
+        //in case the brush does not respect the limit
+        let middleTime = (b[1].getTime() + b[0].getTime())/2;
+        let timeToAdd = sliderBoxPreferences.minBrushableNumberOfDay*1000 * 3600 * 24/2
+        let upperDate = middleTime + timeToAdd;
+        let lowerDate = middleTime - timeToAdd;
+        if(upperDate>endDate.getTime()){
+          let timeToShift = upperDate-endDate.getTime();
+          upperDate -= timeToShift;
+          lowerDate -= timeToShift;
+        }else if (lowerDate<startDate.getTime()){
+          let timeToShift = startDate.getTime()-lowerDate;
+          upperDate += timeToShift;
+          lowerDate += timeToShift;
+        }
+        let small_date = new Date(lowerDate)
+        let big_date = new Date(upperDate)
+        b = [small_date,big_date]
+        console.log(b)
+
+      }
+
+    }
+
+
+
 
     for (var i = 0; i < charts.length; i++) {
       charts[i].showOnly(b);
@@ -343,8 +376,6 @@ function prepareData(csvData){
       //for each category:
       if (d.hasOwnProperty(prop) && prop != 'Year') {
         values.push(parseFloat(d[prop]))
-        console.log(d[prop])
-        console.log(values)
       }
     }
     /* Convert "Year" column to Date format to benefit
