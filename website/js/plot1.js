@@ -10,6 +10,7 @@
     //the charts that will be displayed
     let charts = [];
     let xAxis = null
+    let stacksSupperpose = false
 
     //define the position of the rect that will contain the stacked graphs
     const stackedAreaMargin = {
@@ -34,8 +35,9 @@
     .attr("height", svgHeight);
 
     //load the csv file and call createPlot(),createSlider() when done
-    d3.csv("/data/plot1data.csv",function(data) {
+    d3.csv("/data/plot1data2.csv",function(data) {
       let preparedData = prepareData(data)
+      console.log(preparedData)
       createPlot(preparedData)
       createSlider(preparedData.smallestDate, preparedData.biggestDate)
     });
@@ -218,19 +220,42 @@ class Chart {
       return xS(d.date);
     })
     .y0(function(d) {
-      let values = d.values.slice(0, localId)
-      let previousSum = values.reduce((a,b) => a + b, 0)
-      //y0(this.margin.height)
-      //return yS(d.values[localId]);
-      return yS(previousSum)
+      if(stacksSupperpose){
+        let values = d.values.slice(0, localId)
+        let previousSum = values.reduce((a,b) => a + b, 0)
+        return yS(previousSum)
+      }else{
+        /*let values = d.values.slice()
+        //console.log(values)
+        let actualValue  = d.values[this.id]
+        values.sort(function(a, b){return a - b})
+        let indexToLookAt = values.indexOf(actualValue)-1;
+        console.log(indexToLookAt)
+        let bottom = 0
+        if(indexToLookAt>=0){
+          bottom = values[indexToLookAt]
+        }
+        return yS(bottom)*/
+        return yS(0)
+      }
+
     }.bind(this))
     .y1(function(d) {
-      let values = d.values.slice(0, localId+1)
-      let previousSum = values.reduce((a,b) => a + b, 0)
+      if(stacksSupperpose){
+        let values = d.values.slice(0, localId+1)
+        let previousSum = values.reduce((a,b) => a + b, 0)
+        return yS(previousSum)
+      }else{
+
+        return yS(d.values[this.id])
+      }
+
       //return yS(d.values[localId]);
-      return yS(previousSum)
-    })
+
+    }.bind(this))
+    //.curve(d3.curveMonotoneX);
     .curve(d3.curveLinear);
+  //  Play with the other ones: 'curveBasis', 'curveCardinal', 'curveStepBefore'.
 
     //console.log(this.area)
 
@@ -318,15 +343,19 @@ function prepareData(csvData){
       //for each category:
       if (d.hasOwnProperty(prop) && prop != 'Year') {
         values.push(parseFloat(d[prop]))
+        console.log(d[prop])
+        console.log(values)
       }
     }
     /* Convert "Year" column to Date format to benefit
     from built-in D3 mechanisms for handling dates. */
     let date = new Date(d.Year, 0, 1);
-    let localMax = values.reduce((a,b) => a + b, 0)
+    let localMax = stacksSupperpose ? values.reduce((a,b) => a + b, 0) : values.reduce((a,b) => a > b ? a:b, 0)
+
     if(localMax>maxScore){
       maxScore = localMax
     }
+
     return {
       date : date,
       values : values
