@@ -84,3 +84,6 @@ g.context g.xbrush rect.handle{
   height:16px;
   transform: translate(0px,17px)*/
 }
+.verticalLines{
+  stroke: black;
+}
