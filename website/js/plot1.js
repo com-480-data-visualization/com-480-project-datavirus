@@ -14,6 +14,7 @@
     let yScale = null
     let stacksSupperpose = false
     let stackClever = true
+    let data = null
     //define the position of the rect that will contain the stacked graphs
     const stackedAreaMargin = {
       top: 30,
@@ -43,13 +44,13 @@
 
 
     //load the csv file and call createPlot(),createSlider() when done
-    d3.csv("/data/plot1data2.csv",function(data) {
-      let preparedData = prepareData(data)
+    d3.csv("/data/plot1data2.csv",function(d) {
+       data = prepareData(d)
       if(stackClever){
-        getIndexes(preparedData)
+        getIndexes(data)
       }
-      createSlider(preparedData.smallestDate, preparedData.biggestDate)
-      createPlot(preparedData)
+      createSlider(data.smallestDate, data.biggestDate)
+      createPlot(data)
     });
 
     function createPlot(data) {
@@ -70,6 +71,13 @@
           id: i,
         }));
       }
+      if(data.timeStamps != undefined){
+        addLines(data.timeStamps)
+      }
+
+
+
+
 
       //draw the xAxis
       xAxis = d3.axisBottom(xScale)
@@ -249,6 +257,9 @@
         charts[i].showOnly(b);
       }
       svg.select(".xAxis").call(xAxis);
+      if(data.timeStamps != undefined){
+        addLines(data.timeStamps)
+      }
 
 
     }
@@ -297,24 +308,18 @@
           let previousSum = values.reduce((a,b) => a + b, 0)
           return yScale(previousSum)
         }else{
-
           return yScale(d.values[this.id])
         }
-
-        //return yS(d.values[localId]);
-
       }.bind(this))
       //.curve(d3.curveMonotoneX);
       .curve(d3.curveLinear);
       //  Play with the other ones: 'curveBasis', 'curveCardinal', 'curveStepBefore'.
 
-      //console.log(this.area)
-
 
 
       // Add the chart to the HTML page
       this.chartContainer = stackedArea.append("g")
-      .attr('class', localName.toLowerCase())
+      .attr('id', "chart_nb_"+this.id)
 
       this.chartContainer.append("path")
       .data([this.data.values])
@@ -328,39 +333,25 @@
         onHover(localId, dateSelected)
       })//.bind(this))
 
-
-
-
-      //this.addLines()
-
     }//end of constructor
   }
 
-  Chart.prototype.addLines = function() {
-    let previousContainer = this.chartContainer.select(".linesContainer")
+  function addLines(timestamps) {
+    let previousContainer = stackedArea.select(".linesContainer")
     previousContainer.remove()
-    let linesContainer = this.chartContainer.append("g")
+    let linesContainer = stackedArea.append("g")
     .attr("class", "linesContainer")
 
-    this.data.timeStamps.forEach(t=>{
+    timestamps.forEach(t=>{
       let y = 0;
-      let Y = this.margin.height
-      let x = this.xScale(new Date(t))
+      let Y = stackedAreaMargin.height
+      let x = xScale(new Date(t))
       linesContainer.append("line").attr("x1", x).attr("y1", y).attr("x2", x) .attr("y2", Y).attr("class", "verticalLines")
     })
   }
 
   Chart.prototype.showOnly = function(b) {
-    //this.xScale.domain(b);
     this.chartContainer.select("path").data([this.data.values]).attr("d", this.area);
-    /*if (this.id == this.data.categories.length-1) {
-      this.chartContainer.select(".xAxis").call(this.xAxis);
-      this.addLines()
-    }*/
-
-
-
-
   }
 
   /**/
@@ -483,11 +474,6 @@
     if (a === b) return true;
     if (a == null || b == null) return false;
     if (a.length != b.length) return false;
-
-    // If you don't care about the order of the elements inside
-    // the array, you should sort both arrays here.
-    // Please note that calling sort on an array will modify that array.
-    // you might want to clone your array first.
 
     for (var i = 0; i < a.length; ++i) {
       if (a[i] !== b[i]) return false;
