@@ -186,7 +186,11 @@
       .curve(d3.curveLinear)
       //  Play with the other ones: 'curveBasis', 'curveCardinal', 'curveStepBefore'.
 
+      this.showOnly = function(){
+        this.chartContainer.select("path").data([this.data.values]).attr("d", this.area);
+      }
     }//end of constructor
+
   }
 
   function createChart(options){
