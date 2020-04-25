@@ -43,19 +43,32 @@
 
       let smallestDate = arrayData[0].date;
       let biggestDate = arrayData[arrayData.length - 1].date;
+      if(!stackClever){
+        return{
+          categories:categories,
+          maxScore:maxScore,
+          values:arrayData,
+          smallestDate:smallestDate,
+          biggestDate:biggestDate,
+        }
+      }else{
+        //we must compute the critical time stamps where any 2 lines might intersect
+        let criticalIndexes = getCriticalIndexes(arrayData.slice())
 
-      return{
-        categories:categories,
-        maxScore:maxScore,
-        values:arrayData,
-        smallestDate:smallestDate,
-        biggestDate:biggestDate,
+        return{
+          categories:categories,
+          maxScore:maxScore,
+          values:arrayData,
+          smallestDate:smallestDate,
+          biggestDate:biggestDate,
+          criticalIndexes:criticalIndexes,
+        }
+
       }
     }
 
-    function getIndexes(data){
+    function getCriticalIndexes(values){
       //the idea here is to get the indexes of the data for the one two charts intersect
-      let values = data.values.slice()
       let valuesSorted = values.map(vs =>{
         let array = vs.values
         let arrayExtended = array.map((value, index)=>{
@@ -66,23 +79,24 @@
         })
       })
       let indexesBeforeChanges = []
-      let indicesOfEqualities = []
+      let orderBeforeChanges = []
       let previousOrder = valuesSorted[0].map(x=>{return x[1]})
       for(let i = 1; i < valuesSorted.length; i++){
-        let actualValues = valuesSorted[i].map(x=>{return x[0]})
         let actualOrder = valuesSorted[i].map(x=>{return x[1]})
-        if(findDuplicates(actualValues).length > 0){
-          indicesOfEqualities.push(i)
-        }else{
-          if(!arraysEqual(actualOrder,previousOrder)){
-            indexesBeforeChanges.push(i-1)
-          }
+
+        if(!arraysEqual(actualOrder,previousOrder)){
+          indexesBeforeChanges.push(i-1)
+          orderBeforeChanges.push(previousOrder)
         }
+
         previousOrder = actualOrder
       }//end of for loop
-      //console.log(indicesOfEqualities)
-      //console.log(indexesBeforeChanges)
-      data.timeStamps = getVerticalTimeStamps(data,indicesOfEqualities,indexesBeforeChanges)
+      // console.log(orderBeforeChanges)
+      // console.log(indexesBeforeChanges)
+      return{
+        indexesBeforeChanges:indexesBeforeChanges,
+        orderBeforeChanges:orderBeforeChanges
+      }
     }
 
     function getVerticalTimeStamps(data,indicesOfEqualities,indexesBeforeChanges){
@@ -106,19 +120,6 @@
       return timeStamps
     }
 
-    function findDuplicates(arr){
-      let sorted_arr = arr.slice().sort((a,b)=>{
-        return a-b
-      });
-      let results = [];
-      for (let i = 0; i < sorted_arr.length - 1; i++) {
-        if (sorted_arr[i + 1] == sorted_arr[i]) {
-          results.push(sorted_arr[i]);
-        }
-      }
-      return results;
-    }
-
     function arraysEqual(a, b) {
       if (a === b) return true;
       if (a == null || b == null) return false;
@@ -130,7 +131,7 @@
       return true;
     }
 
-    function getChartOrder(atTimeStamp){
+    /*function getChartOrder(atTimeStamp){
       let heightDelta = 1/1000
       let paths = []
       for(var i = 0; i < data.categories.length; i++){
@@ -140,15 +141,15 @@
       }
       let p = paths[0]
 
+    }*/
+
+
+
+
+    return {
+      prepareData:prepareData,
     }
-
-
-
-
-  return {
-    prepareData:prepareData,
-  }
-})();
-App.Plot1DataModel = Plot1DataModel;
-window.App = App;
+  })();
+  App.Plot1DataModel = Plot1DataModel;
+  window.App = App;
 })(window);
