@@ -3,6 +3,8 @@
   var App = window.App || {};
   let Plot1UI = (function() {
 
+    let curveType = d3.curveLinear
+
 
     /*Create the slider box with the brush*/
     function createSlider(svg,svgWidth,svgHeight,stackedAreaMargin,sliderBoxPreferences,startDate, endDate,userBrushed) {
@@ -188,11 +190,34 @@
         }
       }.bind(this))
       //.curve(d3.curveMonotoneX)
-      .curve(d3.curveLinear)
+      .curve(curveType)
+
+      this.upperPath = d3.line()
+      .x(function(d) {
+        return xScale(d.date);
+      })
+      .y(function(d) {
+      if(stacksSupperpose){
+        let values = d.values.slice(0, localId+1)
+        let previousSum = values.reduce((a,b) => a + b, 0)
+        return yScale(previousSum)
+      }else{
+        return yScale(d.values[this.id])
+      }
+    }.bind(this))
+    //.curve(d3.curveMonotoneX)
+    .curve(curveType)
       //  Play with the other ones: 'curveBasis', 'curveCardinal', 'curveStepBefore'.
 
       this.showOnly = function(){
-        this.chartContainer.select("path").data([this.data.values]).attr("d", this.area);
+        this.chartContainer.select(".chart").data([this.data.values]).attr("d", this.area);
+        this.chartContainer.select(".upperPath").data([this.data.values]).attr("d", this.upperPath);
+        //this.chartContainer.select(".upperPath").remove()
+        /*this.chartContainer.append("path")
+        .data([this.data.values])
+        .attr("class", "upperPath")
+        .attr('id', "upperPath_"+this.id)
+        .attr("d", this.upperPath)*/
       }
     }//end of constructor
 
@@ -201,6 +226,10 @@
   function createChart(options){
     return new Chart(options)
   }
+
+
+
+
 
   return {
       createSlider:createSlider,

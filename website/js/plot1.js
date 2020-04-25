@@ -74,8 +74,9 @@
       charts.forEach(chart=>{
         // Add the chart to the HTML page
         chart.chartContainer = stackedArea.append("g")
-        .attr('id', "chart_nb_"+chart.id)
+        .attr('class', "chartContainer")
 
+        //add the area
         chart.chartContainer.append("path")
         .data([chart.data.values])
         .attr("class", "chart")
@@ -86,11 +87,18 @@
           let coordinateX= d3.mouse(this)[0];
           let dateSelected =xScale.invert(coordinateX)
           onHover(chart.id, dateSelected)  })
-
-          chart.path = document.getElementById("path_nb_"+chart.id)
         })
 
-
+        //and add the upper path
+        charts.forEach(chart=>{
+          // Add the chart to the HTML page
+          chart.chartContainer.append("path")
+          .data([chart.data.values])
+          .attr("class", "upperPath")
+          .attr('id', "upperPath_"+chart.id)
+          .attr("d", chart.upperPath)
+          chart.upperPathElem = document.getElementById("path_nb_"+chart.id)
+          })
 
         if(data.criticalIndexes != undefined){
           let l = model.computeTimeStampsBreaks(charts, data, xScale,[data.smallestDate, data.biggestDate])
