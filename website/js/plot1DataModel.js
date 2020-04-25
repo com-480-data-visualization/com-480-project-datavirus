@@ -107,11 +107,10 @@
       let potentialBreaks = result.timeStamps
       let realStepWidth = result.realStepWidth
 
-      console.log(realStepWidth)
       //console.log(potentialBreaks)
       let timeStamps = []
 
-      //getChartOrderNearTimeStamp(charts, potentialBreaks[2][1][0],10)
+      getChartOrderNearTimeStamp(charts, potentialBreaks[2][1][0],realStepWidth)
 
       //
 
@@ -189,17 +188,33 @@ function arraysEqual(a, b) {
 }
 
 
-function getChartOrderNearTimeStamp(charts, timeStamp, delta_t){
-  charts.forEach(chart=>{
-    console.log(chart.path.getTotalLength())
+function getChartOrderNearTimeStamp(charts, timeStamp, delta_x){
+  /*charts.forEach(chart=>{
+  console.log(chart.path.getTotalLength())
 
-  })
-  console.log(charts[2].path.getPointAtLength(0))
-  console.log(timeStamp)
-  let chart0 = charts[0]
-  console.log(chart0)
+})
+console.log(charts[2].path.getPointAtLength(0))
+console.log(timeStamp)
+let chart0 = charts[0]*/
+console.log(getPointAtX(900,20,0,charts[2].path.getTotalLength(),charts[2].path))
+}
 
+function getPointAtX(x,delta,minX,maxX, path){
+  let middle = (maxX+minX)/2
+  let middlePoint = path.getPointAtLength(middle)
+  var i = 0
+  while (Math.abs(x-middlePoint.x)>=delta/2 && i < 100) {
 
+    if(middlePoint.x < x){
+      minX = middle
+    }else{
+      maxX = middle
+    }
+    middle = (minX + maxX)/2
+    middlePoint = path.getPointAtLength(middle)
+    i++
+  }
+  return middlePoint
 }
 
 /*function getChartOrder(atTimeStamp){
