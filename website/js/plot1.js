@@ -45,17 +45,14 @@
     .attr("transform", "translate(" + stackedAreaMargin.left + "," + stackedAreaMargin.top + ")")
 
 
-
     //load the csv file and call createPlot(),createSlider() when done
     d3.csv("/data/plot1data2.csv",function(d) {
       let data = model.prepareData(d, stacksSupperpose, stackClever)
-
       UI.createSlider(svg,svgWidth,svgHeight,stackedAreaMargin,sliderBoxPreferences,data.smallestDate, data.biggestDate,userBrushed)
       createPlot(data)
     });
 
     function createPlot(data) {
-
       //compute the xscale
       xScale = d3.scaleTime()
       .range([0, stackedAreaMargin.width])
@@ -64,14 +61,38 @@
       yScale = d3.scaleLinear()
       .range([stackedAreaMargin.height,0])
       .domain([0, data.maxScore]);
-
       //draw the complete charts
       for (let i = 0; i < data.categories.length; i++) {
-        charts.push(new Chart({
+        charts.push(UI.createChart({
           data: data,
           id: i,
+          stacksSupperpose:stacksSupperpose,
+          xScale:xScale,
+          yScale:yScale,
         }));
       }
+      charts.forEach(chart=>{
+        // Add the chart to the HTML page
+
+        chart.chartContainer = stackedArea.append("g")
+        .attr('id', "chart_nb_"+chart.id)
+
+
+        chart.chartContainer.append("path")
+        .data([chart.data.values])
+        .attr("class", "chart")
+        .attr('id', "path_nb_"+chart.id)
+        .attr("d", chart.area)
+        .attr("fill", colorForIndex(chart.id))
+        .on("mousemove", function(d,i) {
+          let coordinateX= d3.mouse(this)[0];
+          //let dateSelected = xS(coordinateX)
+          let dateSelected =xScale.invert(coordinateX)
+          onHover(chart.id, dateSelected)  })
+      })
+
+      console.log(charts)
+
       if(data.timeStamps != undefined){
         addLines(data.timeStamps)
       }
@@ -122,71 +143,10 @@
         charts[i].showOnly(b);
       }
       svg.select(".xAxis").call(xAxis);
-      
-
     }
 
 
-    class Chart {
-      constructor(options) {
-        this.data = options.data;
-        this.id = options.id;
 
-        let localName = this.data.categories[this.id]
-        let localId = this.id
-        /*
-        Create the chart.
-        Here we use 'curveLinear' interpolation.
-        Play with the other ones: 'curveBasis', 'curveCardinal', 'curveStepBefore'.
-        */
-        this.area = d3.area()
-        .x(function(d) {
-          return xScale(d.date);
-        })
-        .y0(function(d) {
-          if(stacksSupperpose){
-            let values = d.values.slice(0, localId)
-            let previousSum = values.reduce((a,b) => a + b, 0)
-            return yScale(previousSum)
-          }else{
-          return yScale(0)
-        }
-
-      }.bind(this))
-      .y1(function(d) {
-        if(stacksSupperpose){
-          let values = d.values.slice(0, localId+1)
-          let previousSum = values.reduce((a,b) => a + b, 0)
-          return yScale(previousSum)
-        }else{
-          return yScale(d.values[this.id])
-        }
-      }.bind(this))
-      //.curve(d3.curveMonotoneX)
-      .curve(d3.curveLinear)
-      //  Play with the other ones: 'curveBasis', 'curveCardinal', 'curveStepBefore'.
-
-
-
-      // Add the chart to the HTML page
-      this.chartContainer = stackedArea.append("g")
-      .attr('id', "chart_nb_"+this.id)
-
-      this.chartContainer.append("path")
-      .data([this.data.values])
-      .attr("class", "chart")
-      .attr('id', "path_nb_"+this.id)
-      .attr("d", this.area)
-      .attr("fill", colorForIndex(localId))
-      .on("mousemove", function(d,i) {
-        let coordinateX= d3.mouse(this)[0];
-        //let dateSelected = xS(coordinateX)
-        let dateSelected =xScale.invert(coordinateX)
-        onHover(localId, dateSelected)
-      })//.bind(this))
-
-    }//end of constructor
-  }
 
   function addLines(timestamps) {
     let previousContainer = stackedArea.select(".linesContainer")
@@ -202,9 +162,9 @@
     })
   }
 
-  Chart.prototype.showOnly = function(b) {
+  /*Chart.prototype.showOnly = function(b) {
     this.chartContainer.select("path").data([this.data.values]).attr("d", this.area);
-  }
+  }*/
 
   /**/
 

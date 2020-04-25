@@ -12,7 +12,6 @@
       let contextHeight = sliderBoxPreferences.height
       let selectedRectHeight = sliderBoxPreferences.selectedRectHeight
 
-
       //1)First we add the context and we draw a horizontal line so we see it well
       let context = svg.append("g")
       .attr("class", "context")
@@ -143,8 +142,60 @@
       }
     }//end of createSlider
 
+
+
+    class Chart {
+      constructor(options) {
+        this.data = options.data;
+        this.id = options.id;
+        const xScale = options.xScale
+        const yScale = options.yScale
+        const stacksSupperpose = options.stacksSupperpose
+
+        let localName = this.data.categories[this.id]
+        let localId = this.id
+        /*
+        Create the chart.
+        Here we use 'curveLinear' interpolation.
+        Play with the other ones: 'curveBasis', 'curveCardinal', 'curveStepBefore'.
+        */
+        this.area = d3.area()
+        .x(function(d) {
+          return xScale(d.date);
+        })
+        .y0(function(d) {
+          if(stacksSupperpose){
+            let values = d.values.slice(0, localId)
+            let previousSum = values.reduce((a,b) => a + b, 0)
+            return yScale(previousSum)
+          }else{
+          return yScale(0)
+        }
+
+      }.bind(this))
+      .y1(function(d) {
+        if(stacksSupperpose){
+          let values = d.values.slice(0, localId+1)
+          let previousSum = values.reduce((a,b) => a + b, 0)
+          return yScale(previousSum)
+        }else{
+          return yScale(d.values[this.id])
+        }
+      }.bind(this))
+      //.curve(d3.curveMonotoneX)
+      .curve(d3.curveLinear)
+      //  Play with the other ones: 'curveBasis', 'curveCardinal', 'curveStepBefore'.
+
+    }//end of constructor
+  }
+
+  function createChart(options){
+    return new Chart(options)
+  }
+
   return {
       createSlider:createSlider,
+      createChart: createChart,
   }
 })();
 App.Plot1UI = Plot1UI;
