@@ -85,6 +85,11 @@
       .selectAll("rect")
       .attr("rx",5)
 
+      let elem = context.select(".xbrush").select(".overlay").on("click",function(){
+        var b = [startDate,endDate]
+        userBrushed(b)
+      })
+
       // Brush handler. Get time-range from a brush and pass it to the charts.
       function onBrush() {
 
