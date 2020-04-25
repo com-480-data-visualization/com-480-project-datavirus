@@ -99,57 +99,129 @@
       }
     }
 
-    function getVerticalTimeStamps(data,indicesOfEqualities,indexesBeforeChanges){
-      let nbOfSep = 11
-      let timeIntervalBetweenDates = data.values[1].date.getTime() - data.values[0].date.getTime()
-      let stepWidth = timeIntervalBetweenDates/nbOfSep
+
+
+    function computeTimeStampsBreaks(charts,data,xScale,dateDisplayedInterval){
+      let stepWidth = 10
+      let result = getPotentialTimeStampsBreaksWithOrders(charts,data,xScale,stepWidth,dateDisplayedInterval)
+      let potentialBreaks = result.timeStamps
+      let realStepWidth = result.realStepWidth
+
+      console.log(realStepWidth)
+      //console.log(potentialBreaks)
+      let timeStamps = []
+
+      //getChartOrderNearTimeStamp(charts, potentialBreaks[2][1][0],10)
+
+      //
+
+      /*let stepWidth = timeIntervalBetweenDates/nbOfSep
       let timeStamps = []
       indicesOfEqualities.forEach(z=>{
-        timeStamps.push(data.values[z].date.getTime())
-      })
-      indexesBeforeChanges.forEach(z=>{
+      timeStamps.push(data.values[z].date.getTime())
+    })
+    indexesBeforeChanges.forEach(z=>{
 
-        for (var i = 1; i < nbOfSep ; i++){
-          let baseTemp = data.values[z].date.getTime()
-          timeStamps.push(baseTemp + i * stepWidth)
-        }
-      })
-      timeStamps = timeStamps.sort((a,b)=>{
-        return a-b
-      });
-      return timeStamps
-    }
+    for (var i = 1; i < nbOfSep ; i++){
+    let baseTemp = data.values[z].date.getTime()
+    timeStamps.push(baseTemp + i * stepWidth)
+  }
+})
+timeStamps = timeStamps.sort((a,b)=>{
+return a-b
+});
+return timeStamps*/
 
-    function arraysEqual(a, b) {
-      if (a === b) return true;
-      if (a == null || b == null) return false;
-      if (a.length != b.length) return false;
+potentialBreaks.forEach(pb=>{
+  pb[1].forEach(pbb=>{
+    timeStamps.push(pbb)
+  })
+})
+return timeStamps
+}
 
-      for (var i = 0; i < a.length; ++i) {
-        if (a[i] !== b[i]) return false;
+function getPotentialTimeStampsBreaksWithOrders(charts,data,xScale,stepWidth, dateDisplayedInterval){
+  //how much pixels separate two values on screen for the actual scale
+  let pixelIntervalBetweenDates = xScale(data.values[1].date) - xScale(data.values[0].date)
+  let timeIntervalBetweenDates = data.values[1].date.getTime() - data.values[0].date.getTime()
+  let nbOfInterval = Math.ceil(pixelIntervalBetweenDates/stepWidth)
+
+  let realStepWidth = timeIntervalBetweenDates/nbOfInterval
+  let timeStamps = []
+
+  //very cool, but we now must filter the timestamps that are out of the screen for performance issues
+  const smallestTimeStamp = dateDisplayedInterval[0].getTime()
+  const largestTimeStamp = dateDisplayedInterval[1].getTime()
+
+  data.criticalIndexes.indexesBeforeChanges.forEach((z,index)=>{
+    let orderBeforeChanges = data.criticalIndexes.orderBeforeChanges[index]
+    let localTimeStamps = []
+    for (var i = 1; i < nbOfInterval ; i++){
+      let baseTemp = data.values[z].date.getTime()
+      let newTimeStamp = baseTemp + i * realStepWidth
+      if(newTimeStamp >= smallestTimeStamp && newTimeStamp <= largestTimeStamp){
+        localTimeStamps.push(newTimeStamp)
       }
-      return true;
     }
-
-    /*function getChartOrder(atTimeStamp){
-      let heightDelta = 1/1000
-      let paths = []
-      for(var i = 0; i < data.categories.length; i++){
-        let pathIdentifier = "path_nb_"+i
-        let path = document.getElementById(pathIdentifier);
-        paths.push(path)
-      }
-      let p = paths[0]
-
-    }*/
-
-
-
-
-    return {
-      prepareData:prepareData,
+    if (localTimeStamps.length>0){
+      timeStamps.push([orderBeforeChanges,localTimeStamps])
     }
-  })();
-  App.Plot1DataModel = Plot1DataModel;
-  window.App = App;
+  })
+  timeStamps = timeStamps.sort((a,b)=>{
+    return a-b
+  });
+
+  return {
+    realStepWidth:pixelIntervalBetweenDates/nbOfInterval,
+    timeStamps:timeStamps,
+  }
+}
+
+function arraysEqual(a, b) {
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (a.length != b.length) return false;
+
+  for (var i = 0; i < a.length; ++i) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+
+function getChartOrderNearTimeStamp(charts, timeStamp, delta_t){
+  charts.forEach(chart=>{
+    console.log(chart.path.getTotalLength())
+
+  })
+  console.log(charts[2].path.getPointAtLength(0))
+  console.log(timeStamp)
+  let chart0 = charts[0]
+  console.log(chart0)
+
+
+}
+
+/*function getChartOrder(atTimeStamp){
+let heightDelta = 1/1000
+let paths = []
+for(var i = 0; i < data.categories.length; i++){
+let pathIdentifier = "path_nb_"+i
+let path = document.getElementById(pathIdentifier);
+paths.push(path)
+}
+let p = paths[0]
+
+}*/
+
+
+
+
+return {
+  prepareData:prepareData,
+  computeTimeStampsBreaks:computeTimeStampsBreaks,
+}
+})();
+App.Plot1DataModel = Plot1DataModel;
+window.App = App;
 })(window);

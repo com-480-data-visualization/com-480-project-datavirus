@@ -47,7 +47,7 @@
 
     //load the csv file and call createPlot(),createSlider() when done
     d3.csv("/data/plot1data2.csv",function(d) {
-      let data = model.prepareData(d, stacksSupperpose, stackClever)
+       data = model.prepareData(d, stacksSupperpose, stackClever)
       UI.createSlider(svg,svgWidth,svgHeight,stackedAreaMargin,sliderBoxPreferences,data.smallestDate, data.biggestDate,userBrushed)
       createPlot(data)
     });
@@ -86,12 +86,15 @@
           let coordinateX= d3.mouse(this)[0];
           let dateSelected =xScale.invert(coordinateX)
           onHover(chart.id, dateSelected)  })
+
+          chart.path = document.getElementById("path_nb_"+chart.id)
         })
 
-        console.log(charts)
 
-        if(data.timeStamps != undefined){
-          addLines(data.timeStamps)
+
+        if(data.criticalIndexes != undefined){
+          let l = model.computeTimeStampsBreaks(charts, data, xScale,[data.smallestDate, data.biggestDate])
+          addLines(l)
         }
 
         //draw the xAxis
@@ -125,21 +128,6 @@
       }//end of create plot function
 
 
-
-
-
-
-      function userBrushed(b){
-        xScale.domain(b);
-        for (var i = 0; i < charts.length; i++) {
-          charts[i].showOnly(b);
-        }
-        svg.select(".xAxis").call(xAxis);
-      }
-
-
-
-
       function addLines(timestamps) {
         let previousContainer = stackedArea.select(".linesContainer")
         previousContainer.remove()
@@ -153,6 +141,28 @@
           linesContainer.append("line").attr("x1", x).attr("y1", y).attr("x2", x) .attr("y2", Y).attr("class", "verticalLines")
         })
       }
+
+
+
+
+      function userBrushed(b){
+        xScale.domain(b);
+        for (var i = 0; i < charts.length; i++) {
+          charts[i].showOnly(b);
+        }
+        svg.select(".xAxis").call(xAxis);
+
+        if(data.criticalIndexes != undefined){
+          let l = model.computeTimeStampsBreaks(charts, data, xScale,b)
+          //console.log(l.length)
+          addLines(l)
+        }
+      }
+
+
+
+
+
 
 
 
