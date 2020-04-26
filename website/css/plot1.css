@@ -29,6 +29,10 @@
   fill:none
 }
 
+.upperLinesContainer path {
+  fill:none;
+}
+
 
 
 /*g.stackedArea .upperPath{

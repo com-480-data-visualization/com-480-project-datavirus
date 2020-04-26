@@ -296,22 +296,13 @@
         let xS = this.xScale
         let yS= this.yScale
 
-        this.area = d3.area()
+
+
+        this.upperPath = d3.line()
         .x(function(d) {
           return xS(d.date);
         })
-        .y0(function(d) {
-          if(stacksSupperpose){
-            let values = d.values.slice(0, localId)
-            let previousSum = values.reduce((a,b) => a + b, 0)
-
-            return yS(previousSum)
-          }else{
-            return yS(0)
-          }
-
-        }.bind(this))
-        .y1(function(d) {
+        .y(function(d) {
           if(stacksSupperpose){
             let values = d.values.slice(0, localId+1)
             let previousSum = values.reduce((a,b) => a + b, 0)
@@ -322,109 +313,114 @@
         }.bind(this))
         .curve(curveType)
 
-        /*this.upperPath = d3.line()
-        .x(function(d) {
-        return xScale(d.date);
+        this.showOnly = function(b){
+          this.xScale.domain(b);
+          this.path.data([this.data.values]).attr("d", this.upperPath);
+        }
+      }//end of constructor
+
+    }
+
+    function createChart(options){
+      return new Chart(options)
+    }
+
+    function createUpperLine(options){
+      return new UpperLine(options)
+    }
+
+
+
+    function getXscale(){
+      return d3.scaleTime()
+      .range([0, stackedAreaMargin.width])
+      .domain(timeIntervalSelected);
+    }
+
+    function getYscale(){
+      return d3.scaleLinear()
+      .range([stackedAreaMargin.height,0])
+      .domain([0, maxYscore]);
+    }
+
+    function drawXAxis(){
+      //remove the previous axis
+      svg.select(".xAxis").remove()
+      //and recreate the new axis
+      let xAxis = d3.axisBottom(getXscale())
+      svg.append("g")
+      .attr("class", "xAxis")
+      .attr("transform", "translate("+stackedAreaMargin.left
+      +","+(stackedAreaMargin.height + stackedAreaMargin.top)+")")
+      .call(xAxis)
+    }
+
+
+    function renderCharts(charts){
+      stackedArea.select(".chartsContainer").remove()
+      let chartsContainer = stackedArea.append("g")
+      .attr("class", "chartsContainer")
+
+      charts.forEach(chart=>{
+
+        chart.path = chartsContainer.append("path")
+        .data([chart.data.values])
+        .attr("class", "chart")
+        .attr('id', "chart_nb_"+chart.id)
+        .attr("d", chart.area)
+        .attr("fill", colorForIndex(chart.id))
+        /*.on("mousemove", function(d,i) {
+        let coordinateX= d3.mouse(this)[0];
+        let dateSelected =xScale.invert(coordinateX)
+        onHover(chart.id, dateSelected)})*/
+
       })
-      .y(function(d) {
-      if(stacksSupperpose){
-      let values = d.values.slice(0, localId+1)
-      let previousSum = values.reduce((a,b) => a + b, 0)
-      return yScale(previousSum)
-    }else{
-    return yScale(d.values[this.id])
-  }
-}.bind(this))
-//.curve(d3.curveMonotoneX)
-.curve(curveType)*/
-//  Play with the other ones: 'curveBasis', 'curveCardinal', 'curveStepBefore'.
+    }
 
-this.showOnly = function(b){
-  this.xScale.domain(b);
-  this.path.data([this.data.values]).attr("d", this.area);
-}
-}//end of constructor
+    function renderUpperLines(lines){
+      stackedArea.select(".upperLinesContainer").remove()
+      let chartsContainer = stackedArea.append("g")
+      .attr("class", "upperLinesContainer")
 
-}
+      lines.forEach(line=>{
+        line.path = chartsContainer.append("path")
+        .data([line.data.values])
+        .attr("class", "chart")
+        .attr('id', "chart_nb_"+line.id)
+        .attr("d", line.upperPath)
+        .attr("stroke", "black")
+        /*.on("mousemove", function(d,i) {
+        let coordinateX= d3.mouse(this)[0];
+        let dateSelected =xScale.invert(coordinateX)
+        onHover(chart.id, dateSelected)})*/
 
-function createChart(options){
-  return new Chart(options)
-}
+      })
+    }
 
-
-
-function getXscale(){
-  return d3.scaleTime()
-  .range([0, stackedAreaMargin.width])
-  .domain(timeIntervalSelected);
-}
-
-function getYscale(){
-  return d3.scaleLinear()
-  .range([stackedAreaMargin.height,0])
-  .domain([0, maxYscore]);
-}
-
-function drawXAxis(){
-  //remove the previous axis
-  svg.select(".xAxis").remove()
-  //and recreate the new axis
-  let xAxis = d3.axisBottom(getXscale())
-  svg.append("g")
-  .attr("class", "xAxis")
-  .attr("transform", "translate("+stackedAreaMargin.left
-  +","+(stackedAreaMargin.height + stackedAreaMargin.top)+")")
-  .call(xAxis)
-}
-
-
-function renderCharts(charts){
-  stackedArea.select(".chartsContainer").remove()
-  let chartsContainer = stackedArea.append("g")
-  .attr("class", "chartsContainer")
-
-  charts.forEach(chart=>{
-
-
-
-
-    chart.path = chartsContainer.append("path")
-    .data([chart.data.values])
-    .attr("class", "chart")
-    .attr('id', "chart_nb_"+chart.id)
-    .attr("d", chart.area)
-    .attr("fill", colorForIndex(chart.id))
-    /*.on("mousemove", function(d,i) {
-    let coordinateX= d3.mouse(this)[0];
-    let dateSelected =xScale.invert(coordinateX)
-    onHover(chart.id, dateSelected)})*/
-
-
-  })
-}
-
-function colorForIndex(index){
-  var colors = ["#52304b","#2b4a30","#a70ee8","#e30eb8","#734f37","#fcf803", "#fc0303","#03fc07","#00fff7"]
-  return colors[index%colors.length]
-}
+    function colorForIndex(index){
+      var colors = ["#52304b","#2b4a30","#a70ee8","#e30eb8","#734f37","#fcf803", "#fc0303","#03fc07","#00fff7"]
+      return colors[index%colors.length]
+    }
 
 
 
 
 
-return {
-  setData:setData,
-  prepareElements:function(){
-    prepareSVGElement()
-    createSlider()
-    drawXAxis()
-  },
-  getXscale:getXscale,
-  getYscale:getYscale,
-  createChart: createChart,
-  renderCharts:renderCharts,
-}
-})();
-App.Plot1UI = Plot1UI;
-window.App = App;
+    return {
+      setData:setData,
+      prepareElements:function(){
+        prepareSVGElement()
+        createSlider()
+        drawXAxis()
+      },
+      getXscale:getXscale,
+      getYscale:getYscale,
+      createChart: createChart,
+      createUpperLine:createUpperLine,
+      renderCharts:renderCharts,
+      renderUpperLines:renderUpperLines,
+    }
+  })();
+  App.Plot1UI = Plot1UI;
+  window.App = App;
 })(window);
