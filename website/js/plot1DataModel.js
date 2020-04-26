@@ -116,7 +116,7 @@
       let nbOfInterval = Math.ceil(pixelIntervalBetweenDates/stepWidth)
 
       let realStepWidth = timeIntervalBetweenDates/nbOfInterval
-      let timeStamps = []
+
 
       const smallestTimeStamp = dateDisplayedInterval[0].getTime()
       const largestTimeStamp = dateDisplayedInterval[1].getTime()
@@ -124,41 +124,90 @@
       /*
       Initialise "actual order" with starting order
       Initialise orders-until list (order, until, oder, until, order , until,...)
-      afterMinDate = true
-      beforeMaxDate = false
+      afterMinDate = false
+      beforeMaxDate = true
 
       FOR all time break indices:
-        expectedFinalOrder = break order after
-        FOR all timeStamps t while expectedFinalOrder!=actualOrder:
-          update afterMinDate
-          update beforeMaxDate
-          if t inside the interval:
-            compute order at t
-            if order != actualOrder:
-              add actualOrder+t to orders-until
-              actualOrder = orders
-        ENDFOR
-        if actualOrder != expectedFinalOrder and beforeMaxDate:
-          if afterMinDate:
-            //we missed something!
-            add last timeStamp with actualOrder to the list
-        actualOrder = expectedFinalOrder
-        ENDFOR
+      expectedFinalOrder = break order after
+      FOR all timeStamps t while expectedFinalOrder!=actualOrder:
+      update afterMinDate
+      update beforeMaxDate
+      if t inside the interval:
+      compute order at t
+      if order != actualOrder:
+      add actualOrder+t to orders-until
+      actualOrder = orders
+      ENDFOR
+      if actualOrder != expectedFinalOrder and beforeMaxDate:
+      if afterMinDate:
+      //we missed something!
+      add last timeStamp with actualOrder to the list
+      actualOrder = expectedFinalOrder
+      ENDFOR
 
-        if orders-until list is empty:
-          add actualOrder max date to the list
+      if orders-until list is empty:
+      add actualOrder max date to the list
 
-        if last time stamp in list smaller than max date:
-          add actualOrder max date to the list
+      if last time stamp in list smaller than max date:
+      add actualOrder max date to the list
       */
 
+      let actualOrder = data.criticalIndexes.startingOrder
+      let orderUntil = []
+      let afterMinDate = false
+      let beforeMaxDate = true
+
+      data.criticalIndexes.indexesBeforeChanges.forEach((criticalIndex,i)=>{
+        let expectedFinalOrder = data.criticalIndexes.orderAfterChanges[i]
+        let baseTemp = data.values[criticalIndex].date.getTime()
+        for (var i = 1; i < nbOfInterval ; i++){
+          if(!arraysEqual(expectedFinalOrder,actualOrder)){
+            let newTimeStamp = baseTemp + i * realStepWidth
+            if(newTimeStamp>=smallestTimeStamp){
+              afterMinDate = true
+            }
+            if(newTimeStamp>largestTimeStamp){
+              beforeMaxDate = false
+            }
+            if(afterMinDate && beforeMaxDate){
+              let orderAtT = computeOrderAtT(charts, newTimeStamp)
+              if(!arraysEqual(orderAtT,actualOrder){
+                orderUntil.push([actualOrder, newTimeStamp])
+                actualOrder = orderAtT
+              }
+            }
+          }
+        }
+        if(actualOrder != expectedFinalOrder && beforeMaxDate){
+          if(afterMinDate){
+            //we missed something
+            orderUntil.push([actualOrder, baseTemp + (nbOfInterval-1) * realStepWidth])
+          }
+          actualOrder = expectedFinalOrder
+        }
+      })
+
+      if (orderUntil.length == 0){
+        orderUntil.push([actualOrder, largestTimeStamp])
+      }
+
+      if(orderUntil[orderUntil.length-1][1]<largestTimeStamp){
+        orderUntil.push([actualOrder, largestTimeStamp])
+      }
 
 
-      let orderBeforeChanges = data.criticalIndexes.startingOrder
 
+
+
+
+
+
+
+
+      let timeStamps = []
       data.criticalIndexes.indexesBeforeChanges.forEach((z,index)=>{
         orderBeforeChanges = data.criticalIndexes.orderBeforeChanges[index]
-        let orderAfterChanges = data.criticalIndexes.orderAfterChanges[index]
+
 
         let localTimeStamps = []
 
@@ -245,9 +294,9 @@ return a-b
 return timeStamps*/
 /*
 potentialBreaks.forEach(pb=>{
-  pb[1].forEach(pbb=>{
-    timeStamps.push(pbb)
-  })
+pb[1].forEach(pbb=>{
+timeStamps.push(pbb)
+})
 })
 return timeStamps*/
 }
