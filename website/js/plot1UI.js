@@ -6,7 +6,7 @@
     const svgHeight = document.getElementById("plot1_container").clientHeight
 
 
-//-------------SOME UI PARAMTER TO TUNE-------------
+    //-------------SOME UI PARAMTER TO TUNE-------------
     let curveType = d3.curveMonotoneX
     //'curveLinear','curveBasis', 'curveCardinal', 'curveStepBefore',...
     const stackedAreaMargin = {
@@ -26,10 +26,27 @@
     }
 
 
-//------------------------------------------------
+    //------------------------------------------------
     let svg = null
     let stackedArea = null
     let stackedAreaBorderLines = null
+    let timeIntervalSelected = null
+
+    //the revelant data needed
+    let smallestDate = null
+    let biggestDate = null
+    let maxYscore = null
+    let onBrush = null
+
+    function setData(data){
+      smallestDate = data.smallestDate
+      biggestDate = data.biggestDate
+      maxYscore = data.maxYscore
+      onBrush = function(){
+        drawXAxis()
+        data.onBrush()
+      }
+    }
 
 
     function prepareSVGElement(){
@@ -64,7 +81,9 @@
     }
 
     /*Create the slider box with the brush*/
-    function createSlider(startDate, endDate, onBrushClean) {
+    function createSlider() {
+      timeIntervalSelected = [smallestDate, biggestDate]
+
       let sliderWidth = sliderBoxPreferences.sliderWidth * svgWidth
       let niceAxis = sliderBoxPreferences.displayNiceAxis
       let tickHeight = sliderBoxPreferences.tickHeight
@@ -81,7 +100,7 @@
       // Create a domain
       var contextXScale = d3.scaleTime()
       .range([0, sliderWidth])//length of the slider
-      .domain([startDate, endDate])
+      .domain([smallestDate, biggestDate])
       if(niceAxis){
         contextXScale = contextXScale.nice()
       }
@@ -125,8 +144,8 @@
       //Now we do the brush
       const minYBrushable = (contextHeight-selectedRectHeight)/2
       const maxYBrushable = (contextHeight+selectedRectHeight)/2
-      const minXBrushable = contextXScale(startDate) + (svgWidth -sliderWidth)/2
-      const maxXBrushable = contextXScale(endDate) + (svgWidth -sliderWidth)/2
+      const minXBrushable = contextXScale(smallestDate) + (svgWidth -sliderWidth)/2
+      const maxXBrushable = contextXScale(biggestDate) + (svgWidth -sliderWidth)/2
       var brush = d3.brushX()
       .extent([
         //sets the brushable part
@@ -144,8 +163,8 @@
       .attr("rx",5)
 
       let elem = silderBox.select(".xbrush").select(".overlay").on("click",function(){
-        var b = [startDate,endDate]
-        userBrushed(b)
+        timeIntervalSelected = [smallestDate,biggestDate]
+        onBrush(timeIntervalSelected)
       })
 
       // Brush handler. Get time-range from a brush and pass it to the charts.
@@ -168,11 +187,11 @@
             let timeToAdd = sliderBoxPreferences.minBrushableNumberOfDay*1000 * 3600 * 24/2
             let upperDate = middleTime + timeToAdd;
             let lowerDate = middleTime - timeToAdd;
-            if(upperDate>endDate.getTime()){
+            if(upperDate>biggestDate.getTime()){
               let timeToShift = upperDate-endDate.getTime();
               upperDate -= timeToShift;
               lowerDate -= timeToShift;
-            }else if (lowerDate<startDate.getTime()){
+            }else if (lowerDate<smallestDate.getTime()){
               let timeToShift = startDate.getTime()-lowerDate;
               upperDate += timeToShift;
               lowerDate += timeToShift;
@@ -201,7 +220,8 @@
           rightSlider.style("x", xForRight)
 
         }
-        onBrushClean(b)
+        timeIntervalSelected = b
+        onBrush(timeIntervalSelected)
       }
     }//end of createSlider
 
@@ -234,62 +254,90 @@
             let previousSum = values.reduce((a,b) => a + b, 0)
             return yScale(previousSum)
           }else{
-          return yScale(0)
+            return yScale(0)
+          }
+
+        }.bind(this))
+        .y1(function(d) {
+          if(stacksSupperpose){
+            let values = d.values.slice(0, localId+1)
+            let previousSum = values.reduce((a,b) => a + b, 0)
+            return yScale(previousSum)
+          }else{
+            return yScale(d.values[this.id])
+          }
+        }.bind(this))
+
+        .curve(curveType)
+
+        this.upperPath = d3.line()
+        .x(function(d) {
+          return xScale(d.date);
+        })
+        .y(function(d) {
+          if(stacksSupperpose){
+            let values = d.values.slice(0, localId+1)
+            let previousSum = values.reduce((a,b) => a + b, 0)
+            return yScale(previousSum)
+          }else{
+            return yScale(d.values[this.id])
+          }
+        }.bind(this))
+        //.curve(d3.curveMonotoneX)
+        .curve(curveType)
+        //  Play with the other ones: 'curveBasis', 'curveCardinal', 'curveStepBefore'.
+
+        this.showOnly = function(){
+          this.chartContainer.select(".chart").data([this.data.values]).attr("d", this.area);
+          this.chartContainer.select(".upperPath").data([this.data.values]).attr("d", this.upperPath);
         }
+      }//end of constructor
 
-      }.bind(this))
-      .y1(function(d) {
-        if(stacksSupperpose){
-          let values = d.values.slice(0, localId+1)
-          let previousSum = values.reduce((a,b) => a + b, 0)
-          return yScale(previousSum)
-        }else{
-          return yScale(d.values[this.id])
-        }
-      }.bind(this))
+    }
 
-      .curve(curveType)
+    function createChart(options){
+      return new Chart(options)
+    }
 
-      this.upperPath = d3.line()
-      .x(function(d) {
-        return xScale(d.date);
-      })
-      .y(function(d) {
-      if(stacksSupperpose){
-        let values = d.values.slice(0, localId+1)
-        let previousSum = values.reduce((a,b) => a + b, 0)
-        return yScale(previousSum)
-      }else{
-        return yScale(d.values[this.id])
-      }
-    }.bind(this))
-    //.curve(d3.curveMonotoneX)
-    .curve(curveType)
-      //  Play with the other ones: 'curveBasis', 'curveCardinal', 'curveStepBefore'.
 
-      this.showOnly = function(){
-        this.chartContainer.select(".chart").data([this.data.values]).attr("d", this.area);
-        this.chartContainer.select(".upperPath").data([this.data.values]).attr("d", this.upperPath);
-      }
-    }//end of constructor
 
-  }
+    function getXscale(){
+      return d3.scaleTime()
+      .range([0, stackedAreaMargin.width])
+      .domain(timeIntervalSelected);
+    }
 
-  function createChart(options){
-    return new Chart(options)
-  }
+    function getYscale(maxScore){
+      return d3.scaleLinear()
+      .range([stackedAreaMargin.height,0])
+      .domain([0, maxScore]);
+    }
+
+    function drawXAxis(){
+      //remove the previous axis
+      svg.select(".xAxis").remove()
+      //and recreate the new axis
+      let xAxis = d3.axisBottom(getXscale())
+      svg.append("g")
+      .attr("class", "xAxis")
+      .attr("transform", "translate("+stackedAreaMargin.left
+      +","+(stackedAreaMargin.height + stackedAreaMargin.top)+")")
+      .call(xAxis)
+    }
 
 
 
 
 
-
-
-  return {
+    return {
+      setData:setData,
       prepareElements:prepareElements,
+      getXscale:getXscale,
+      getYscale:getYscale,
+      drawXAxis:drawXAxis,
       createChart: createChart,
-  }
-})();
-App.Plot1UI = Plot1UI;
-window.App = App;
+    }
+  })();
+  App.Plot1UI = Plot1UI;
+  window.App = App;
 })(window);

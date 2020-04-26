@@ -8,13 +8,8 @@
 
     var heavyComputationTimer = null
 
-
-
     //the charts that will be displayed
     let charts = [];
-    let xAxis = null
-    let xScale = null
-    let yScale = null
 
     let stacksSupperpose = false
     let stackClever = true
@@ -24,27 +19,32 @@
 
 
 
-
-
-
-
     //load the csv file and call createPlot(),createSlider() when done
     d3.csv("/data/plot1data2.csv",function(d) {
        data = model.prepareData(d, stacksSupperpose, stackClever)
-       console.log(data)
+       UI.setData({
+         smallestDate: data.smallestDate,
+         biggestDate:data.biggestDate,
+         maxYscore: data.maxScore,
+         onBrush: userBrushed,
+       })
       UI.prepareElements(data.smallestDate, data.biggestDate, userBrushed)
-      //createPlot(data)
+      createPlot(data)
     });
 
     function createPlot(data) {
-      //compute the xscale
-      xScale = d3.scaleTime()
-      .range([0, stackedAreaMargin.width])
-      .domain([data.smallestDate, data.biggestDate]);
-      //and yScale using maxDataPoint
-      yScale = d3.scaleLinear()
-      .range([stackedAreaMargin.height,0])
-      .domain([0, data.maxScore]);
+
+      UI.drawXAxis()
+
+
+
+
+return
+
+
+
+
+
       //draw the complete charts
       for (let i = 0; i < data.categories.length; i++) {
         charts.push(UI.createChart({
@@ -86,13 +86,7 @@
 
         addPartsOfChart()
 
-        //draw the xAxis
-        xAxis = d3.axisBottom(xScale)
-        svg.append("g")
-        .attr("class", "xAxis")
-        .attr("transform", "translate("+stackedAreaMargin.left
-        +","+(stackedAreaMargin.height + stackedAreaMargin.top)+")")
-        .call(xAxis)
+
 
 
         //now create the clipped path so no chart will be outside of the box
@@ -126,13 +120,14 @@
 
 
       function userBrushed(b){
+        console.log("brushed")
+        return
         xScale.domain(b);
 
         for (var i = 0; i < charts.length; i++) {
           charts[i].showOnly(b);
         }
         console.log(charts.length)
-        svg.select(".xAxis").call(xAxis);
 
         addPartsOfChart()
       }
