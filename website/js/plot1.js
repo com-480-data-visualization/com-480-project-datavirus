@@ -101,16 +101,14 @@ UI.renderCharts(charts)
 
 
       function userBrushed(b){
-        console.log("brushed")
-        return
-        xScale.domain(b);
-
+        
+        UI.getXscale().domain(b)
         for (var i = 0; i < charts.length; i++) {
           charts[i].showOnly(b);
         }
-        console.log(charts.length)
+        return
 
-        addPartsOfChart()
+        //addPartsOfChart()
       }
 
       function heavyCompute(){
@@ -188,7 +186,7 @@ heavyComputationTimer = window.setTimeout(function(){
         //console.log("over In elem "+ elmx + " for the date " + date)
       }
 
-      
+
 
       return {
         //  playVideo:showVideo,

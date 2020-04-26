@@ -44,7 +44,7 @@
       maxYscore = data.maxYscore
       onBrush = function(){
         drawXAxis()
-        data.onBrush()
+        data.onBrush(timeIntervalSelected)
       }
     }
 
@@ -232,26 +232,27 @@
       constructor(options) {
         this.data = options.data;
         this.id = options.id;
+        this.xScale = getXscale()
         const stacksSupperpose = options.stacksSupperpose
 
         let localName = this.data.categories[this.id]
         let localId = this.id
-        let xScale = getXscale()
-        let yScale = getYscale()
+        let xS = this.xScale
+        let yS= getYscale()
 
         this.area = d3.area()
         .x(function(d) {
 
-          return xScale(d.date);
+          return xS(d.date);
         })
         .y0(function(d) {
           if(stacksSupperpose){
             let values = d.values.slice(0, localId)
             let previousSum = values.reduce((a,b) => a + b, 0)
 
-            return yScale(previousSum)
+            return yS(previousSum)
           }else{
-            return yScale(0)
+            return yS(0)
           }
 
         }.bind(this))
@@ -259,9 +260,9 @@
           if(stacksSupperpose){
             let values = d.values.slice(0, localId+1)
             let previousSum = values.reduce((a,b) => a + b, 0)
-            return yScale(previousSum)
+            return yS(previousSum)
           }else{
-            return yScale(d.values[this.id])
+            return yS(d.values[this.id])
           }
         }.bind(this))
         .curve(curveType)
@@ -283,8 +284,18 @@
         .curve(curveType)*/
         //  Play with the other ones: 'curveBasis', 'curveCardinal', 'curveStepBefore'.
 
-        this.showOnly = function(){
-          this.chartContainer.select(".chart").data([this.data.values]).attr("d", this.area);
+        this.showOnly = function(b){
+          console.log(b)
+          console.log(timeIntervalSelected)
+          console.log(this)
+          this.xScale.domain(b);
+          this.chartContainer.select("path").data([this.data.values]).attr("d", this.area);
+          //this.chartContainer.select("path").data([this.data.values]).attr("d", this.area);
+          //console.log(this)
+          //d3.select("#chart_nb_"+this.id).data([this.data.values]).attr("d", this.area);
+          /*this.xScale.domain(timeIntervalSelected)
+          console.log(  this.chartContainer.select(".chart"))
+          this.chartContainer.select(".chart").data([this.data.values]).attr("d", this.area);*/
           //this.chartContainer.select(".upperPath").data([this.data.values]).attr("d", this.upperPath);
         }
       }//end of constructor
@@ -324,11 +335,18 @@
 
     function renderCharts(charts){
       stackedArea.select(".chartsContainer").remove()
-      let chartContainer = stackedArea.append("g")
+      let chartsContainer = stackedArea.append("g")
       .attr("class", "chartsContainer")
 
       charts.forEach(chart=>{
-        chartContainer.append("path")
+
+        chart.chartContainer = chartsContainer.append("g")
+        .attr('class', "coco")
+
+
+
+
+         chart.chartContainer.append("path")
         .data([chart.data.values])
         .attr("class", "chart")
         .attr('id', "chart_nb_"+chart.id)
@@ -338,6 +356,8 @@
           let coordinateX= d3.mouse(this)[0];
           let dateSelected =xScale.invert(coordinateX)
           onHover(chart.id, dateSelected)})*/
+
+
       })
     }
 
