@@ -226,32 +226,29 @@
     }//end of createSlider
 
 
-    function prepareElements(startDate, endDate,onBrush){
-      prepareSVGElement()
-      createSlider(startDate, endDate,onBrush)
-    }
-
 
 
     class Chart {
       constructor(options) {
         this.data = options.data;
         this.id = options.id;
-        const xScale = options.xScale
-        const yScale = options.yScale
         const stacksSupperpose = options.stacksSupperpose
 
         let localName = this.data.categories[this.id]
         let localId = this.id
+        let xScale = getXscale()
+        let yScale = getYscale()
 
         this.area = d3.area()
         .x(function(d) {
+
           return xScale(d.date);
         })
         .y0(function(d) {
           if(stacksSupperpose){
             let values = d.values.slice(0, localId)
             let previousSum = values.reduce((a,b) => a + b, 0)
+
             return yScale(previousSum)
           }else{
             return yScale(0)
@@ -267,10 +264,9 @@
             return yScale(d.values[this.id])
           }
         }.bind(this))
-
         .curve(curveType)
 
-        this.upperPath = d3.line()
+        /*this.upperPath = d3.line()
         .x(function(d) {
           return xScale(d.date);
         })
@@ -284,12 +280,12 @@
           }
         }.bind(this))
         //.curve(d3.curveMonotoneX)
-        .curve(curveType)
+        .curve(curveType)*/
         //  Play with the other ones: 'curveBasis', 'curveCardinal', 'curveStepBefore'.
 
         this.showOnly = function(){
           this.chartContainer.select(".chart").data([this.data.values]).attr("d", this.area);
-          this.chartContainer.select(".upperPath").data([this.data.values]).attr("d", this.upperPath);
+          //this.chartContainer.select(".upperPath").data([this.data.values]).attr("d", this.upperPath);
         }
       }//end of constructor
 
@@ -307,10 +303,10 @@
       .domain(timeIntervalSelected);
     }
 
-    function getYscale(maxScore){
+    function getYscale(){
       return d3.scaleLinear()
       .range([stackedAreaMargin.height,0])
-      .domain([0, maxScore]);
+      .domain([0, maxYscore]);
     }
 
     function drawXAxis(){
@@ -326,16 +322,45 @@
     }
 
 
+    function renderCharts(charts){
+      stackedArea.select(".chartsContainer").remove()
+      let chartContainer = stackedArea.append("g")
+      .attr("class", "chartsContainer")
+
+      charts.forEach(chart=>{
+        chartContainer.append("path")
+        .data([chart.data.values])
+        .attr("class", "chart")
+        .attr('id', "chart_nb_"+chart.id)
+        .attr("d", chart.area)
+        .attr("fill", colorForIndex(chart.id))
+        /*.on("mousemove", function(d,i) {
+          let coordinateX= d3.mouse(this)[0];
+          let dateSelected =xScale.invert(coordinateX)
+          onHover(chart.id, dateSelected)})*/
+      })
+    }
+
+    function colorForIndex(index){
+      var colors = ["#52304b","#2b4a30","#a70ee8","#e30eb8","#734f37","#fcf803", "#fc0303","#03fc07","#00fff7"]
+      return colors[index%colors.length]
+    }
+
+
 
 
 
     return {
       setData:setData,
-      prepareElements:prepareElements,
+      prepareElements:function(){
+        prepareSVGElement()
+        createSlider()
+        drawXAxis()
+      },
       getXscale:getXscale,
       getYscale:getYscale,
-      drawXAxis:drawXAxis,
       createChart: createChart,
+      renderCharts:renderCharts,
     }
   })();
   App.Plot1UI = Plot1UI;

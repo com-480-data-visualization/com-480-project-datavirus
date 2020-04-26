@@ -28,20 +28,11 @@
          maxYscore: data.maxScore,
          onBrush: userBrushed,
        })
-      UI.prepareElements(data.smallestDate, data.biggestDate, userBrushed)
+      UI.prepareElements()
       createPlot(data)
     });
 
     function createPlot(data) {
-
-      UI.drawXAxis()
-
-
-
-
-return
-
-
 
 
 
@@ -51,27 +42,17 @@ return
           data: data,
           id: i,
           stacksSupperpose:stacksSupperpose,
-          xScale:xScale,
-          yScale:yScale,
         }));
       }
-      charts.forEach(chart=>{
+UI.renderCharts(charts)
+      return
+
         // Add the chart to the HTML page
-        chart.chartContainer = stackedArea.append("g")
+        /*chart.chartContainer = stackedArea.append("g")
         .attr('class', "chartContainer")
 
         //add the area
-        chart.chartContainer.append("path")
-        .data([chart.data.values])
-        .attr("class", "chart")
-        .attr('id', "path_nb_"+chart.id)
-        .attr("d", chart.area)
-        .attr("fill", colorForIndex(chart.id))
-        .on("mousemove", function(d,i) {
-          let coordinateX= d3.mouse(this)[0];
-          let dateSelected =xScale.invert(coordinateX)
-          onHover(chart.id, dateSelected)  })
-        })
+
 
         //and add the upper path
         charts.forEach(chart=>{
@@ -98,7 +79,7 @@ return
         .attr("height", stackedAreaMargin.height)
         .attr("width", stackedAreaMargin.width)
 
-        stackedArea.attr("clip-path", "url(#stackedArea-clip)")
+        stackedArea.attr("clip-path", "url(#stackedArea-clip)")*/
       }//end of create plot function
 
 
@@ -207,10 +188,7 @@ heavyComputationTimer = window.setTimeout(function(){
         //console.log("over In elem "+ elmx + " for the date " + date)
       }
 
-      function colorForIndex(index){
-        var colors = ["#52304b","#2b4a30","#a70ee8","#e30eb8","#734f37","#fcf803", "#fc0303","#03fc07","#00fff7"]
-        return colors[index%colors.length]
-      }
+      
 
       return {
         //  playVideo:showVideo,
