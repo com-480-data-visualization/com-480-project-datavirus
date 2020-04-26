@@ -212,12 +212,6 @@
       this.showOnly = function(){
         this.chartContainer.select(".chart").data([this.data.values]).attr("d", this.area);
         this.chartContainer.select(".upperPath").data([this.data.values]).attr("d", this.upperPath);
-        //this.chartContainer.select(".upperPath").remove()
-        /*this.chartContainer.append("path")
-        .data([this.data.values])
-        .attr("class", "upperPath")
-        .attr('id', "upperPath_"+this.id)
-        .attr("d", this.upperPath)*/
       }
     }//end of constructor
 
