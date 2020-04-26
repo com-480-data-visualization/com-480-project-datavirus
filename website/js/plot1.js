@@ -71,7 +71,7 @@ UI.renderCharts(charts)
 
 
         //now create the clipped path so no chart will be outside of the box
-      
+
 
         stackedArea.attr("clip-path", "url(#stackedArea-clip)")*/
       }//end of create plot function

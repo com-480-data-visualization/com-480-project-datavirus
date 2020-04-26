@@ -242,16 +242,62 @@
         this.data = options.data;
         this.id = options.id;
         this.xScale = getXscale()
+        this.yScale = getYscale()
         const stacksSupperpose = options.stacksSupperpose
 
         let localName = this.data.categories[this.id]
         let localId = this.id
         let xS = this.xScale
-        let yS= getYscale()
+        let yS= this.yScale
 
         this.area = d3.area()
         .x(function(d) {
+          return xS(d.date);
+        })
+        .y0(function(d) {
+          if(stacksSupperpose){
+            let values = d.values.slice(0, localId)
+            let previousSum = values.reduce((a,b) => a + b, 0)
 
+            return yS(previousSum)
+          }else{
+            return yS(0)
+          }
+
+        }.bind(this))
+        .y1(function(d) {
+          if(stacksSupperpose){
+            let values = d.values.slice(0, localId+1)
+            let previousSum = values.reduce((a,b) => a + b, 0)
+            return yS(previousSum)
+          }else{
+            return yS(d.values[this.id])
+          }
+        }.bind(this))
+        .curve(curveType)
+        this.showOnly = function(b){
+          this.xScale.domain(b);
+          this.path.data([this.data.values]).attr("d", this.area);
+        }
+      }//end of constructor
+
+    }
+
+    class UpperLine {
+      constructor(options) {
+        this.data = options.data;
+        this.id = options.id;
+        this.xScale = getXscale()
+        this.yScale = getYscale()
+        const stacksSupperpose = options.stacksSupperpose
+
+        let localName = this.data.categories[this.id]
+        let localId = this.id
+        let xS = this.xScale
+        let yS= this.yScale
+
+        this.area = d3.area()
+        .x(function(d) {
           return xS(d.date);
         })
         .y0(function(d) {
@@ -278,117 +324,107 @@
 
         /*this.upperPath = d3.line()
         .x(function(d) {
-          return xScale(d.date);
-        })
-        .y(function(d) {
-          if(stacksSupperpose){
-            let values = d.values.slice(0, localId+1)
-            let previousSum = values.reduce((a,b) => a + b, 0)
-            return yScale(previousSum)
-          }else{
-            return yScale(d.values[this.id])
-          }
-        }.bind(this))
-        //.curve(d3.curveMonotoneX)
-        .curve(curveType)*/
-        //  Play with the other ones: 'curveBasis', 'curveCardinal', 'curveStepBefore'.
-
-        this.showOnly = function(b){
-          console.log(b)
-          console.log(timeIntervalSelected)
-          console.log(this)
-          this.xScale.domain(b);
-          this.path.data([this.data.values]).attr("d", this.area);
-          //this.chartContainer.select("path").data([this.data.values]).attr("d", this.area);
-          //console.log(this)
-          //d3.select("#chart_nb_"+this.id).data([this.data.values]).attr("d", this.area);
-          /*this.xScale.domain(timeIntervalSelected)
-          console.log(  this.chartContainer.select(".chart"))
-          this.chartContainer.select(".chart").data([this.data.values]).attr("d", this.area);*/
-          //this.chartContainer.select(".upperPath").data([this.data.values]).attr("d", this.upperPath);
-        }
-      }//end of constructor
-
-    }
-
-    function createChart(options){
-      return new Chart(options)
-    }
-
-
-
-    function getXscale(){
-      return d3.scaleTime()
-      .range([0, stackedAreaMargin.width])
-      .domain(timeIntervalSelected);
-    }
-
-    function getYscale(){
-      return d3.scaleLinear()
-      .range([stackedAreaMargin.height,0])
-      .domain([0, maxYscore]);
-    }
-
-    function drawXAxis(){
-      //remove the previous axis
-      svg.select(".xAxis").remove()
-      //and recreate the new axis
-      let xAxis = d3.axisBottom(getXscale())
-      svg.append("g")
-      .attr("class", "xAxis")
-      .attr("transform", "translate("+stackedAreaMargin.left
-      +","+(stackedAreaMargin.height + stackedAreaMargin.top)+")")
-      .call(xAxis)
-    }
-
-
-    function renderCharts(charts){
-      stackedArea.select(".chartsContainer").remove()
-      let chartsContainer = stackedArea.append("g")
-      .attr("class", "chartsContainer")
-
-      charts.forEach(chart=>{
-
-
-
-
-         chart.path = chartsContainer.append("path")
-        .data([chart.data.values])
-        .attr("class", "chart")
-        .attr('id', "chart_nb_"+chart.id)
-        .attr("d", chart.area)
-        .attr("fill", colorForIndex(chart.id))
-        /*.on("mousemove", function(d,i) {
-          let coordinateX= d3.mouse(this)[0];
-          let dateSelected =xScale.invert(coordinateX)
-          onHover(chart.id, dateSelected)})*/
-
-
+        return xScale(d.date);
       })
-    }
+      .y(function(d) {
+      if(stacksSupperpose){
+      let values = d.values.slice(0, localId+1)
+      let previousSum = values.reduce((a,b) => a + b, 0)
+      return yScale(previousSum)
+    }else{
+    return yScale(d.values[this.id])
+  }
+}.bind(this))
+//.curve(d3.curveMonotoneX)
+.curve(curveType)*/
+//  Play with the other ones: 'curveBasis', 'curveCardinal', 'curveStepBefore'.
 
-    function colorForIndex(index){
-      var colors = ["#52304b","#2b4a30","#a70ee8","#e30eb8","#734f37","#fcf803", "#fc0303","#03fc07","#00fff7"]
-      return colors[index%colors.length]
-    }
+this.showOnly = function(b){
+  this.xScale.domain(b);
+  this.path.data([this.data.values]).attr("d", this.area);
+}
+}//end of constructor
+
+}
+
+function createChart(options){
+  return new Chart(options)
+}
+
+
+
+function getXscale(){
+  return d3.scaleTime()
+  .range([0, stackedAreaMargin.width])
+  .domain(timeIntervalSelected);
+}
+
+function getYscale(){
+  return d3.scaleLinear()
+  .range([stackedAreaMargin.height,0])
+  .domain([0, maxYscore]);
+}
+
+function drawXAxis(){
+  //remove the previous axis
+  svg.select(".xAxis").remove()
+  //and recreate the new axis
+  let xAxis = d3.axisBottom(getXscale())
+  svg.append("g")
+  .attr("class", "xAxis")
+  .attr("transform", "translate("+stackedAreaMargin.left
+  +","+(stackedAreaMargin.height + stackedAreaMargin.top)+")")
+  .call(xAxis)
+}
+
+
+function renderCharts(charts){
+  stackedArea.select(".chartsContainer").remove()
+  let chartsContainer = stackedArea.append("g")
+  .attr("class", "chartsContainer")
+
+  charts.forEach(chart=>{
+
+
+
+
+    chart.path = chartsContainer.append("path")
+    .data([chart.data.values])
+    .attr("class", "chart")
+    .attr('id', "chart_nb_"+chart.id)
+    .attr("d", chart.area)
+    .attr("fill", colorForIndex(chart.id))
+    /*.on("mousemove", function(d,i) {
+    let coordinateX= d3.mouse(this)[0];
+    let dateSelected =xScale.invert(coordinateX)
+    onHover(chart.id, dateSelected)})*/
+
+
+  })
+}
+
+function colorForIndex(index){
+  var colors = ["#52304b","#2b4a30","#a70ee8","#e30eb8","#734f37","#fcf803", "#fc0303","#03fc07","#00fff7"]
+  return colors[index%colors.length]
+}
 
 
 
 
 
-    return {
-      setData:setData,
-      prepareElements:function(){
-        prepareSVGElement()
-        createSlider()
-        drawXAxis()
-      },
-      getXscale:getXscale,
-      getYscale:getYscale,
-      createChart: createChart,
-      renderCharts:renderCharts,
-    }
-  })();
-  App.Plot1UI = Plot1UI;
-  window.App = App;
+return {
+  setData:setData,
+  prepareElements:function(){
+    prepareSVGElement()
+    createSlider()
+    drawXAxis()
+  },
+  getXscale:getXscale,
+  getYscale:getYscale,
+  createChart: createChart,
+  renderCharts:renderCharts,
+}
+})();
+App.Plot1UI = Plot1UI;
+window.App = App;
 })(window);
