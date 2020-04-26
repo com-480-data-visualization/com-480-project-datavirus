@@ -37,6 +37,7 @@
     let biggestDate = null
     let maxYscore = null
     let onBrush = null
+    let data = null
 
     function setData(data){
       smallestDate = data.smallestDate
@@ -389,12 +390,71 @@
         .attr('id', "chart_nb_"+line.id)
         .attr("d", line.upperPath)
         .attr("stroke", "black")
+        line.upperPathElem = document.getElementById("chart_nb_"+line.id)
         /*.on("mousemove", function(d,i) {
         let coordinateX= d3.mouse(this)[0];
         let dateSelected =xScale.invert(coordinateX)
         onHover(chart.id, dateSelected)})*/
 
       })
+    }
+
+    function removePartsOfChart(){
+      stackedArea.select(".chartFrames").remove()
+    }
+
+    function addPartsOfChart(leftTimeBorder,orderTimeStamps,stacksSupperpose,data){
+      removePartsOfChart()
+
+      console.log(leftTimeBorder)
+      console.log(orderTimeStamps)
+
+      let framesContainer = stackedArea.append("g")
+      .attr("class", "chartFrames")
+
+
+      orderTimeStamps.forEach((el,i)=>{
+
+        let order = el[0]
+        let rightTimeBorder = el[1]
+
+        console.log(leftTimeBorder)
+        console.log(leftTimeBorder)
+
+        framesContainer.append("clipPath")
+        .attr("id", "clip_for_frame_"+i)
+        .append("rect")
+        .attr("x", getXscale()(leftTimeBorder)-2)
+        .attr("y", 0)
+        .attr("height", stackedAreaMargin.height)
+        .attr("width", stackedAreaMargin.width)
+
+        order.forEach(chartId=>{
+          let newIncompleteChart = createChart({
+            data: data,
+            id: chartId,
+            stacksSupperpose:stacksSupperpose,
+            xScale:getXscale(),
+            yScale:getYscale(),
+          })
+
+          //console.log(newIncompleteChart)
+
+
+          //add the area
+          framesContainer.append("path")
+          .data([newIncompleteChart.data.values])
+          .attr("class", "partOfchart")
+          .attr("d", newIncompleteChart.area)
+          .attr("fill", colorForIndex(newIncompleteChart.id))
+          .attr("clip-path", "url(#clip_for_frame_"+i+")")
+
+        })
+        leftTimeBorder = rightTimeBorder
+      })
+
+
+
     }
 
     function colorForIndex(index){
@@ -419,6 +479,7 @@
       createUpperLine:createUpperLine,
       renderCharts:renderCharts,
       renderUpperLines:renderUpperLines,
+      addPartsOfChart:addPartsOfChart,
     }
   })();
   App.Plot1UI = Plot1UI;

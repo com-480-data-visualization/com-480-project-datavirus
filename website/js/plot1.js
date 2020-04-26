@@ -18,8 +18,6 @@
     let data = null
     //define the position of the rect that will contain the stacked graphs
 
-
-
     //load the csv file and call createPlot(),createSlider() when done
     d3.csv("/data/plot1data2.csv",function(d) {
       data = model.prepareData(d, stacksSupperpose, stackClever)
@@ -35,8 +33,6 @@
 
     function createPlot(data) {
 
-
-
       //draw the complete charts
       for (let i = 0; i < data.categories.length; i++) {
         charts.push(UI.createChart({
@@ -45,8 +41,6 @@
           stacksSupperpose:stacksSupperpose,
         }));
       }
-      UI.renderCharts(charts)
-
 
       for (let i = 0; i < data.categories.length; i++) {
         upperLines.push(UI.createUpperLine({
@@ -56,38 +50,11 @@
         }));
       }
 
+      UI.renderCharts(charts)
       UI.renderUpperLines(upperLines)
 
+      heavyCompute()
 
-      return
-
-      // Add the chart to the HTML page
-      /*chart.chartContainer = stackedArea.append("g")
-      .attr('class', "chartContainer")
-
-      //add the area
-
-
-      //and add the upper path
-      charts.forEach(chart=>{
-      // Add the chart to the HTML page
-      chart.chartContainer.append("path")
-      .data([chart.data.values])
-      .attr("class", "upperPath")
-      .attr('id', "upperPath_"+chart.id)
-      .attr("d", chart.upperPath)
-      chart.upperPathElem = document.getElementById("path_nb_"+chart.id)
-    })
-
-    addPartsOfChart()
-
-
-
-
-    //now create the clipped path so no chart will be outside of the box
-
-
-    stackedArea.attr("clip-path", "url(#stackedArea-clip)")*/
   }//end of create plot function
 
 
@@ -106,10 +73,7 @@
   }
 
 
-
-
   function userBrushed(b){
-
     UI.getXscale().domain(b)
     for (var i = 0; i < charts.length; i++) {
       charts[i].showOnly(b);
@@ -118,64 +82,17 @@
     for (var i = 0; i < upperLines.length; i++) {
       upperLines[i].showOnly(b);
     }
-
-
-    return
-
     //addPartsOfChart()
   }
 
   function heavyCompute(){
-    console.log("1")
-    let orderTimeStamps = model.computeTimeStampsBreaks(charts, data, xScale,[data.smallestDate, data.biggestDate])
-    let leftTimeBorder = data.smallestDate.getTime()
-    let frameContainer = stackedArea.append("g")
-    .attr('class', "chartFrames")
+    let orderTimeStamps = model.computeTimeStampsBreaks(upperLines, data, UI.getXscale(),[data.smallestDate, data.biggestDate])
 
-    console.log("2")
-    orderTimeStamps.forEach((el,i)=>{
-
-      let order = el[0]
-      let rightTimeBorder = el[1]
-
-
-
-      frameContainer.append("clipPath")
-      .attr("id", "clip_for_frame_"+i)
-      .append("rect")
-      .attr("x", xScale(leftTimeBorder)-2)
-      .attr("y", 0)
-      .attr("height", stackedAreaMargin.height)
-      .attr("width", stackedAreaMargin.width)
-
-      order.forEach(chartId=>{
-        let newIncompleteChart = UI.createChart({
-          data: data,
-          id: chartId,
-          stacksSupperpose:stacksSupperpose,
-          xScale:xScale,
-          yScale:yScale,
-        })
-
-        //console.log(newIncompleteChart)
-
-
-        //add the area
-        frameContainer.append("path")
-        .data([newIncompleteChart.data.values])
-        .attr("class", "partOfchart")
-        .attr("d", newIncompleteChart.area)
-        .attr("fill", colorForIndex(newIncompleteChart.id))
-        .attr("clip-path", "url(#clip_for_frame_"+i+")")
-
-      })
-      leftTimeBorder = rightTimeBorder
-    })
-    console.log("3")
+    UI.addPartsOfChart(data.smallestDate.getTime(),orderTimeStamps,stacksSupperpose,data)
   }
 
 
-  function addPartsOfChart(){
+  /*function addPartsOfChart(){
     window.clearInterval(heavyComputationTimer);
 
     if(data.criticalIndexes != undefined){
@@ -194,7 +111,7 @@
 
 
     }
-  }
+  }*/
 
   function onHover(elmx, date){
     //console.log("over In elem "+ elmx + " for the date " + date)

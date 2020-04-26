@@ -110,7 +110,6 @@
 
     function computeTimeStampsBreaks(charts,data,xScale,dateDisplayedInterval){
 
-
       //how much pixels separate two values on screen for the actual scale
       let pixelIntervalBetweenDates = xScale(data.values[1].date) - xScale(data.values[0].date)
       let timeIntervalBetweenDates = data.values[1].date.getTime() - data.values[0].date.getTime()
