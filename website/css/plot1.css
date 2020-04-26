@@ -1,8 +1,5 @@
-body {
-    font: 13px "Arial", Arial;
-}
 
-#plot1-container{
+#plot1_container{
   border: 1px solid blue;
   position: fixed;
   left: 5px;
@@ -11,25 +8,35 @@ body {
   bottom: 5px;
 }
 
-/*The border of the stacked area*/
-/*#plot1-container svg .stackedArea line{
-  stroke-opacity: 1;
+.stackedAreaBorder{
   stroke: black;
-  stroke-width: 1;
-}*/
-
-
-/*.axis path, .axis line {
-	fill: none;
-	stroke: #aaa;
-	shape-rendering: crispEdges;
-}*/
-
-g.stackedArea .upperPath{
-  stroke: red;
-  stroke-width:5;
+  stroke-opacity: 1;
+  stroke-width:1;
   fill:none
 }
+
+.sliderBox .topLine{
+  stroke: black;
+  stroke-opacity: 1;
+  stroke-width:1;
+  fill:none
+}
+
+.sliderBox .outerTick{
+  stroke: black;
+  stroke-opacity: 1;
+  stroke-width:1;
+  fill:none
+}
+
+
+
+/*g.stackedArea .upperPath{
+  stroke: black;
+  stroke-width:1;
+  fill:none
+}*/
+
 
 
 
@@ -39,52 +46,58 @@ g.stackedArea .upperPath{
 
 /*------------AXIS OF THE TIME SLIDER-------------------*/
 /*The line that divides the context from the above graph*/
-g.context>line{
+/*g.context>line{
   stroke: blue;
   stroke-opacity: 1;
   stroke-width: 1;
-}
+}*/
 /*The end ticks if the time interval displayed is not .nice()*/
-g.context .outerTick{
+/*g.context .outerTick{
   stroke: black;
   stroke-opacity: 1;
   stroke-width: 1;
-}
+}*/
 
 /*horizontal axis line*/
-g.context g.axis path {
+/*g.context g.axis path {
 	stroke-opacity: 1;
   stroke: black;
-}
+}*/
 
 /*vertical ticks*/
-g.context g.axis line {
+/*g.context g.axis line {
 	stroke-opacity: 1;
   /*stroke-width: 3;*/
-  stroke: black;
-}
+  /*stroke: black;
+}*/
 
 /*text of axis (temporal labels)*/
-g.context g.axis text {
+/*g.context g.axis text {
   stroke-width: 0.3;
   stroke: black;
   text-anchor: middle;/* middle or start or end */
-}
+/*}
 /*------------BRUSH-------------------*/
-g.context g.xbrush rect.selection{
+/*g.context g.xbrush rect.selection{
 	fill: yellow;
   cursor: ew-resize;
   stroke: black;
   /*height:16px;
   transform: translate(0px,17px)*/
-}
+/*}
 
 g.context g.xbrush rect.handle{
   /*cursor: ew-resize;
   stroke: black;
   height:16px;
   transform: translate(0px,17px)*/
-}
-.verticalLines{
+/*}
+g.stackedArea .verticalLines{
   stroke: black;
+  stroke-width: 1;
+}
+
+g.stackedArea .chartFrames .partOfchart{
+  stroke: black;
+  stroke-width: 1;
 }

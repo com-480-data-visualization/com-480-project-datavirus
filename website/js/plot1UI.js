@@ -2,12 +2,69 @@
   'use strict';
   var App = window.App || {};
   let Plot1UI = (function() {
+    const svgWidth = document.getElementById("plot1_container").clientWidth
+    const svgHeight = document.getElementById("plot1_container").clientHeight
 
-    let curveType = d3.curveLinear
 
+//-------------SOME UI PARAMTER TO TUNE-------------
+    let curveType = d3.curveMonotoneX
+    //'curveLinear','curveBasis', 'curveCardinal', 'curveStepBefore',...
+    const stackedAreaMargin = {
+      top: 30,
+      left: 50,
+      width: svgWidth*0.9,
+      height: 350
+    }
+
+    const sliderBoxPreferences = {
+      height:60,
+      sliderWidth:0.9,
+      tickHeight:10,
+      displayNiceAxis:false,
+      selectedRectHeight:50,
+      minBrushableNumberOfDay:365*2,//cannot zoom more than over 2 years
+    }
+
+
+//------------------------------------------------
+    let svg = null
+    let stackedArea = null
+    let stackedAreaBorderLines = null
+
+
+    function prepareSVGElement(){
+      //delete the previous svg element
+      d3.select("#plot1_container").select("svg").remove()
+
+      //create a new svg element
+      svg = d3.select("#plot1_container").append("svg")
+      .attr("width", svgWidth)
+      .attr("height", svgHeight);
+
+      //add a container for the stacked area
+      stackedArea = svg.append("g")
+      .attr("class", "stackedArea")
+      .attr("transform", "translate(" + stackedAreaMargin.left + "," + stackedAreaMargin.top + ")")
+
+      //add a container for the lines that will delimit the stacked area
+      stackedAreaBorderLines = svg.append("g")
+      .attr("class", "stackedAreaBorderLines")
+      .attr("transform", "translate(" + stackedAreaMargin.left + "," + stackedAreaMargin.top + ")")
+
+      //file the stackedAreaBorderLines with the 4 lines:
+      //top
+      stackedAreaBorderLines.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", stackedAreaMargin.width) .attr("y2", 0).attr("class", "stackedAreaBorder");
+      //bottom
+      stackedAreaBorderLines.append("line") .attr("x1", 0) .attr("y1", stackedAreaMargin.height).attr("x2", stackedAreaMargin.width) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
+      //left
+      stackedAreaBorderLines.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", 0) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
+      //right
+      stackedAreaBorderLines.append("line") .attr("x1", stackedAreaMargin.width) .attr("y1", 0).attr("x2", stackedAreaMargin.width) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
+
+    }
 
     /*Create the slider box with the brush*/
-    function createSlider(svg,svgWidth,svgHeight,stackedAreaMargin,sliderBoxPreferences,startDate, endDate,userBrushed) {
+    function createSlider(startDate, endDate, onBrushClean) {
       let sliderWidth = sliderBoxPreferences.sliderWidth * svgWidth
       let niceAxis = sliderBoxPreferences.displayNiceAxis
       let tickHeight = sliderBoxPreferences.tickHeight
@@ -15,13 +72,12 @@
       let selectedRectHeight = sliderBoxPreferences.selectedRectHeight
 
       //1)First we add the context and we draw a horizontal line so we see it well
-      let context = svg.append("g")
-      .attr("class", "context")
+      let silderBox = svg.append("g")
+      .attr("class", "sliderBox")
       .attr("transform", "translate(" + 0 + "," + (svgHeight - sliderBoxPreferences.height) + ")")
 
       //drawing the separation line
-      context.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", svgWidth) .attr("y2", 0).attr("class", "separationLine");
-
+      silderBox.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", svgWidth) .attr("y2", 0).attr("class", "topLine");
       // Create a domain
       var contextXScale = d3.scaleTime()
       .range([0, sliderWidth])//length of the slider
@@ -43,16 +99,16 @@
       //.tickFormat(x => /[AEIOUY]/.test(x) ? x : "")
 
       //append the axis to the svg element
-      context.append("g")
+      silderBox.append("g")
       .attr("transform", "translate("+(svgWidth -sliderWidth)/2+","+contextHeight/2+")")
       .call(contextAxis)
 
       //move the ticks to position them in the middle of the horizontal line
-      context.selectAll(".tick line")
+      silderBox.selectAll(".tick line")
       .attr("transform", "translate(0,-"+tickHeight/2+")");
 
       //moves the text accordingly
-      context.selectAll(".tick text")
+      silderBox.selectAll(".tick text")
       .attr("transform", "translate(0,-"+tickHeight/2+")");
 
       if(!niceAxis){
@@ -62,8 +118,8 @@
         const yBottom = (contextHeight + outerTickSize)/2
         const xLeft = (svgWidth -sliderWidth)/2
         const xRight = xLeft + sliderWidth
-        context.append("line") .attr("x1", xLeft) .attr("y1", yTop).attr("x2", xLeft) .attr("y2", yBottom).attr("class", "outerTick")
-        context.append("line") .attr("x1", xRight) .attr("y1", yTop).attr("x2", xRight) .attr("y2", yBottom).attr("class", "outerTick")
+        silderBox.append("line") .attr("x1", xLeft) .attr("y1", yTop).attr("x2", xLeft) .attr("y2", yBottom).attr("class", "outerTick")
+        silderBox.append("line") .attr("x1", xRight) .attr("y1", yTop).attr("x2", xRight) .attr("y2", yBottom).attr("class", "outerTick")
       }
 
       //Now we do the brush
@@ -78,22 +134,22 @@
         [minXBrushable, minYBrushable],
         [maxXBrushable, maxYBrushable]
       ])
-      .on("brush", onBrush)
+      .on("brush", cleanBrushInterval)
 
       //The selection rectangle
-      context.append("g")
+      silderBox.append("g")
       .attr("class", "xbrush")
       .call(brush)
       .selectAll("rect")
       .attr("rx",5)
 
-      let elem = context.select(".xbrush").select(".overlay").on("click",function(){
+      let elem = silderBox.select(".xbrush").select(".overlay").on("click",function(){
         var b = [startDate,endDate]
         userBrushed(b)
       })
 
       // Brush handler. Get time-range from a brush and pass it to the charts.
-      function onBrush() {
+      function cleanBrushInterval() {
 
         //d3.event.selection looks like [622,698] for example
         //b is then an array of 2 dates: [from, to]
@@ -129,7 +185,7 @@
           let big_date = b[1]
           //now we should adapt the brush!!
 
-          let brushSelected = context.select(".xbrush")
+          let brushSelected = silderBox.select(".xbrush")
           let selection = brushSelected.select(".selection")
           let leftSlider = brushSelected.select(".handle--w")
           let rightSlider = brushSelected.select(".handle--e")
@@ -145,9 +201,15 @@
           rightSlider.style("x", xForRight)
 
         }
-        userBrushed(b)
+        onBrushClean(b)
       }
     }//end of createSlider
+
+
+    function prepareElements(startDate, endDate,onBrush){
+      prepareSVGElement()
+      createSlider(startDate, endDate,onBrush)
+    }
 
 
 
@@ -161,11 +223,7 @@
 
         let localName = this.data.categories[this.id]
         let localId = this.id
-        /*
-        Create the chart.
-        Here we use 'curveLinear' interpolation.
-        Play with the other ones: 'curveBasis', 'curveCardinal', 'curveStepBefore'.
-        */
+
         this.area = d3.area()
         .x(function(d) {
           return xScale(d.date);
@@ -189,7 +247,7 @@
           return yScale(d.values[this.id])
         }
       }.bind(this))
-      //.curve(d3.curveMonotoneX)
+
       .curve(curveType)
 
       this.upperPath = d3.line()
@@ -225,8 +283,10 @@
 
 
 
+
+
   return {
-      createSlider:createSlider,
+      prepareElements:prepareElements,
       createChart: createChart,
   }
 })();
