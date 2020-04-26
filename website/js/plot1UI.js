@@ -361,9 +361,7 @@
       stackedArea.select(".chartsContainer").remove()
       let chartsContainer = stackedArea.append("g")
       .attr("class", "chartsContainer")
-
       charts.forEach(chart=>{
-
         chart.path = chartsContainer.append("path")
         .data([chart.data.values])
         .attr("class", "chart")
@@ -374,17 +372,22 @@
         let coordinateX= d3.mouse(this)[0];
         let dateSelected =xScale.invert(coordinateX)
         onHover(chart.id, dateSelected)})*/
-
       })
     }
 
-    function renderUpperLines(lines){
+
+
+    function removeLines(){
       stackedArea.select(".upperLinesContainer").remove()
-      let chartsContainer = stackedArea.append("g")
+    }
+
+    function renderUpperLines(lines){
+      removeLines()
+      let linesContainer = stackedArea.append("g")
       .attr("class", "upperLinesContainer")
 
       lines.forEach(line=>{
-        line.path = chartsContainer.append("path")
+        line.path = linesContainer.append("path")
         .data([line.data.values])
         .attr("class", "chart")
         .attr('id', "chart_nb_"+line.id)
@@ -395,9 +398,10 @@
         let coordinateX= d3.mouse(this)[0];
         let dateSelected =xScale.invert(coordinateX)
         onHover(chart.id, dateSelected)})*/
-
       })
     }
+
+
 
     function removePartsOfChart(){
       stackedArea.select(".chartFrames").remove()
@@ -406,8 +410,7 @@
     function addPartsOfChart(leftTimeBorder,orderTimeStamps,stacksSupperpose,data){
       removePartsOfChart()
 
-      console.log(leftTimeBorder)
-      console.log(orderTimeStamps)
+
 
       let framesContainer = stackedArea.append("g")
       .attr("class", "chartFrames")
@@ -417,9 +420,6 @@
 
         let order = el[0]
         let rightTimeBorder = el[1]
-
-        console.log(leftTimeBorder)
-        console.log(leftTimeBorder)
 
         framesContainer.append("clipPath")
         .attr("id", "clip_for_frame_"+i)
@@ -480,6 +480,8 @@
       renderCharts:renderCharts,
       renderUpperLines:renderUpperLines,
       addPartsOfChart:addPartsOfChart,
+      removePartsOfChart:removePartsOfChart,
+      removeLines:removeLines,
     }
   })();
   App.Plot1UI = Plot1UI;

@@ -32,7 +32,6 @@
     });
 
     function createPlot(data) {
-
       //draw the complete charts
       for (let i = 0; i < data.categories.length; i++) {
         charts.push(UI.createChart({
@@ -50,11 +49,14 @@
         }));
       }
 
-      UI.renderCharts(charts)
-      UI.renderUpperLines(upperLines)
-
-      heavyCompute()
-
+      if(data.criticalIndexes == undefined){
+        UI.renderCharts(charts)
+      }else{
+        UI.renderCharts(charts)
+        UI.renderUpperLines(upperLines)
+        heavyCompute()
+        UI.renderUpperLines(upperLines)
+      }
   }//end of create plot function
 
 
@@ -82,6 +84,18 @@
     for (var i = 0; i < upperLines.length; i++) {
       upperLines[i].showOnly(b);
     }
+
+    UI.removePartsOfChart()
+    window.clearInterval(heavyComputationTimer)
+    if(data.categories != undefined){
+      UI.removeLines()
+      heavyComputationTimer = window.setTimeout(function(){
+        console.log("do calculuuus")
+        heavyCompute()
+        UI.renderUpperLines(upperLines)
+      }, 500);
+    }
+
     //addPartsOfChart()
   }
 
