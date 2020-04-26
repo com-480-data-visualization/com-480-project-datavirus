@@ -71,13 +71,7 @@ UI.renderCharts(charts)
 
 
         //now create the clipped path so no chart will be outside of the box
-        svg.append("clipPath")
-        .attr("id", "stackedArea-clip")
-        .append("rect")
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("height", stackedAreaMargin.height)
-        .attr("width", stackedAreaMargin.width)
+      
 
         stackedArea.attr("clip-path", "url(#stackedArea-clip)")*/
       }//end of create plot function
@@ -101,7 +95,7 @@ UI.renderCharts(charts)
 
 
       function userBrushed(b){
-        
+
         UI.getXscale().domain(b)
         for (var i = 0; i < charts.length; i++) {
           charts[i].showOnly(b);

@@ -58,10 +58,19 @@
       .attr("width", svgWidth)
       .attr("height", svgHeight);
 
+      svg.append("clipPath")
+      .attr("id", "clipForStackedArea")
+      .append("rect")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("height", stackedAreaMargin.height)
+      .attr("width", stackedAreaMargin.width)
+
       //add a container for the stacked area
       stackedArea = svg.append("g")
       .attr("class", "stackedArea")
       .attr("transform", "translate(" + stackedAreaMargin.left + "," + stackedAreaMargin.top + ")")
+      .attr("clip-path", "url(#clipForStackedArea)")
 
       //add a container for the lines that will delimit the stacked area
       stackedAreaBorderLines = svg.append("g")
@@ -289,7 +298,7 @@
           console.log(timeIntervalSelected)
           console.log(this)
           this.xScale.domain(b);
-          this.chartContainer.select("path").data([this.data.values]).attr("d", this.area);
+          this.path.data([this.data.values]).attr("d", this.area);
           //this.chartContainer.select("path").data([this.data.values]).attr("d", this.area);
           //console.log(this)
           //d3.select("#chart_nb_"+this.id).data([this.data.values]).attr("d", this.area);
@@ -340,13 +349,10 @@
 
       charts.forEach(chart=>{
 
-        chart.chartContainer = chartsContainer.append("g")
-        .attr('class', "coco")
 
 
 
-
-         chart.chartContainer.append("path")
+         chart.path = chartsContainer.append("path")
         .data([chart.data.values])
         .attr("class", "chart")
         .attr('id', "chart_nb_"+chart.id)
