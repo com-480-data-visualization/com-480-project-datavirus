@@ -11,7 +11,7 @@
     //'curveLinear','curveBasis', 'curveCardinal', 'curveStepBefore',...
     const stackedAreaMargin = {
       top: 30,
-      left: 50,
+      left: 70,
       width: svgWidth*0.9,
       height: 350
     }
@@ -364,6 +364,18 @@
       .call(xAxis)
     }
 
+    function drawYAxis(){
+      //remove the previous axis
+      svg.select(".yAxis").remove()
+      //and recreate the new axis
+      let yAxis = d3.axisLeft(getYscale())
+      svg.append("g")
+      .attr("class", "yAxis")
+      .attr("transform", "translate("+stackedAreaMargin.left
+      +","+stackedAreaMargin.top+")")
+      .call(yAxis)
+    }
+
 
     function renderCharts(charts){
       stackedArea.select(".chartsContainer").remove()
@@ -481,6 +493,8 @@
         prepareSVGElement()
         createSlider()
         drawXAxis()
+        drawYAxis()
+
       },
       getXscale:getXscale,
       getYscale:getYscale,

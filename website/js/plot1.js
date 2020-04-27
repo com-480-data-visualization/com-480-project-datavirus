@@ -12,20 +12,21 @@
     let charts = [];
     let upperLines = [];
 
-    let stacksSupperpose = false
+    let stacksSupperpose = true
     let stackClever = false
+    let adapativeYScale = true
 
     let data = null
     //define the position of the rect that will contain the stacked graphs
 
     //load the csv file and call createPlot(),createSlider() when done
-    d3.csv("/data/video_count/count_day.csv",function(d) {
-      data = model.prepareData(d, stacksSupperpose, stackClever)
+    d3.csv("/data/video_count/count_month.csv",function(d) {
+      data = model.prepareData(d)
       console.log(data)
       UI.setData({
         smallestDate: data.smallestDate,
         biggestDate:data.biggestDate,
-        maxYscore: data.maxScore,
+        maxYscore: stacksSupperpose ? data.maxScoreAtTimeStamp:data.maxSingleScore ,
         onBrush: userBrushed,
       })
 
@@ -38,6 +39,7 @@
       const char = String.fromCharCode(e.charCode);
       if(char == 's'){
         stacksSupperpose = !stacksSupperpose
+        
       }
 
 });
@@ -105,7 +107,7 @@
 
       UI.removePartsOfChart()
       window.clearInterval(heavyComputationTimer)
-      if(data.categories != undefined){
+      if(stackClever && !stacksSupperpose){
         UI.removeLines()
         heavyComputationTimer = window.setTimeout(function(){
           console.log("do calculuuus")
