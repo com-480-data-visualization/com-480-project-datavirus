@@ -368,6 +368,7 @@
         .attr('id', "chart_nb_"+chart.id)
         .attr("d", chart.area)
         .attr("fill", colorForIndex(chart.id))
+
         /*.on("mousemove", function(d,i) {
         let coordinateX= d3.mouse(this)[0];
         let dateSelected =xScale.invert(coordinateX)

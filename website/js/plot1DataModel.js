@@ -3,7 +3,7 @@
   var App = window.App || {};
   let Plot1DataModel = (function() {
 
-    let pixelStepWidth = 0.5
+    let pixelStepWidth = 0.3
 
     /**From the csv file, task is to return the data object*/
     function prepareData(csvData,stacksSupperpose,stackClever){
@@ -108,7 +108,7 @@
 
 
 
-    function computeTimeStampsBreaks(charts,data,xScale,dateDisplayedInterval){
+    function computeTimeStampsBreaks(lines,data,xScale,dateDisplayedInterval){
 
       //how much pixels separate two values on screen for the actual scale
       let pixelIntervalBetweenDates = xScale(data.values[1].date) - xScale(data.values[0].date)
@@ -140,7 +140,7 @@
               beforeMaxDate = false
             }
             if(afterMinDate && beforeMaxDate){
-              let orderAtT = getChartOrderNearTimeStamp(charts, newTimeStamp,delta_x,xScale)
+              let orderAtT = getChartOrderNearTimeStamp(lines, newTimeStamp,delta_x,xScale)
               if(!arraysEqual(orderAtT,actualOrder)){
                 orderUntil.push([actualOrder, newTimeStamp])
                 actualOrder = orderAtT
@@ -186,13 +186,14 @@
     }
 
 
-    function getChartOrderNearTimeStamp(charts, timeStamp, delta_x, xScale){
+    function getChartOrderNearTimeStamp(lines, timeStamp, delta_x, xScale){
+
 
       let toSort = []
       let x = xScale(timeStamp)
-      charts.forEach(chart=>{
-        let totalLength = chart.upperPathElem.getTotalLength()
-        toSort.push([chart.id, getPointAtX(x,delta_x,0,totalLength,chart.upperPathElem).y])
+      lines.forEach(line=>{
+        let totalLength = line.upperPathElem.getTotalLength()
+        toSort.push([line.id, getPointAtX(x,delta_x,0,totalLength,line.upperPathElem).y])
       })
       toSort =  toSort.sort((a,b)=>{
         return a[1]-b[1]
