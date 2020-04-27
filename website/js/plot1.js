@@ -19,7 +19,7 @@
     let data = null
     //define the position of the rect that will contain the stacked graphs
 
-    //load the csv file and call createPlot(),createSlider() when done
+    //load the csv file and call addElementsToStackedArea(),createSlider() when done
     d3.csv("/data/video_count/count_month.csv",function(d) {
       data = model.prepareData(d)
 
@@ -28,9 +28,8 @@
         stacksSupperpose:stacksSupperpose,
         onBrush: userBrushed,
       })
-      console.log(data)
       UI.prepareElements()
-      createPlot(data)
+      addElementsToStackedArea(data)
     });
 
 
@@ -43,20 +42,14 @@
           stacksSupperpose:stacksSupperpose,
           onBrush: userBrushed,
         })
-        UI.prepareElements()
-        createPlot(data)
-
+        UI.drawYAxis()
+        addElementsToStackedArea(data)
       }
 
 });
 
 
-
-
-
-
-
-    function createPlot(data) {
+    function addElementsToStackedArea(data) {
       //draw the complete charts
       charts = []
       for (let i = 0; i < data.categories.length; i++) {
@@ -76,10 +69,15 @@
         }));
       }
 
+      UI.removeCharts()
+      UI.removeLines()
+      UI.removePartsOfChart()
+
       if(stacksSupperpose){
           UI.renderCharts(charts,true)
       }else{
         UI.renderCharts(charts,false)
+        //UI.renderUpperLines(upperLines)
       }
 
 
@@ -114,7 +112,8 @@
       for (var i = 0; i < charts.length; i++) {
         charts[i].showOnly(b);
       }
-
+      model.getMaxValuesBetween(data,b[0],b[1])
+      return
       for (var i = 0; i < upperLines.length; i++) {
         upperLines[i].showOnly(b);
       }

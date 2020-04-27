@@ -232,11 +232,11 @@
             let upperDate = middleTime + timeToAdd;
             let lowerDate = middleTime - timeToAdd;
             if(upperDate>biggestDate.getTime()){
-              let timeToShift = upperDate-endDate.getTime();
+              let timeToShift = upperDate-biggestDate.getTime();
               upperDate -= timeToShift;
               lowerDate -= timeToShift;
             }else if (lowerDate<smallestDate.getTime()){
-              let timeToShift = startDate.getTime()-lowerDate;
+              let timeToShift = smallestDate.getTime()-lowerDate;
               upperDate += timeToShift;
               lowerDate += timeToShift;
             }
@@ -404,7 +404,7 @@
 
 
     function renderCharts(charts, withStroke){
-      stackedArea.select(".chartsContainer").remove()
+      removeCharts()
       let chartsContainer = stackedArea.append("g")
       .attr("class", "chartsContainer")
       charts.forEach(chart=>{
@@ -427,6 +427,10 @@
         let dateSelected =xScale.invert(coordinateX)
         onHover(chart.id, dateSelected)})*/
       })
+    }
+
+    function removeCharts(){
+      stackedArea.select(".chartsContainer").remove()
     }
 
 
@@ -532,6 +536,7 @@
       },
       getXscale:getXscale,
       getYscale:getYscale,
+      drawYAxis:drawYAxis,
       createChart: createChart,
       createUpperLine:createUpperLine,
       renderCharts:renderCharts,
@@ -539,6 +544,7 @@
       addPartsOfChart:addPartsOfChart,
       removePartsOfChart:removePartsOfChart,
       removeLines:removeLines,
+      removeCharts:removeCharts,
     }
   })();
   App.Plot1UI = Plot1UI;

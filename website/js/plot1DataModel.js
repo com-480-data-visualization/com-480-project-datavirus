@@ -220,10 +220,35 @@
       return middlePoint
     }
 
+    function getMaxValuesBetween(data, startDate, endDate){
+      console.log(data)
+      let firstIndex = 0
+      let lastIndex = 0
+      console.log(data.values[firstIndex].date)
+      while(data.values[firstIndex].date <= startDate && data.values[lastIndex].date <= endDate){
+        if(data.values[firstIndex].date <= startDate){
+          firstIndex = firstIndex + 1
+        }
+        if(data.values[lastIndex].date <= endDate){
+          lastIndex = lastIndex + 1
+        }
+      }
+      firstIndex = firstIndex -1
+      lastIndex = lastIndex -1
+      console.log(firstIndex)
+      console.log(lastIndex)
+
+
+
+    }
+
+
+
 
     return {
       prepareData:prepareData,
       computeTimeStampsBreaks:computeTimeStampsBreaks,
+      getMaxValuesBetween:getMaxValuesBetween,
     }
   })();
   App.Plot1DataModel = Plot1DataModel;
