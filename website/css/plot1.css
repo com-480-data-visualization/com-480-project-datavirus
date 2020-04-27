@@ -1,22 +1,19 @@
 
 #plot1_container{
   border: 1px solid blue;
-  position: fixed;
-  left: 5px;
-  right: 5px;
-  top: 5px;
-  bottom: 5px;
+  margin: 5px;
+  height: 500px;
 }
 
 #plot1_title_container{
-  /*border: 1px solid blue;*/
-  margin-top: 10px;
+  border: 1px solid blue;
+  margin: 5px;
   display: flex;
   justify-content: center;
   font-size: large;
   font-family:verdana;
-
 }
+
 
 #plot1_title_container div{
   margin-left: 40px;

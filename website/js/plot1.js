@@ -28,7 +28,7 @@
         stacksSupperpose:stacksSupperpose,
         onBrush: userBrushed,
       })
-
+      console.log(data)
       UI.prepareElements()
       createPlot(data)
     });
@@ -58,7 +58,7 @@
 
     function createPlot(data) {
       //draw the complete charts
-
+      charts = []
       for (let i = 0; i < data.categories.length; i++) {
         charts.push(UI.createChart({
           data: data,
@@ -67,6 +67,7 @@
         }));
       }
 
+      upperLines = []
       for (let i = 0; i < data.categories.length; i++) {
         upperLines.push(UI.createUpperLine({
           data: data,
@@ -185,9 +186,19 @@ function onHover(elmx, date){
   //console.log("over In elem "+ elmx + " for the date " + date)
 }
 
+function overTitle(id){
+  console.log("Mouse over title " + data.categories[id])
+}
+
+function mouseLeftTitle(id){
+  console.log("Mouse left title " + data.categories[id])
+}
+
 
 
 return {
+  overTitle:overTitle,
+  mouseLeftTitle:mouseLeftTitle,
   //  playVideo:showVideo,
 }
 })();

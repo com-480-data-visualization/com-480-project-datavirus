@@ -90,17 +90,28 @@
       stackedAreaBorderLines.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", 0) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
       //right
       stackedAreaBorderLines.append("line") .attr("x1", stackedAreaMargin.width) .attr("y1", 0).attr("x2", stackedAreaMargin.width) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
+
     }
 
     function createTitles(){
       const titleContainer = document.getElementById(titleContainerId)
       titleContainer.innerHTML = ""
 
+
       data.categories.forEach((cat,i)=>{
         var title = document.createElement("div");
         title.innerHTML = cat
         titleContainer.appendChild(title)
+        title.style.color = colorForIndex(i)
+        title.addEventListener("mouseover", function(){
+           App.Plot1.overTitle(i)
+         });
+         title.addEventListener("mouseout", function(){
+            App.Plot1.mouseLeftTitle(i)
+          });
       })
+
+
 
       //console.log(data.categories)
     }
