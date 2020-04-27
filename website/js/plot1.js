@@ -13,26 +13,44 @@
     let upperLines = [];
 
     let stacksSupperpose = false
-    let stackClever = true
+    let stackClever = false
 
     let data = null
     //define the position of the rect that will contain the stacked graphs
 
     //load the csv file and call createPlot(),createSlider() when done
-    d3.csv("/data/plot1data2.csv",function(d) {
+    d3.csv("/data/video_count/count_day.csv",function(d) {
       data = model.prepareData(d, stacksSupperpose, stackClever)
+      console.log(data)
       UI.setData({
         smallestDate: data.smallestDate,
         biggestDate:data.biggestDate,
         maxYscore: data.maxScore,
         onBrush: userBrushed,
       })
+
       UI.prepareElements()
       createPlot(data)
     });
 
+
+    document.addEventListener("keypress", function(e){
+      const char = String.fromCharCode(e.charCode);
+      if(char == 's'){
+        stacksSupperpose = !stacksSupperpose
+      }
+
+});
+
+
+
+
+
+
+
     function createPlot(data) {
       //draw the complete charts
+
       for (let i = 0; i < data.categories.length; i++) {
         charts.push(UI.createChart({
           data: data,

@@ -3,38 +3,43 @@
   var App = window.App || {};
   let Plot1DataModel = (function() {
 
-    let pixelStepWidth = 0.3
+    let pixelStepWidth = 30
 
     /**From the csv file, task is to return the data object*/
-    function prepareData(csvData,stacksSupperpose,stackClever){
+    function prepareData(csvData){
       //getting all the categories
       let categories = []
       for (let prop in csvData[0]) {
         if (csvData[0].hasOwnProperty(prop)) {
-          if (prop != 'Year') {
+          if (prop != 'date') {
             categories.push(prop);
           }
         }
       };
 
-      let maxScore =  Number.MIN_VALUE;
+      let maxSingleScore =  Number.MIN_VALUE;
+      let maxScoreAtTimeStamp =  Number.MIN_VALUE;
       //mapping each line to an array
       let arrayData = csvData.map(d => {
         //for each date:
         let values = []
         for (let prop in d) {
           //for each category:
-          if (d.hasOwnProperty(prop) && prop != 'Year') {
+          if (d.hasOwnProperty(prop) && prop != 'date') {
             values.push(parseFloat(d[prop]))
           }
         }
-        /* Convert "Year" column to Date format to benefit
-        from built-in D3 mechanisms for handling dates. */
-        let date = new Date(d.Year, 0, 1);
-        let localMax = stacksSupperpose ? values.reduce((a,b) => a + b, 0) : values.reduce((a,b) => a > b ? a:b, 0)
 
-        if(localMax>maxScore){
-          maxScore = localMax
+        let date = new Date(Date.parse(d.date))
+        let localSingleMax = values.reduce((a,b) => a > b ? a:b, 0)
+        let localTemporalMax = values.reduce((a,b) => a + b, 0)
+
+        if(localSingleMax>maxSingleScore){
+          maxSingleScore = localSingleMax
+        }
+
+        if(localTemporalMax>maxScoreAtTimeStamp){
+          maxScoreAtTimeStamp = localTemporalMax
         }
 
         return {
@@ -45,32 +50,23 @@
 
       let smallestDate = arrayData[0].date;
       let biggestDate = arrayData[arrayData.length - 1].date;
-      if(!stackClever){
-        return{
-          categories:categories,
-          maxScore:maxScore,
-          values:arrayData,
-          smallestDate:smallestDate,
-          biggestDate:biggestDate,
-        }
-      }else{
-        //we must compute the critical time stamps where any 2 lines might intersect
-        let criticalIndexes = getCriticalIndexes(arrayData.slice())
 
-        return{
-          categories:categories,
-          maxScore:maxScore,
-          values:arrayData,
-          smallestDate:smallestDate,
-          biggestDate:biggestDate,
-          criticalIndexes:criticalIndexes,
-        }
+      //we must compute the critical time stamps where any 2 lines might intersect
+      let criticalIndexes = getCriticalIndexes(arrayData.slice())
 
+      return{
+        categories:categories,
+        maxSingleScore:maxSingleScore,
+        maxScoreAtTimeStamp:maxScoreAtTimeStamp,
+        values:arrayData,
+        smallestDate:smallestDate,
+        biggestDate:biggestDate,
+        criticalIndexes:criticalIndexes,
       }
     }
 
     function getCriticalIndexes(values){
-      //the idea here is to get the indexes before any path should cross
+      //the idea here is to get the indexes before any path could cross an other
       let valuesSorted = values.map(vs =>{
         let array = vs.values
         let arrayExtended = array.map((value, index)=>{

@@ -100,6 +100,8 @@
       let contextHeight = sliderBoxPreferences.height
       let selectedRectHeight = sliderBoxPreferences.selectedRectHeight
 
+
+
       //1)First we add the context and we draw a horizontal line so we see it well
       let silderBox = svg.append("g")
       .attr("class", "sliderBox")
@@ -111,10 +113,12 @@
       var contextXScale = d3.scaleTime()
       .range([0, sliderWidth])//length of the slider
       .domain([smallestDate, biggestDate])
+
+
+
       if(niceAxis){
         contextXScale = contextXScale.nice()
       }
-
       // a function thag generates a bunch of SVG elements.
       var contextAxis = d3.axisBottom(contextXScale)
       .tickPadding(5)//height of the date on the axis
@@ -139,6 +143,7 @@
       //moves the text accordingly
       silderBox.selectAll(".tick text")
       .attr("transform", "translate(0,-"+tickHeight/2+")");
+
 
       if(!niceAxis){
         //then draw line at end of axis
@@ -165,17 +170,20 @@
       ])
       .on("brush", cleanBrushInterval)
 
+
       //The selection rectangle
       silderBox.append("g")
       .attr("class", "xbrush")
       .call(brush)
       .selectAll("rect")
       .attr("rx",5)
-
       let elem = silderBox.select(".xbrush").select(".overlay").on("click",function(){
         timeIntervalSelected = [smallestDate,biggestDate]
         onBrush(timeIntervalSelected)
       })
+
+
+
 
       // Brush handler. Get time-range from a brush and pass it to the charts.
       function cleanBrushInterval() {
