@@ -11,7 +11,7 @@
     //'curveLinear','curveBasis', 'curveCardinal', 'curveStepBefore',...
     const stackedAreaMargin = {
       top: 30,
-      left: 50,
+      left: 70,
       width: svgWidth*0.9,
       height: 350
     }
@@ -100,6 +100,8 @@
       let contextHeight = sliderBoxPreferences.height
       let selectedRectHeight = sliderBoxPreferences.selectedRectHeight
 
+
+
       //1)First we add the context and we draw a horizontal line so we see it well
       let silderBox = svg.append("g")
       .attr("class", "sliderBox")
@@ -111,10 +113,12 @@
       var contextXScale = d3.scaleTime()
       .range([0, sliderWidth])//length of the slider
       .domain([smallestDate, biggestDate])
+
+
+
       if(niceAxis){
         contextXScale = contextXScale.nice()
       }
-
       // a function thag generates a bunch of SVG elements.
       var contextAxis = d3.axisBottom(contextXScale)
       .tickPadding(5)//height of the date on the axis
@@ -139,6 +143,7 @@
       //moves the text accordingly
       silderBox.selectAll(".tick text")
       .attr("transform", "translate(0,-"+tickHeight/2+")");
+
 
       if(!niceAxis){
         //then draw line at end of axis
@@ -165,17 +170,20 @@
       ])
       .on("brush", cleanBrushInterval)
 
+
       //The selection rectangle
       silderBox.append("g")
       .attr("class", "xbrush")
       .call(brush)
       .selectAll("rect")
       .attr("rx",5)
-
       let elem = silderBox.select(".xbrush").select(".overlay").on("click",function(){
         timeIntervalSelected = [smallestDate,biggestDate]
         onBrush(timeIntervalSelected)
       })
+
+
+
 
       // Brush handler. Get time-range from a brush and pass it to the charts.
       function cleanBrushInterval() {
@@ -356,6 +364,18 @@
       .call(xAxis)
     }
 
+    function drawYAxis(){
+      //remove the previous axis
+      svg.select(".yAxis").remove()
+      //and recreate the new axis
+      let yAxis = d3.axisLeft(getYscale())
+      svg.append("g")
+      .attr("class", "yAxis")
+      .attr("transform", "translate("+stackedAreaMargin.left
+      +","+stackedAreaMargin.top+")")
+      .call(yAxis)
+    }
+
 
     function renderCharts(charts){
       stackedArea.select(".chartsContainer").remove()
@@ -368,6 +388,7 @@
         .attr('id', "chart_nb_"+chart.id)
         .attr("d", chart.area)
         .attr("fill", colorForIndex(chart.id))
+
         /*.on("mousemove", function(d,i) {
         let coordinateX= d3.mouse(this)[0];
         let dateSelected =xScale.invert(coordinateX)
@@ -472,6 +493,8 @@
         prepareSVGElement()
         createSlider()
         drawXAxis()
+        drawYAxis()
+
       },
       getXscale:getXscale,
       getYscale:getYscale,
