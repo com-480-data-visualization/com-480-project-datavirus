@@ -8,6 +8,20 @@
   bottom: 5px;
 }
 
+#plot1_title_container{
+  /*border: 1px solid blue;*/
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  font-size: large;
+  font-family:verdana;
+
+}
+
+#plot1_title_container div{
+  margin-left: 40px;
+}
+
 .stackedAreaBorder{
   stroke: black;
   stroke-opacity: 1;

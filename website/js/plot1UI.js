@@ -2,8 +2,10 @@
   'use strict';
   var App = window.App || {};
   let Plot1UI = (function() {
-    const svgWidth = document.getElementById("plot1_container").clientWidth
-    const svgHeight = document.getElementById("plot1_container").clientHeight
+    const containerName = "plot1_container"
+    const titleContainerId = "plot1_title_container"
+    const svgWidth = document.getElementById(containerName).clientWidth
+    const svgHeight = document.getElementById(containerName).clientHeight
 
 
     //-------------SOME UI PARAMTER TO TUNE-------------
@@ -39,13 +41,14 @@
     let onBrush = null
     let data = null
 
-    function setData(data){
-      smallestDate = data.smallestDate
-      biggestDate = data.biggestDate
-      maxYscore = data.maxYscore
+    function setData(args){
+      data = args.data
+      smallestDate = args.data.smallestDate
+      biggestDate = args.data.biggestDate
+      maxYscore = args.stacksSupperpose ? args.data.maxScoreAtTimeStamp:args.data.maxSingleScore
       onBrush = function(){
         drawXAxis()
-        data.onBrush(timeIntervalSelected)
+        args.onBrush(timeIntervalSelected)
       }
     }
 
@@ -87,7 +90,19 @@
       stackedAreaBorderLines.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", 0) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
       //right
       stackedAreaBorderLines.append("line") .attr("x1", stackedAreaMargin.width) .attr("y1", 0).attr("x2", stackedAreaMargin.width) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
+    }
 
+    function createTitles(){
+      const titleContainer = document.getElementById(titleContainerId)
+      titleContainer.innerHTML = ""
+
+      data.categories.forEach((cat,i)=>{
+        var title = document.createElement("div");
+        title.innerHTML = cat
+        titleContainer.appendChild(title)
+      })
+
+      //console.log(data.categories)
     }
 
     /*Create the slider box with the brush*/
@@ -377,7 +392,7 @@
     }
 
 
-    function renderCharts(charts){
+    function renderCharts(charts, withStroke){
       stackedArea.select(".chartsContainer").remove()
       let chartsContainer = stackedArea.append("g")
       .attr("class", "chartsContainer")
@@ -388,6 +403,13 @@
         .attr('id', "chart_nb_"+chart.id)
         .attr("d", chart.area)
         .attr("fill", colorForIndex(chart.id))
+
+        if(withStroke){
+          chart.path
+          .attr("stroke", "black")
+          .attr("stroke-width", "1")
+
+        }
 
         /*.on("mousemove", function(d,i) {
         let coordinateX= d3.mouse(this)[0];
@@ -479,7 +501,7 @@
     }
 
     function colorForIndex(index){
-      var colors = ["#52304b","#2b4a30","#a70ee8","#e30eb8","#734f37","#fcf803", "#fc0303","#03fc07","#00fff7"]
+      var colors = ["#52304b","#2b4a30","#a70ee8","#e30eb8","#734f37","#fcf803", "#fc0303"]
       return colors[index%colors.length]
     }
 
@@ -490,6 +512,7 @@
     return {
       setData:setData,
       prepareElements:function(){
+        createTitles()
         prepareSVGElement()
         createSlider()
         drawXAxis()

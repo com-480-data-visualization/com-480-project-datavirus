@@ -22,11 +22,10 @@
     //load the csv file and call createPlot(),createSlider() when done
     d3.csv("/data/video_count/count_month.csv",function(d) {
       data = model.prepareData(d)
-      console.log(data)
+
       UI.setData({
-        smallestDate: data.smallestDate,
-        biggestDate:data.biggestDate,
-        maxYscore: stacksSupperpose ? data.maxScoreAtTimeStamp:data.maxSingleScore ,
+        data:data,
+        stacksSupperpose:stacksSupperpose,
         onBrush: userBrushed,
       })
 
@@ -39,7 +38,14 @@
       const char = String.fromCharCode(e.charCode);
       if(char == 's'){
         stacksSupperpose = !stacksSupperpose
-        
+        UI.setData({
+          data:data,
+          stacksSupperpose:stacksSupperpose,
+          onBrush: userBrushed,
+        })
+        UI.prepareElements()
+        createPlot(data)
+
       }
 
 });
@@ -69,14 +75,21 @@
         }));
       }
 
-      if(data.criticalIndexes == undefined){
-        UI.renderCharts(charts)
+      if(stacksSupperpose){
+          UI.renderCharts(charts,true)
+      }else{
+        UI.renderCharts(charts,false)
+      }
+
+
+      /*if(data.criticalIndexes == undefined){
+
       }else{
         UI.renderCharts(charts)
         UI.renderUpperLines(upperLines)
         heavyCompute()
         UI.renderUpperLines(upperLines)
-      }
+      }*/
     }//end of create plot function
 
 
