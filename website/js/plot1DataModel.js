@@ -221,11 +221,12 @@
     }
 
     function getMaxValuesBetween(data, startDate, endDate){
-      console.log(data)
+
+
       let firstIndex = 0
       let lastIndex = 0
-      console.log(data.values[firstIndex].date)
-      while(data.values[firstIndex].date <= startDate && data.values[lastIndex].date <= endDate){
+
+      while(lastIndex < data.values.length && (data.values[firstIndex].date <= startDate || data.values[lastIndex].date <= endDate)){
         if(data.values[firstIndex].date <= startDate){
           firstIndex = firstIndex + 1
         }
@@ -235,10 +236,26 @@
       }
       firstIndex = firstIndex -1
       lastIndex = lastIndex -1
-      console.log(firstIndex)
-      console.log(lastIndex)
 
+      let maxSingleScore =  Number.MIN_VALUE;
+      let maxScoreAtTimeStamp =  Number.MIN_VALUE;
 
+      for (var i = firstIndex; i<=lastIndex; i++){
+        let values = data.values[i].values
+        let localSingleMax = values.reduce((a,b) => a > b ? a:b, 0)
+        let localTemporalMax = values.reduce((a,b) => a + b, 0)
+        if(localSingleMax>maxSingleScore){
+          maxSingleScore = localSingleMax
+        }
+
+        if(localTemporalMax>maxScoreAtTimeStamp){
+          maxScoreAtTimeStamp = localTemporalMax
+        }
+      }
+      return{
+        maxSingleScore:maxSingleScore,
+        maxScoreAtTimeStamp:maxScoreAtTimeStamp,
+      }
 
     }
 

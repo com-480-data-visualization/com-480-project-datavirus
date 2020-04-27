@@ -45,7 +45,7 @@
       data = args.data
       smallestDate = args.data.smallestDate
       biggestDate = args.data.biggestDate
-      maxYscore = args.stacksSupperpose ? args.data.maxScoreAtTimeStamp:args.data.maxSingleScore
+      maxYscore = args.maxYscore
       onBrush = function(){
         drawXAxis()
         args.onBrush(timeIntervalSelected)
@@ -312,6 +312,11 @@
         .curve(curveType)
         this.showOnly = function(b){
           this.xScale.domain(b);
+          this.path.data([this.data.values]).attr("d", this.area);
+        }
+
+        this.rescaleY = function(maxY){
+          this.yScale.domain([0,maxY]);
           this.path.data([this.data.values]).attr("d", this.area);
         }
       }//end of constructor

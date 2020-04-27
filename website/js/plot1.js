@@ -11,10 +11,12 @@
     //the charts that will be displayed
     let charts = [];
     let upperLines = [];
+    let maxYScore = null
 
     let stacksSupperpose = true
     let stackClever = false
     let adapativeYScale = true
+
 
     let data = null
     //define the position of the rect that will contain the stacked graphs
@@ -22,10 +24,11 @@
     //load the csv file and call addElementsToStackedArea(),createSlider() when done
     d3.csv("/data/video_count/count_month.csv",function(d) {
       data = model.prepareData(d)
+      maxYScore = stacksSupperpose ? data.maxScoreAtTimeStamp: data.maxSingleScore
 
       UI.setData({
         data:data,
-        stacksSupperpose:stacksSupperpose,
+        maxYscore:maxYScore,
         onBrush: userBrushed,
       })
       UI.prepareElements()
@@ -37,9 +40,10 @@
       const char = String.fromCharCode(e.charCode);
       if(char == 's'){
         stacksSupperpose = !stacksSupperpose
+        maxYScore = stacksSupperpose ? data.maxScoreAtTimeStamp: data.maxSingleScoref
         UI.setData({
           data:data,
-          stacksSupperpose:stacksSupperpose,
+          maxYscore:maxYScore,
           onBrush: userBrushed,
         })
         UI.drawYAxis()
@@ -109,10 +113,27 @@
 
     function userBrushed(b){
       UI.getXscale().domain(b)
+      if(adapativeYScale){
+        var bounds = model.getMaxValuesBetween(data,b[0],b[1])
+        var maxBound = stacksSupperpose ? bounds.maxScoreAtTimeStamp : bounds.maxSingleScore
+        UI.setData({
+          data:data,
+          maxYscore:maxBound,
+          onBrush: userBrushed,
+        })
+        UI.drawYAxis()
+
+        for (var i = 0; i < charts.length; i++) {
+          charts[i].rescaleY(maxBound);
+        }
+      }
+
+
+
       for (var i = 0; i < charts.length; i++) {
         charts[i].showOnly(b);
       }
-      model.getMaxValuesBetween(data,b[0],b[1])
+
       return
       for (var i = 0; i < upperLines.length; i++) {
         upperLines[i].showOnly(b);
