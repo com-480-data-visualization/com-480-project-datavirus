@@ -9,8 +9,9 @@
 
 
     //-------------SOME UI PARAMTER TO TUNE-------------
-    let curveType = d3.curveMonotoneX
-    //'curveLinear','curveBasis', 'curveCardinal', 'curveStepBefore',...
+    let curveType = d3.curveLinear
+    let minNumberOfPointInScreen = 30
+    //'curveMonotoneX','curveLinear','curveBasis', 'curveCardinal', 'curveStepBefore',...
     const stackedAreaMargin = {
       top: 30,
       left: 70,
@@ -24,7 +25,6 @@
       tickHeight:10,
       displayNiceAxis:false,
       selectedRectHeight:50,
-      minBrushableNumberOfDay:365*2,//cannot zoom more than over 2 years
     }
 
 
@@ -50,6 +50,12 @@
         drawXAxis()
         args.onBrush(timeIntervalSelected)
       }
+    }
+
+    function getMinTimeIntervalWeCanSee(){
+      let timeIntervalBetweenDates = data.values[1].date.getTime() - data.values[0].date.getTime()
+      return timeIntervalBetweenDates * minNumberOfPointInScreen
+
     }
 
 
@@ -197,6 +203,8 @@
       .on("brush", cleanBrushInterval)
 
 
+
+
       //The selection rectangle
       silderBox.append("g")
       .attr("class", "xbrush")
@@ -221,14 +229,15 @@
         });
 
         //first we make sure that we cannot zoom too much
-        if(sliderBoxPreferences.minBrushableNumberOfDay>0){
+        if(minNumberOfPointInScreen>0){
+
           //in case we have a limit
           let differenceInTime = b[1].getTime() - b[0].getTime();
-          let  differenceInDays = differenceInTime / (1000 * 3600 * 24);
-          if(differenceInDays<sliderBoxPreferences.minBrushableNumberOfDay){
+          let minTimeInterval = getMinTimeIntervalWeCanSee()
+          if(differenceInTime<minTimeInterval){
             //in case the brush does not respect the limit
             let middleTime = (b[1].getTime() + b[0].getTime())/2;
-            let timeToAdd = sliderBoxPreferences.minBrushableNumberOfDay*1000 * 3600 * 24/2
+            let timeToAdd = minTimeInterval/2
             let upperDate = middleTime + timeToAdd;
             let lowerDate = middleTime - timeToAdd;
             if(upperDate>biggestDate.getTime()){
@@ -265,7 +274,7 @@
 
         }
         timeIntervalSelected = b
-        onBrush(timeIntervalSelected)
+        onBrush()
       }
     }//end of createSlider
 
@@ -394,6 +403,8 @@
       +","+(stackedAreaMargin.height + stackedAreaMargin.top)+")")
       .call(xAxis)
     }
+
+
 
     function drawYAxis(){
       //remove the previous axis

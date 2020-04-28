@@ -23,7 +23,7 @@
     //define the position of the rect that will contain the stacked graphs
 
     //load the csv file and call addElementsToStackedArea(),createSlider() when done
-    d3.csv("/data/video_count/count_month.csv",function(d) {
+    d3.csv("/data/video_count/count_week.csv",function(d) {
       data = model.prepareData(d)
       maxYScore = stacksSupperpose ? data.maxScoreAtTimeStamp: data.maxSingleScore
       displayedXInterval = [data.smallestDate, data.biggestDate]
@@ -139,17 +139,16 @@ function adaptYScale(forInterval){
 
 
 function userBrushed(b){
+
   displayedXInterval = b
   UI.getXscale().domain(b)
   adaptYScale(b)
 
 
-
   for (var i = 0; i < charts.length; i++) {
     charts[i].showOnly(b);
   }
-
-  return
+return
   for (var i = 0; i < upperLines.length; i++) {
     upperLines[i].showOnly(b);
   }
