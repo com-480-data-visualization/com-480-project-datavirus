@@ -10,7 +10,7 @@
 
     //-------------SOME UI PARAMTER TO TUNE-------------
     let curveType = d3.curveLinear
-    let minNumberOfPointInScreen = 300
+    let minNumberOfPointInScreen = 30
     //'curveMonotoneX','curveLinear','curveBasis', 'curveCardinal', 'curveStepBefore',...
     const stackedAreaMargin = {
       top: 30,
@@ -54,8 +54,8 @@
 
     function getMinTimeIntervalWeCanSee(){
       let timeIntervalBetweenDates = data.values[1].date.getTime() - data.values[0].date.getTime()
-      return timeIntervalBetweenDates * minNumberOfPointInScreen
-
+      let minActualNbOfPoint = Math.min(data.values.length, minNumberOfPointInScreen)
+      return timeIntervalBetweenDates * (minActualNbOfPoint-1)
     }
 
 
@@ -110,16 +110,12 @@
         titleContainer.appendChild(title)
         title.style.color = colorForIndex(i)
         title.addEventListener("mouseover", function(){
-           App.Plot1.overTitle(i)
-         });
-         title.addEventListener("mouseout", function(){
-            App.Plot1.mouseLeftTitle(i)
-          });
+          App.Plot1.overTitle(i)
+        });
+        title.addEventListener("mouseout", function(){
+          App.Plot1.mouseLeftTitle(i)
+        });
       })
-
-
-
-      //console.log(data.categories)
     }
 
     /*Create the slider box with the brush*/
@@ -228,18 +224,20 @@
           return contextXScale.invert(x-(svgWidth -sliderWidth)/2)
         });
 
+
         //first we make sure that we cannot zoom too much
         if(minNumberOfPointInScreen>0){
-
           //in case we have a limit
           let differenceInTime = b[1].getTime() - b[0].getTime();
           let minTimeInterval = getMinTimeIntervalWeCanSee()
           if(differenceInTime<minTimeInterval){
             //in case the brush does not respect the limit
             let middleTime = (b[1].getTime() + b[0].getTime())/2;
+
             let timeToAdd = minTimeInterval/2
             let upperDate = middleTime + timeToAdd;
             let lowerDate = middleTime - timeToAdd;
+
             if(upperDate>biggestDate.getTime()){
               let timeToShift = upperDate-biggestDate.getTime();
               upperDate -= timeToShift;
@@ -256,6 +254,8 @@
           let small_date = b[0]
           let big_date = b[1]
           //now we should adapt the brush!!
+
+
 
           let brushSelected = silderBox.select(".xbrush")
           let selection = brushSelected.select(".selection")
@@ -364,6 +364,10 @@
 
         this.showOnly = function(b){
           this.xScale.domain(b);
+          this.path.data([this.data.values]).attr("d", this.upperPath);
+        }
+        this.rescaleY = function(maxY){
+          this.yScale.domain([0,maxY]);
           this.path.data([this.data.values]).attr("d", this.upperPath);
         }
       }//end of constructor
@@ -519,8 +523,14 @@
           .attr("d", newIncompleteChart.area)
           .attr("fill", colorForIndex(newIncompleteChart.id))
           .attr("clip-path", "url(#clip_for_frame_"+i+")")
-          .attr("stroke", colorForIndex(newIncompleteChart.id))
-          .attr("stroke-width", j/order.length)
+          .attr("id","partOfChart_"+i+"_"+j)
+          //.attr("opacity","0")
+          //.attr("stroke", "black")//colorForIndex(newIncompleteChart.id))
+          //.attr("stroke-width", 10)
+
+          //let newElem = document.getElementById("partOfChart_"+i+"_"+j)
+          //newElem.classList.add("animOpacity")
+
 
         })
         leftTimeBorder = rightTimeBorder
@@ -534,6 +544,7 @@
       var colors = ["#52304b","#2b4a30","#a70ee8","#e30eb8","#734f37","#fcf803", "#fc0303"]
       return colors[index%colors.length]
     }
+
 
 
 

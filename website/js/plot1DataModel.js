@@ -3,7 +3,7 @@
   var App = window.App || {};
   let Plot1DataModel = (function() {
 
-    let pixelStepWidth = 30
+    let pixelStepWidth = 3
 
     /**From the csv file, task is to return the data object*/
     function prepareData(csvData){
@@ -145,7 +145,7 @@
           }
         }
         if(!arraysEqual(actualOrder,expectedFinalOrder) && beforeMaxDate){
-          if(afterMinDate){          
+          if(afterMinDate){
             //we missed something
             orderUntil.push([actualOrder, baseTemp + (nbOfInterval-1) * realStepWidth])
           }

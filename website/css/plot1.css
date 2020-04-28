@@ -44,6 +44,19 @@
   fill:none;
 }
 
+.animOpacity{
+animation: monAnimationEnCSS 2s;
+}
+
+@keyframes monAnimationEnCSS {
+from {
+opacity: 0;}
+
+to {
+  opacity: 1;
+}
+}
+
 
 
 /*g.stackedArea .upperPath{

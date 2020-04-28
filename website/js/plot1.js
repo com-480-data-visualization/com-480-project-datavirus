@@ -23,8 +23,8 @@
     //define the position of the rect that will contain the stacked graphs
 
     //load the csv file and call addElementsToStackedArea(),createSlider() when done
-    d3.csv("/data/plot1data.csv",function(d) {
-    //d3.csv("/data/video_count/count_month.csv",function(d) {
+    //d3.csv("/data/plot1data.csv",function(d) {
+    d3.csv("/data/video_count/count_week.csv",function(d) {
       data = model.prepareData(d)
       maxYScore = stacksSupperpose ? data.maxScoreAtTimeStamp: data.maxSingleScore
       displayedXInterval = [data.smallestDate, data.biggestDate]
@@ -49,18 +49,20 @@
           onBrush: userBrushed,
         })
         UI.drawYAxis()
-        addElementsToStackedArea(data)
+
         if(adapativeYScale){
           adaptYScale(displayedXInterval)
         }
+        addElementsToStackedArea(data)
       }
       if(char == 'y'){
         adapativeYScale = !adapativeYScale
         if(adapativeYScale){
           adaptYScale(displayedXInterval)
+          heavyCompute()
+          UI.renderUpperLines(upperLines)
         }
       }
-
     });
 
 
@@ -88,7 +90,8 @@
       UI.removePartsOfChart()
 
       if(stacksSupperpose){
-        UI.renderCharts(charts,true)
+        UI.renderCharts(charts,false)
+        UI.renderUpperLines(upperLines)
       }else{
         UI.renderCharts(charts,false)
         if(stackClever){
@@ -99,7 +102,6 @@
         }
         //
       }
-
 
 }//end of create plot function
 
@@ -132,8 +134,10 @@ function adaptYScale(forInterval){
     for (var i = 0; i < charts.length; i++) {
       charts[i].rescaleY(maxBound);
     }
+    for (var i = 0; i < upperLines.length; i++) {
+      upperLines[i].rescaleY(maxBound);
+    }
   }
-
 }
 
 
@@ -143,25 +147,25 @@ function userBrushed(b){
   UI.getXscale().domain(b)
   adaptYScale(b)
 
-
   for (var i = 0; i < charts.length; i++) {
     charts[i].showOnly(b);
-  }
-return
-  for (var i = 0; i < upperLines.length; i++) {
     upperLines[i].showOnly(b);
   }
 
-  UI.removePartsOfChart()
   window.clearInterval(heavyComputationTimer)
-  if(stackClever && !stacksSupperpose){
+  UI.removePartsOfChart()
+  if(!stacksSupperpose && stackClever){
+    UI.removePartsOfChart()
     UI.removeLines()
+    for (var i = 0; i < upperLines.length; i++) {
+      upperLines[i].showOnly(b);
+    }
     heavyComputationTimer = window.setTimeout(function(){
       heavyCompute()
       UI.renderUpperLines(upperLines)
-    }, 2000);
-  }
+    }, 4000);
 
+  }
   //addPartsOfChart()
 }
 
@@ -169,7 +173,6 @@ function heavyCompute(){
   console.log("do calculuuus")
 
   let orderTimeStamps = model.computeTimeStampsBreaks(upperLines, data, UI.getXscale(),[data.smallestDate, data.biggestDate])
-  console.log(orderTimeStamps)
 
   UI.addPartsOfChart(data.smallestDate.getTime(),orderTimeStamps,stacksSupperpose,data)
   console.log("donew")
