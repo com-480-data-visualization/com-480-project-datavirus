@@ -484,11 +484,8 @@
     function addPartsOfChart(leftTimeBorder,orderTimeStamps,stacksSupperpose,data){
       removePartsOfChart()
 
-
-
       let framesContainer = stackedArea.append("g")
       .attr("class", "chartFrames")
-
 
       orderTimeStamps.forEach((el,i)=>{
 
@@ -503,7 +500,7 @@
         .attr("height", stackedAreaMargin.height)
         .attr("width", stackedAreaMargin.width)
 
-        order.forEach((chartId,i)=>{
+        order.forEach((chartId,j)=>{
           let newIncompleteChart = createChart({
             data: data,
             id: chartId,
@@ -523,7 +520,7 @@
           .attr("fill", colorForIndex(newIncompleteChart.id))
           .attr("clip-path", "url(#clip_for_frame_"+i+")")
           .attr("stroke", colorForIndex(newIncompleteChart.id))
-          .attr("stroke-width", i/order.length)
+          .attr("stroke-width", j/order.length)
 
         })
         leftTimeBorder = rightTimeBorder

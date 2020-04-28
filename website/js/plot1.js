@@ -169,6 +169,7 @@ function heavyCompute(){
   console.log("do calculuuus")
 
   let orderTimeStamps = model.computeTimeStampsBreaks(upperLines, data, UI.getXscale(),[data.smallestDate, data.biggestDate])
+  console.log(orderTimeStamps)
 
   UI.addPartsOfChart(data.smallestDate.getTime(),orderTimeStamps,stacksSupperpose,data)
   console.log("donew")
