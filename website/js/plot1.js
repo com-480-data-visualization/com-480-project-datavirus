@@ -14,8 +14,8 @@
     let maxYScore = null
     let displayedXInterval = null
 
-    let stacksSupperpose = true
-    let stackClever = false
+    let stacksSupperpose = false
+    let stackClever = true
     let adapativeYScale = true
 
 
@@ -23,7 +23,8 @@
     //define the position of the rect that will contain the stacked graphs
 
     //load the csv file and call addElementsToStackedArea(),createSlider() when done
-    d3.csv("/data/video_count/count_week.csv",function(d) {
+    d3.csv("/data/plot1data.csv",function(d) {
+    //d3.csv("/data/video_count/count_month.csv",function(d) {
       data = model.prepareData(d)
       maxYScore = stacksSupperpose ? data.maxScoreAtTimeStamp: data.maxSingleScore
       displayedXInterval = [data.smallestDate, data.biggestDate]
@@ -90,18 +91,16 @@
         UI.renderCharts(charts,true)
       }else{
         UI.renderCharts(charts,false)
-        //UI.renderUpperLines(upperLines)
+        if(stackClever){
+          UI.renderUpperLines(upperLines)
+          heavyCompute()
+          UI.renderUpperLines(upperLines)
+
+        }
+        //
       }
 
 
-      /*if(data.criticalIndexes == undefined){
-
-    }else{
-    UI.renderCharts(charts)
-    UI.renderUpperLines(upperLines)
-    heavyCompute()
-    UI.renderUpperLines(upperLines)
-  }*/
 }//end of create plot function
 
 
@@ -158,9 +157,7 @@ return
   if(stackClever && !stacksSupperpose){
     UI.removeLines()
     heavyComputationTimer = window.setTimeout(function(){
-      console.log("do calculuuus")
       heavyCompute()
-      console.log("render now")
       UI.renderUpperLines(upperLines)
     }, 2000);
   }
@@ -169,29 +166,12 @@ return
 }
 
 function heavyCompute(){
-  /*let worker = new Worker('js/worker.js');
-  let message = {
-  upperLines:upperLines,
-  data:data,
-  xScale: UI.getXscale(),
-  timeInterval:[data.smallestDate, data.biggestDate]
-}
-worker.postMessage("window.App")
+  console.log("do calculuuus")
 
-worker.onmessage = function(e) {
-console.log('Message received from worker' + e);
-}*/
-
-/**/
-/*let orderTimeStamps = model.computeTimeStampsBreaks(upperLines, data, UI.getXscale(),[data.smallestDate, data.biggestDate])
-UI.addPartsOfChart(data.smallestDate.getTime(),orderTimeStamps,stacksSupperpose,data)
-*/
-(function(){
   let orderTimeStamps = model.computeTimeStampsBreaks(upperLines, data, UI.getXscale(),[data.smallestDate, data.biggestDate])
+
   UI.addPartsOfChart(data.smallestDate.getTime(),orderTimeStamps,stacksSupperpose,data)
-})()
-
-
+  console.log("donew")
 }
 
 

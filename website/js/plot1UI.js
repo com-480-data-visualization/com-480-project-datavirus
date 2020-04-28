@@ -10,7 +10,7 @@
 
     //-------------SOME UI PARAMTER TO TUNE-------------
     let curveType = d3.curveLinear
-    let minNumberOfPointInScreen = 30
+    let minNumberOfPointInScreen = 300
     //'curveMonotoneX','curveLinear','curveBasis', 'curveCardinal', 'curveStepBefore',...
     const stackedAreaMargin = {
       top: 30,
@@ -503,7 +503,7 @@
         .attr("height", stackedAreaMargin.height)
         .attr("width", stackedAreaMargin.width)
 
-        order.forEach(chartId=>{
+        order.forEach((chartId,i)=>{
           let newIncompleteChart = createChart({
             data: data,
             id: chartId,
@@ -522,6 +522,8 @@
           .attr("d", newIncompleteChart.area)
           .attr("fill", colorForIndex(newIncompleteChart.id))
           .attr("clip-path", "url(#clip_for_frame_"+i+")")
+          .attr("stroke", colorForIndex(newIncompleteChart.id))
+          .attr("stroke-width", i/order.length)
 
         })
         leftTimeBorder = rightTimeBorder

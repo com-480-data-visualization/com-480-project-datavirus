@@ -109,7 +109,7 @@
       //how much pixels separate two values on screen for the actual scale
       let pixelIntervalBetweenDates = xScale(data.values[1].date) - xScale(data.values[0].date)
       let timeIntervalBetweenDates = data.values[1].date.getTime() - data.values[0].date.getTime()
-      let nbOfInterval = Math.ceil(pixelIntervalBetweenDates/pixelStepWidth)
+      let nbOfInterval = Math.max(2,Math.ceil(pixelIntervalBetweenDates/pixelStepWidth))
 
       let realStepWidth = timeIntervalBetweenDates/nbOfInterval
       let delta_x = pixelIntervalBetweenDates/nbOfInterval
@@ -145,11 +145,7 @@
           }
         }
         if(!arraysEqual(actualOrder,expectedFinalOrder) && beforeMaxDate){
-          if(afterMinDate){
-            console.log("Missing something")
-            console.log(new Date( baseTemp + (nbOfInterval-1) * realStepWidth))
-            console.log(actualOrder)
-            console.log(expectedFinalOrder)
+          if(afterMinDate){          
             //we missed something
             orderUntil.push([actualOrder, baseTemp + (nbOfInterval-1) * realStepWidth])
           }
