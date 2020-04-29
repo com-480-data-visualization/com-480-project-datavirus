@@ -359,11 +359,17 @@
         this.showOnly = function(b){
           this.xScale.domain(b);
           this.path.data([this.data.values]).attr("d", this.area);
+          if(this.frontPath != undefined){
+          this.frontPath.data([this.data.values]).attr("d", this.area);
+        }
         }
 
         this.rescaleY = function(maxY){
           this.yScale.domain([0,maxY]);
           this.path.data([this.data.values]).attr("d", this.area);
+          if(this.frontPath != undefined){
+          this.frontPath.data([this.data.values]).attr("d", this.area);
+        }
         }
       }//end of constructor
 
@@ -606,6 +612,7 @@
           .attr("d", chart.area)
           .attr("fill",colorForFadingIndex(chart.id))
           frontChartsPaths.push(path)
+          chart.frontPath = path
         }
       })
 
@@ -617,6 +624,7 @@
       .attr("d", chart.area)
       .attr("fill",colorForIndex(chart.id))
       .attr("stroke","black")
+      chart.frontPath = path
       frontChartsPaths.push(path)
 
       lastIndexHighlighted = indexSelected
@@ -659,22 +667,16 @@
 
 
         let domEl = document.getElementById("front_chart_nb_"+id)
-
+        let xS = getXscale()
         domEl.addEventListener("click", function(e){
-          (function(id){
-            if(id == categorySelected){
-              categorySelected = null
-            }else{
-              categorySelected = id
-            }
 
-            var dim = e.target.getBoundingClientRect();
-            var xInSvg = e.clientX - dim.left;
-            let date = getXscale().invert(xInSvg)
-
-            App.Plot1.userSelectedCategory(categorySelected)
-            App.Plot1.mouseMoveInFrontChart(id,date)
-          })(id)
+          if(id == categorySelected){
+            categorySelected = null
+          }else{
+            categorySelected = id
+          }
+          removeVerticalLines()
+          App.Plot1.userSelectedCategory(categorySelected)
         })
 
 
