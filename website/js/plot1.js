@@ -208,43 +208,49 @@
 
 
 function mouseOverTitle(id){
-  console.log("Mouse over title " + data.categories[id])
   if(categorySelected == null){
+    console.log("Mouse over title " + data.categories[id])
     UI.addFrontCharts(id,charts)
   }
 }
 
 function mouseLeftTitle(id){
-  console.log("Mouse left title " + data.categories[id])
   if(categorySelected == null){
+    console.log("Mouse left title " + data.categories[id])
     UI.removeFrontCharts()
   }
 }
 
 function userSelectedCategory(catId){
   categorySelected = catId
-  UI.addFrontCharts(catId,charts)
+  if(catId == null){
+    UI.removeFrontCharts()
+    UI.makeTitlesLookNormal()
+  }else{
+    UI.addFrontCharts(catId,charts)
+    UI.updateTitles(catId, catId)
+  }
+
   console.log("User just selected the category" + catId)
 }
 
 function mouseInChart(chartId){
-  console.log("Mouse went inside chart "+ chartId )
-  UI.addFrontCharts(chartId,charts)
-
+  if(chartId == null){
+    console.log("Mouse went inside chart "+ chartId)
+    UI.addFrontCharts(chartId,charts)
+  }
 }
 function mouseMoveOutOfCharts(atDate){
   console.log("Mouse move out of the charts at Date"+atDate)
   if(categorySelected == null){
     UI.removeFrontCharts()
+    UI.makeTitlesLookNormal()
   }
 }
 
 function mouseMoveInFrontChart(chartId, date){
   console.log("Mouse move in Front "+ chartId + " for the date " + date)
 }
-
-
-
 
 
 return {

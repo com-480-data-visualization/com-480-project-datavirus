@@ -443,8 +443,6 @@
       .call(xAxis)
     }
 
-
-
     function drawYAxis(){
       //remove the previous axis
       svg.select(".yAxis").remove()
@@ -456,7 +454,6 @@
       +","+stackedAreaMargin.top+")")
       .call(yAxis)
     }
-
 
     function renderCharts(charts, withStroke){
       removeCharts()
@@ -579,12 +576,10 @@
 
 
 
-    function removeFrontCharts(indexSelected,charts){
+    function removeFrontCharts(){
       stackedArea.select(".frontAreasContainer").remove()
       frontChartsPaths = null
-      indexSelected = null
       chartsContainer.attr("opacity",1)
-      makeTitlesLookNormal()
     }
 
     function makeTitlesLookNormal(){
@@ -666,14 +661,8 @@
           }
           e.stopPropagation()
         })
-
-
       })
     }
-
-
-
-
 
 
     function colorForIndex(index){
@@ -684,10 +673,6 @@
       var colors = ["#bcf5cc","#bce9f5","#fafac5","#fad5c5","#f0b9b9","#c4b6f2","#ede3c0"]
       return colors[index%colors.length]
     }
-
-
-
-
 
 
     return {
@@ -713,6 +698,9 @@
       removeCharts:removeCharts,
       addFrontCharts:addFrontCharts,
       removeFrontCharts:removeFrontCharts,
+      updateTitles:updateTitles,
+      makeTitlesLookNormal:makeTitlesLookNormal,
+
     }
   })();
   App.Plot1UI = Plot1UI;
