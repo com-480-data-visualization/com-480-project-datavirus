@@ -4,14 +4,17 @@
   let Plot1UI = (function() {
     const containerName = "plot1_container"
     const titleContainerId = "plot1_title_container"
+    let titles = null
     const svgWidth = document.getElementById(containerName).clientWidth
     const svgHeight = document.getElementById(containerName).clientHeight
 
 
     //-------------SOME UI PARAMTER TO TUNE-------------
-    let curveType = d3.curveLinear
+
     let minNumberOfPointInScreen = 30
+    let curveType = d3.curveLinear
     //'curveMonotoneX','curveLinear','curveBasis', 'curveCardinal', 'curveStepBefore',...
+
     const stackedAreaMargin = {
       top: 30,
       left: 70,
@@ -97,12 +100,17 @@
       //right
       stackedAreaBorderLines.append("line") .attr("x1", stackedAreaMargin.width) .attr("y1", 0).attr("x2", stackedAreaMargin.width) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
 
+
+      svg.on("mousemove", function() {
+      App.Plot1.mouseMoveOutOfCharts()
+    })
+
     }
 
     function createTitles(){
       const titleContainer = document.getElementById(titleContainerId)
       titleContainer.innerHTML = ""
-
+      titles = []
 
       data.categories.forEach((cat,i)=>{
         var title = document.createElement("div");
@@ -110,11 +118,12 @@
         titleContainer.appendChild(title)
         title.style.color = colorForIndex(i)
         title.addEventListener("mouseover", function(){
-          App.Plot1.overTitle(i)
+          App.Plot1.mouseOverTitle(i)
         });
         title.addEventListener("mouseout", function(){
           App.Plot1.mouseLeftTitle(i)
         });
+        titles.push(title)
       })
     }
 
@@ -127,8 +136,6 @@
       let tickHeight = sliderBoxPreferences.tickHeight
       let contextHeight = sliderBoxPreferences.height
       let selectedRectHeight = sliderBoxPreferences.selectedRectHeight
-
-
 
       //1)First we add the context and we draw a horizontal line so we see it well
       let silderBox = svg.append("g")
@@ -143,7 +150,6 @@
       .domain([smallestDate, biggestDate])
 
 
-
       if(niceAxis){
         contextXScale = contextXScale.nice()
       }
@@ -156,7 +162,7 @@
       //.tickValues([2006, 2008, 2010,2012, 2014, 2016, 2018])
       //.tickArguments([29])
       //.ticks(30)
-      .ticks(15, d3.timeFormat('%Y'))
+      //.ticks(15, d3.timeFormat('%Y'))
       //.tickFormat(x => /[AEIOUY]/.test(x) ? x : "")
 
       //append the axis to the svg element
@@ -428,31 +434,78 @@
       let chartsContainer = stackedArea.append("g")
       .attr("class", "chartsContainer")
       charts.forEach(chart=>{
+
+          chart.path = chartsContainer.append("path")
+          .data([chart.data.values])
+          .attr("class", "chart")
+          .attr('id', "chart_nb_"+chart.id)
+          .attr("d", chart.area)
+          .attr("fill", colorForIndex(chart.id))
+
+          if(withStroke){
+            chart.path
+            .attr("stroke", "black")
+            .attr("stroke-width", "1")
+
+          }
+        })
+      }
+
+
+          /*let domElement = document.getElementById("chart_nb_"+chart.id)
+          domElement.addEventListener("mousemove",function(e){
+            console.log("move")
+            e.stopPropagation()
+          })
+          console.log(domElement)*/
+
+          /*chart.path.on("mousemove", function(e) {
+          let coordinateX= d3.mouse(this)[0];
+          let dateSelected =getXscale().invert(coordinateX)
+          App.Plot1.onHover(chart.id, dateSelected)})*/
+
+          /*chart.path.on("mousein", function(e) {
+
+          App.Plot1.onHover(chart.id)})
+
+
+          chart.path.on("mouseout", function(d,i) {
+            console.log("öLJöJöLJKöLJLöJKöJKöL")
+          App.Plot1.onMouseOut(chart.id)})*/
+      /*})
+
+      if(withSelection){
+
+        let chart = charts[indexSelected]
+        let chartColor =  colorForIndex(chart.id)
+
         chart.path = chartsContainer.append("path")
         .data([chart.data.values])
         .attr("class", "chart")
         .attr('id', "chart_nb_"+chart.id)
         .attr("d", chart.area)
-        .attr("fill", colorForIndex(chart.id))
+        .attr("fill", chartColor)
 
-        if(withStroke){
           chart.path
           .attr("stroke", "black")
-          .attr("stroke-width", "1")
+          .attr("stroke-width", "1")*/
 
-        }
+          /*chart.path.on("mousemove", function(d,i) {
+          let coordinateX= d3.mouse(this)[0];
+          let dateSelected =getXscale().invert(coordinateX)
+          App.Plot1.onHover(chart.id, dateSelected)})
+          chart.path.on("mouseout", function(d,i) {
+            console.log("öLJöJöLJKöLJLöJKöJKöL")
+          App.Plot1.onMouseOut(chart.id)})*/
 
-        /*.on("mousemove", function(d,i) {
-        let coordinateX= d3.mouse(this)[0];
-        let dateSelected =xScale.invert(coordinateX)
-        onHover(chart.id, dateSelected)})*/
-      })
-    }
+
+      /*}
+
+    }*/
 
     function removeCharts(){
       stackedArea.select(".chartsContainer").remove()
     }
-
 
 
     function removeLines(){
@@ -540,8 +593,24 @@
 
     }
 
+
+
+    function removeFrontCharts(indexSelected,charts){
+      renderCharts(charts, true)
+    }
+
+    function addFrontCharts(indexSelected,charts){
+      renderCharts(charts, true, indexSelected)
+    }
+
+
+
     function colorForIndex(index){
-      var colors = ["#52304b","#2b4a30","#a70ee8","#e30eb8","#734f37","#fcf803", "#fc0303"]
+      var colors = ["#32a852","#2b90ab","#d1d138","#fa8350","#b32929","#493782","#968a60"]
+      return colors[index%colors.length]
+    }
+    function colorForFadingIndex(index){
+      var colors = ["#bcf5cc","#bce9f5","#fafac5","#fad5c5","#f0b9b9","#c4b6f2","#ede3c0"]
       return colors[index%colors.length]
     }
 
@@ -571,6 +640,8 @@
       removePartsOfChart:removePartsOfChart,
       removeLines:removeLines,
       removeCharts:removeCharts,
+      addFrontCharts:addFrontCharts,
+      removeFrontCharts:removeFrontCharts,
     }
   })();
   App.Plot1UI = Plot1UI;

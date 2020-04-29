@@ -14,7 +14,7 @@
     let maxYScore = null
     let displayedXInterval = null
 
-    let stacksSupperpose = false
+    let stacksSupperpose = true
     let stackClever = true
     let adapativeYScale = true
 
@@ -78,6 +78,7 @@
       }
 
       upperLines = []
+      if(!stacksSupperpose){
       for (let i = 0; i < data.categories.length; i++) {
         upperLines.push(UI.createUpperLine({
           data: data,
@@ -85,13 +86,14 @@
           stacksSupperpose:stacksSupperpose,
         }));
       }
+    }
+
       UI.removeCharts()
       UI.removeLines()
       UI.removePartsOfChart()
 
       if(stacksSupperpose){
-        UI.renderCharts(charts,false)
-        UI.renderUpperLines(upperLines)
+        UI.renderCharts(charts,true)
       }else{
         UI.renderCharts(charts,false)
         if(stackClever){
@@ -149,6 +151,9 @@ function userBrushed(b){
 
   for (var i = 0; i < charts.length; i++) {
     charts[i].showOnly(b);
+
+  }
+  for (var i = 0; i < upperLines.length; i++) {
     upperLines[i].showOnly(b);
   }
 
@@ -200,23 +205,31 @@ heavyCompute()
 }
 }*/
 
-function onHover(elmx, date){
-  //console.log("over In elem "+ elmx + " for the date " + date)
-}
 
-function overTitle(id){
+function mouseOverTitle(id){
   console.log("Mouse over title " + data.categories[id])
+  UI.addFrontCharts(id,charts)
 }
 
 function mouseLeftTitle(id){
   console.log("Mouse left title " + data.categories[id])
+  UI.removeFrontCharts(id, charts)
+}
+
+function mouseMoveInChart(chartId, date){
+  console.log("Mouse move in "+ elmx + " for the date " + date)
+}
+function mouseMoveOutOfCharts(){
+  console.log("Mouse move in out of the charts")
 }
 
 
 
 return {
-  overTitle:overTitle,
+  mouseOverTitle:mouseOverTitle,
   mouseLeftTitle:mouseLeftTitle,
+  mouseMoveInChart:mouseMoveInChart,
+  mouseMoveOutOfCharts:mouseMoveOutOfCharts,
   //  playVideo:showVideo,
 }
 })();
