@@ -60,8 +60,10 @@
         adapativeYScale = !adapativeYScale
         if(adapativeYScale){
           adaptYScale(displayedXInterval)
-          heavyCompute()
-          UI.renderUpperLines(upperLines)
+          if(!stacksSupperpose){
+            heavyCompute()
+            UI.renderUpperLines(upperLines)
+          }
         }
       }
     });
@@ -109,19 +111,7 @@
     }//end of create plot function
 
 
-    function addLines(timestamps) {
-      let previousContainer = stackedArea.select(".linesContainer")
-      previousContainer.remove()
-      let linesContainer = stackedArea.append("g")
-      .attr("class", "linesContainer")
 
-      timestamps.forEach(t=>{
-        let y = 0;
-        let Y = stackedAreaMargin.height
-        let x = xScale(new Date(t))
-        linesContainer.append("line").attr("x1", x).attr("y1", y).attr("x2", x) .attr("y2", Y).attr("class", "verticalLines")
-      })
-    }
 
     function adaptYScale(forInterval){
       if(adapativeYScale){
@@ -235,7 +225,7 @@ function userSelectedCategory(catId){
 }
 
 function mouseInChart(chartId){
-  if(chartId == null){
+  if(categorySelected == null){
     console.log("Mouse went inside chart "+ chartId)
     UI.addFrontCharts(chartId,charts)
   }
@@ -246,10 +236,15 @@ function mouseMoveOutOfCharts(atDate){
     UI.removeFrontCharts()
     UI.makeTitlesLookNormal()
   }
+  let color = categorySelected == null ? "black" : UI.colorForIndex(categorySelected)
+  UI.addVerticalLines([atDate.getTime()],color)
 }
 
-function mouseMoveInFrontChart(chartId, date){
-  console.log("Mouse move in Front "+ chartId + " for the date " + date)
+function mouseMoveInFrontChart(chartId, atDate){
+//  UI.colorForIndex(chartId)
+  let color = categorySelected == null ? "black" : UI.colorForIndex(categorySelected)
+  UI.addVerticalLines([atDate.getTime()],color)
+  console.log("Mouse move in Front "+ chartId + " for the date " + atDate)
 }
 
 

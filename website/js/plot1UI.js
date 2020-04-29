@@ -122,6 +122,8 @@
             dateSelected = biggestDate
           }
           App.Plot1.mouseMoveOutOfCharts(dateSelected)
+        }else{
+          removeVerticalLines()
         }
       })
 
@@ -664,6 +666,30 @@
       })
     }
 
+    function removeVerticalLines(){
+      stackedArea.select(".verticalLinesContainer").remove()
+    }
+
+    function addVerticalLines(timestamps, color) {
+      removeVerticalLines()
+      let linesContainer = stackedArea.append("g")
+      .attr("class", "verticalLinesContainer")
+
+      timestamps.forEach(t=>{
+        let y = 0;
+        let Y = stackedAreaMargin.height
+        let x = getXscale()(new Date(t))
+        linesContainer
+        .append("line")
+        .attr("x1", x)
+        .attr("y1", y)
+        .attr("x2", x)
+        .attr("y2", Y)
+        .attr("class", "verticalLines")
+        .attr("stroke", color)
+      })
+    }
+
 
     function colorForIndex(index){
       var colors = ["#32a852","#2b90ab","#d1d138","#fa8350","#b32929","#493782","#968a60"]
@@ -700,6 +726,8 @@
       removeFrontCharts:removeFrontCharts,
       updateTitles:updateTitles,
       makeTitlesLookNormal:makeTitlesLookNormal,
+      addVerticalLines:addVerticalLines,
+      colorForIndex:colorForIndex,
 
     }
   })();
