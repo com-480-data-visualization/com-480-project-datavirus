@@ -213,14 +213,20 @@ function mouseOverTitle(id){
 
 function mouseLeftTitle(id){
   console.log("Mouse left title " + data.categories[id])
-  UI.removeFrontCharts(id, charts)
+  UI.removeFrontCharts()
 }
 
 function mouseMoveInChart(chartId, date){
-  console.log("Mouse move in "+ elmx + " for the date " + date)
+  console.log("Mouse move in "+ chartId + " for the date " + date)
+  UI.addFrontCharts(chartId,charts)
 }
 function mouseMoveOutOfCharts(){
-  console.log("Mouse move in out of the charts")
+  console.log("Mouse move out of the charts")
+  UI.removeFrontCharts()
+}
+
+function mouseMoveInFrontChart(chartId, date){
+  console.log("Mouse move in Front "+ chartId + " for the date " + date)
 }
 
 
@@ -229,6 +235,7 @@ return {
   mouseOverTitle:mouseOverTitle,
   mouseLeftTitle:mouseLeftTitle,
   mouseMoveInChart:mouseMoveInChart,
+  mouseMoveInFrontChart:mouseMoveInFrontChart,
   mouseMoveOutOfCharts:mouseMoveOutOfCharts,
   //  playVideo:showVideo,
 }

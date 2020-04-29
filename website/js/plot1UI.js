@@ -36,6 +36,8 @@
     let stackedArea = null
     let stackedAreaBorderLines = null
     let timeIntervalSelected = null
+    let chartsContainer = null
+    let frontChartsPaths = null
 
     //the revelant data needed
     let smallestDate = null
@@ -102,8 +104,8 @@
 
 
       svg.on("mousemove", function() {
-      App.Plot1.mouseMoveOutOfCharts()
-    })
+        App.Plot1.mouseMoveOutOfCharts()
+      })
 
     }
 
@@ -431,80 +433,44 @@
 
     function renderCharts(charts, withStroke){
       removeCharts()
-      let chartsContainer = stackedArea.append("g")
+      chartsContainer = stackedArea.append("g")
       .attr("class", "chartsContainer")
       charts.forEach(chart=>{
-
-          chart.path = chartsContainer.append("path")
-          .data([chart.data.values])
-          .attr("class", "chart")
-          .attr('id', "chart_nb_"+chart.id)
-          .attr("d", chart.area)
-          .attr("fill", colorForIndex(chart.id))
-
-          if(withStroke){
-            chart.path
-            .attr("stroke", "black")
-            .attr("stroke-width", "1")
-
-          }
-        })
-      }
-
-
-          /*let domElement = document.getElementById("chart_nb_"+chart.id)
-          domElement.addEventListener("mousemove",function(e){
-            console.log("move")
-            e.stopPropagation()
-          })
-          console.log(domElement)*/
-
-          /*chart.path.on("mousemove", function(e) {
-          let coordinateX= d3.mouse(this)[0];
-          let dateSelected =getXscale().invert(coordinateX)
-          App.Plot1.onHover(chart.id, dateSelected)})*/
-
-          /*chart.path.on("mousein", function(e) {
-
-          App.Plot1.onHover(chart.id)})
-
-
-          chart.path.on("mouseout", function(d,i) {
-            console.log("öLJöJöLJKöLJLöJKöJKöL")
-          App.Plot1.onMouseOut(chart.id)})*/
-      /*})
-
-      if(withSelection){
-
-        let chart = charts[indexSelected]
-        let chartColor =  colorForIndex(chart.id)
 
         chart.path = chartsContainer.append("path")
         .data([chart.data.values])
         .attr("class", "chart")
         .attr('id', "chart_nb_"+chart.id)
         .attr("d", chart.area)
-        .attr("fill", chartColor)
+        .attr("fill", colorForIndex(chart.id))
 
+        if(withStroke){
           chart.path
           .attr("stroke", "black")
-          .attr("stroke-width", "1")*/
+          .attr("stroke-width", "1")
 
-          /*chart.path.on("mousemove", function(d,i) {
+        }
+
+        let domElement = document.getElementById("chart_nb_"+chart.id)
+        domElement.addEventListener("mousemove",function(e){
+          e.stopPropagation()
+        })
+
+        chart.path.on("mousemove", function(e) {
+          console.log("mouse move in chart nb "+chart.id)
           let coordinateX= d3.mouse(this)[0];
           let dateSelected =getXscale().invert(coordinateX)
-          App.Plot1.onHover(chart.id, dateSelected)})
-          chart.path.on("mouseout", function(d,i) {
-            console.log("öLJöJöLJKöLJLöJKöJKöL")
-          App.Plot1.onMouseOut(chart.id)})*/
+          App.Plot1.mouseMoveInChart(chart.id, dateSelected)})
+        })
+      }
 
 
-      /*}
 
-    }*/
+
 
     function removeCharts(){
       stackedArea.select(".chartsContainer").remove()
+      chartsContainer = null
     }
 
 
@@ -596,54 +562,142 @@
 
 
     function removeFrontCharts(indexSelected,charts){
-      renderCharts(charts, true)
+      stackedArea.select(".frontAreasContainer").remove()
+      frontChartsPaths = null
+      chartsContainer.attr("opacity",1)
     }
 
     function addFrontCharts(indexSelected,charts){
-      renderCharts(charts, true, indexSelected)
+        frontChartsPaths = []
+        chartsContainer.attr("opacity",0)
+        let container = stackedArea.append("g").attr("class", "frontAreasContainer")
+        charts.forEach(chart=>{
+          let chartColor = chart.id == indexSelected ? colorForIndex(chart.id) :colorForFadingIndex(chart.id)
+
+            let path = container.append("path")
+            .data([chart.data.values])
+            .attr("class", "chart")
+            .attr('id', "front_chart_nb_"+chart.id)
+            .attr("d", chart.area)
+            .attr("fill",chartColor)
+            if(chart.id == indexSelected){
+              path.attr("stroke","black")
+            }
+            frontChartsPaths.push(path)
+        })
+        addEventListenersInFrontChart(indexSelected,frontChartsPaths)
+    }
+
+    function updateFrontChartsUI(indexSelected,frontChartsPaths){
+      frontChartsPaths.forEach((path,id)=>{
+        if(id != indexSelected){
+          path.attr("fill", colorForFadingIndex(id))
+          .attr("stroke",null)
+        }else{
+          path.attr("fill", colorForIndex(id))
+          .attr("stroke","black")
+        }
+      })
+    }
+
+
+    function addEventListenersInFrontChart(indexSelected, frontChartsPaths){
+      frontChartsPaths.forEach((path,id)=>{
+
+        path.on("mousemove", function(e){
+        let coordinateX= d3.mouse(this)[0];
+        let dateSelected =getXscale().invert(coordinateX)
+        //App.Plot1.mouseMoveInFrontChart(chart.id, dateSelected)
+      })
+
+        let domEl = document.getElementById("front_chart_nb_"+id)
+        domEl.addEventListener("mousemove",function(e){
+          updateFrontChartsUI(id, frontChartsPaths)
+          console.log("JööJöLöL"+id)
+          e.stopPropagation()
+        })
+
+
+      })
     }
 
 
 
-    function colorForIndex(index){
-      var colors = ["#32a852","#2b90ab","#d1d138","#fa8350","#b32929","#493782","#968a60"]
-      return colors[index%colors.length]
-    }
-    function colorForFadingIndex(index){
-      var colors = ["#bcf5cc","#bce9f5","#fafac5","#fad5c5","#f0b9b9","#c4b6f2","#ede3c0"]
-      return colors[index%colors.length]
-    }
+
+
+
+    /*
+
+    chart.path = chartsContainer.append("path")
+    .data([chart.data.values])
+    .attr("class", "chart")
+    .attr('id', "chart_nb_"+chart.id)
+    .attr("d", chart.area)
+    .attr("fill", colorForIndex(chart.id))
+
+    if(withStroke){
+    chart.path
+    .attr("stroke", "black")
+    .attr("stroke-width", "1")
+
+  }
+
+  let domElement = document.getElementById("chart_nb_"+chart.id)
+  domElement.addEventListener("mousemove",function(e){
+  e.stopPropagation()
+})
+
+
+
+*/
 
 
 
 
 
 
-    return {
-      setData:setData,
-      prepareElements:function(){
-        createTitles()
-        prepareSVGElement()
-        createSlider()
-        drawXAxis()
-        drawYAxis()
 
-      },
-      getXscale:getXscale,
-      getYscale:getYscale,
-      drawYAxis:drawYAxis,
-      createChart: createChart,
-      createUpperLine:createUpperLine,
-      renderCharts:renderCharts,
-      renderUpperLines:renderUpperLines,
-      addPartsOfChart:addPartsOfChart,
-      removePartsOfChart:removePartsOfChart,
-      removeLines:removeLines,
-      removeCharts:removeCharts,
-      addFrontCharts:addFrontCharts,
-      removeFrontCharts:removeFrontCharts,
-    }
-  })();
-  App.Plot1UI = Plot1UI;
-  window.App = App;
+
+
+function colorForIndex(index){
+  var colors = ["#32a852","#2b90ab","#d1d138","#fa8350","#b32929","#493782","#968a60"]
+  return colors[index%colors.length]
+}
+function colorForFadingIndex(index){
+  var colors = ["#bcf5cc","#bce9f5","#fafac5","#fad5c5","#f0b9b9","#c4b6f2","#ede3c0"]
+  return colors[index%colors.length]
+}
+
+
+
+
+
+
+return {
+  setData:setData,
+  prepareElements:function(){
+    createTitles()
+    prepareSVGElement()
+    createSlider()
+    drawXAxis()
+    drawYAxis()
+
+  },
+  getXscale:getXscale,
+  getYscale:getYscale,
+  drawYAxis:drawYAxis,
+  createChart: createChart,
+  createUpperLine:createUpperLine,
+  renderCharts:renderCharts,
+  renderUpperLines:renderUpperLines,
+  addPartsOfChart:addPartsOfChart,
+  removePartsOfChart:removePartsOfChart,
+  removeLines:removeLines,
+  removeCharts:removeCharts,
+  addFrontCharts:addFrontCharts,
+  removeFrontCharts:removeFrontCharts,
+}
+})();
+App.Plot1UI = Plot1UI;
+window.App = App;
 })(window);
