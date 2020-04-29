@@ -656,7 +656,28 @@
           App.Plot1.mouseMoveInFrontChart(indexSelected, dateSelected)
         })
 
+
+
         let domEl = document.getElementById("front_chart_nb_"+id)
+
+        domEl.addEventListener("click", function(e){
+          (function(id){
+            if(id == categorySelected){
+              categorySelected = null
+            }else{
+              categorySelected = id
+            }
+
+            var dim = e.target.getBoundingClientRect();
+            var xInSvg = e.clientX - dim.left;
+            let date = getXscale().invert(xInSvg)
+
+            App.Plot1.userSelectedCategory(categorySelected)
+            App.Plot1.mouseMoveInFrontChart(id,date)
+          })(id)
+        })
+
+
         domEl.addEventListener("mousemove",function(e){
           if(id != lastIndexHighlighted && categorySelected == null){
             addFrontCharts(id, charts)
