@@ -20,6 +20,7 @@
 
 
     let data = null
+    let categorySelected = null
     //define the position of the rect that will contain the stacked graphs
 
     //load the csv file and call addElementsToStackedArea(),createSlider() when done
@@ -208,12 +209,16 @@ heavyCompute()
 
 function mouseOverTitle(id){
   console.log("Mouse over title " + data.categories[id])
-  UI.addFrontCharts(id,charts)
+  if(categorySelected == null){
+    UI.addFrontCharts(id,charts)
+  }
 }
 
 function mouseLeftTitle(id){
   console.log("Mouse left title " + data.categories[id])
-  UI.removeFrontCharts()
+  if(categorySelected == null){
+    UI.removeFrontCharts()
+  }
 }
 
 function mouseMoveInChart(chartId, date){
@@ -222,11 +227,18 @@ function mouseMoveInChart(chartId, date){
 }
 function mouseMoveOutOfCharts(){
   console.log("Mouse move out of the charts")
+  if(categorySelected == null){
   UI.removeFrontCharts()
+}
 }
 
 function mouseMoveInFrontChart(chartId, date){
   console.log("Mouse move in Front "+ chartId + " for the date " + date)
+}
+
+function userSelectedCategory(catId){
+  categorySelected = catId
+  console.log("User just selected the category" + catId)
 }
 
 
@@ -237,6 +249,7 @@ return {
   mouseMoveInChart:mouseMoveInChart,
   mouseMoveInFrontChart:mouseMoveInFrontChart,
   mouseMoveOutOfCharts:mouseMoveOutOfCharts,
+  userSelectedCategory:userSelectedCategory,
   //  playVideo:showVideo,
 }
 })();
