@@ -10,13 +10,16 @@
   margin: 5px;
   display: flex;
   justify-content: center;
+  align-items: center;
   font-size: large;
   font-family:verdana;
+  height: 40px;
 }
 
 
 #plot1_title_container div{
   margin-left: 40px;
+  padding: 5px;
 }
 
 .stackedAreaBorder{

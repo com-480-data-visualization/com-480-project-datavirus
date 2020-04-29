@@ -465,15 +465,10 @@
         })
       }
 
-
-
-
-
     function removeCharts(){
       stackedArea.select(".chartsContainer").remove()
       chartsContainer = null
     }
-
 
     function removeLines(){
       stackedArea.select(".upperLinesContainer").remove()
@@ -567,6 +562,10 @@
       frontChartsPaths = null
       indexSelected = null
       chartsContainer.attr("opacity",1)
+      titles.forEach((title, i)=>{
+        title.style.color = colorForIndex(i)
+        title.style.border = null
+      })
     }
 
     function addFrontCharts(indexSelected,charts){
@@ -598,6 +597,20 @@
 
         lastIndexHighlighted = indexSelected
         addEventListenersInFrontChart(indexSelected,frontChartsPaths,charts)
+
+        titles.forEach((title, i)=>{
+          updateTitleUI(title, i, indexSelected == i)
+        })
+    }
+
+    function updateTitleUI(title,index, isSelected){
+      title.style.color = isSelected ? colorForIndex(index) : colorForFadingIndex(index)
+      if(isSelected){
+        title.style.border = "2px solid"
+        title.style.borderRadius = '0.5em'
+      }else{
+        title.style.border = null
+      }
     }
 
 
