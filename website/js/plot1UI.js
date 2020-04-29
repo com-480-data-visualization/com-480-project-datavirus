@@ -107,8 +107,22 @@
 
       svg.on("mousemove", function() {
         let coordinateX= d3.mouse(this)[0];
-        let dateSelected =getXscale().invert(coordinateX)
-        App.Plot1.mouseMoveOutOfCharts(dateSelected)
+        let coordinateY= d3.mouse(this)[1];
+        let tolerancePixel = 10
+        if(coordinateX > stackedAreaMargin.left - tolerancePixel
+          && coordinateX < stackedAreaMargin.left +stackedAreaMargin.width + tolerancePixel
+          && coordinateY > stackedAreaMargin.top - tolerancePixel
+          && coordinateY < stackedAreaMargin.top +stackedAreaMargin.height + tolerancePixel
+        ){
+          let dateSelected =getXscale().invert(coordinateX - stackedAreaMargin.left)
+
+          if(dateSelected < smallestDate){
+            dateSelected = smallestDate
+          }else if(dateSelected > biggestDate){
+            dateSelected = biggestDate
+          }
+          App.Plot1.mouseMoveOutOfCharts(dateSelected)
+        }
       })
 
     }
