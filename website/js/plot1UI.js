@@ -38,6 +38,7 @@
     let timeIntervalSelected = null
     let chartsContainer = null
     let frontChartsPaths = null
+    let lastIndexHighlighted = null
 
     //the revelant data needed
     let smallestDate = null
@@ -564,44 +565,43 @@
     function removeFrontCharts(indexSelected,charts){
       stackedArea.select(".frontAreasContainer").remove()
       frontChartsPaths = null
+      indexSelected = null
       chartsContainer.attr("opacity",1)
     }
 
     function addFrontCharts(indexSelected,charts){
+      removeFrontCharts()
         frontChartsPaths = []
         chartsContainer.attr("opacity",0)
         let container = stackedArea.append("g").attr("class", "frontAreasContainer")
         charts.forEach(chart=>{
-          let chartColor = chart.id == indexSelected ? colorForIndex(chart.id) :colorForFadingIndex(chart.id)
-
+          if(chart.id != indexSelected){
             let path = container.append("path")
             .data([chart.data.values])
             .attr("class", "chart")
             .attr('id', "front_chart_nb_"+chart.id)
             .attr("d", chart.area)
-            .attr("fill",chartColor)
-            if(chart.id == indexSelected){
-              path.attr("stroke","black")
-            }
+            .attr("fill",colorForFadingIndex(chart.id))
             frontChartsPaths.push(path)
+          }
         })
-        addEventListenersInFrontChart(indexSelected,frontChartsPaths)
+
+        let chart = charts[indexSelected]
+        let path = container.append("path")
+        .data([chart.data.values])
+        .attr("class", "chart")
+        .attr('id', "front_chart_nb_"+chart.id)
+        .attr("d", chart.area)
+        .attr("fill",colorForIndex(chart.id))
+        .attr("stroke","black")
+        frontChartsPaths.push(path)
+
+        lastIndexHighlighted = indexSelected
+        addEventListenersInFrontChart(indexSelected,frontChartsPaths,charts)
     }
 
-    function updateFrontChartsUI(indexSelected,frontChartsPaths){
-      frontChartsPaths.forEach((path,id)=>{
-        if(id != indexSelected){
-          path.attr("fill", colorForFadingIndex(id))
-          .attr("stroke",null)
-        }else{
-          path.attr("fill", colorForIndex(id))
-          .attr("stroke","black")
-        }
-      })
-    }
 
-
-    function addEventListenersInFrontChart(indexSelected, frontChartsPaths){
+    function addEventListenersInFrontChart(indexSelected, frontChartsPaths,charts){
       frontChartsPaths.forEach((path,id)=>{
 
         path.on("mousemove", function(e){
@@ -612,8 +612,9 @@
 
         let domEl = document.getElementById("front_chart_nb_"+id)
         domEl.addEventListener("mousemove",function(e){
-          updateFrontChartsUI(id, frontChartsPaths)
-          console.log("JööJöLöL"+id)
+          if(id != lastIndexHighlighted){
+            addFrontCharts(id, charts)
+          }
           e.stopPropagation()
         })
 
@@ -625,31 +626,6 @@
 
 
 
-
-    /*
-
-    chart.path = chartsContainer.append("path")
-    .data([chart.data.values])
-    .attr("class", "chart")
-    .attr('id', "chart_nb_"+chart.id)
-    .attr("d", chart.area)
-    .attr("fill", colorForIndex(chart.id))
-
-    if(withStroke){
-    chart.path
-    .attr("stroke", "black")
-    .attr("stroke-width", "1")
-
-  }
-
-  let domElement = document.getElementById("chart_nb_"+chart.id)
-  domElement.addEventListener("mousemove",function(e){
-  e.stopPropagation()
-})
-
-
-
-*/
 
 
 
