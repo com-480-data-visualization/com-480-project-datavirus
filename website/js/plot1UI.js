@@ -106,7 +106,9 @@
 
 
       svg.on("mousemove", function() {
-        App.Plot1.mouseMoveOutOfCharts()
+        let coordinateX= d3.mouse(this)[0];
+        let dateSelected =getXscale().invert(coordinateX)
+        App.Plot1.mouseMoveOutOfCharts(dateSelected)
       })
 
     }
@@ -134,12 +136,7 @@
           }else{
             categorySelected = i
           }
-          titles.forEach((title, j)=>{
-            updateTitleUI(title, j, j == i,j== categorySelected)
-          })
           App.Plot1.userSelectedCategory(categorySelected)
-
-
         });
         titles.push(title)
       })
@@ -472,245 +469,238 @@
           e.stopPropagation()
         })
 
-        chart.path.on("mousemove", function(e) {
-          console.log("mouse move in chart nb "+chart.id)
-          let coordinateX= d3.mouse(this)[0];
-          let dateSelected =getXscale().invert(coordinateX)
-          App.Plot1.mouseMoveInChart(chart.id, dateSelected)})
+        chart.path.on("mouseover", function(e) {
+          App.Plot1.mouseInChart(chart.id)
         })
-      }
+      })
+    }
 
-      function removeCharts(){
-        stackedArea.select(".chartsContainer").remove()
-        chartsContainer = null
-      }
+    function removeCharts(){
+      stackedArea.select(".chartsContainer").remove()
+      chartsContainer = null
+    }
 
-      function removeLines(){
-        stackedArea.select(".upperLinesContainer").remove()
-      }
+    function removeLines(){
+      stackedArea.select(".upperLinesContainer").remove()
+    }
 
-      function renderUpperLines(lines){
-        removeLines()
-        let linesContainer = stackedArea.append("g")
-        .attr("class", "upperLinesContainer")
+    function renderUpperLines(lines){
+      removeLines()
+      let linesContainer = stackedArea.append("g")
+      .attr("class", "upperLinesContainer")
 
-        lines.forEach(line=>{
-          line.path = linesContainer.append("path")
-          .data([line.data.values])
-          .attr("class", "chart")
-          .attr('id', "chart_nb_"+line.id)
-          .attr("d", line.upperPath)
-          .attr("stroke", "black")
-          line.upperPathElem = document.getElementById("chart_nb_"+line.id)
-          /*.on("mousemove", function(d,i) {
-          let coordinateX= d3.mouse(this)[0];
-          let dateSelected =xScale.invert(coordinateX)
-          onHover(chart.id, dateSelected)})*/
-        })
-      }
-
-      function removePartsOfChart(){
-        stackedArea.select(".chartFrames").remove()
-      }
-
-      function addPartsOfChart(leftTimeBorder,orderTimeStamps,stacksSupperpose,data){
-        removePartsOfChart()
-
-        let framesContainer = stackedArea.append("g")
-        .attr("class", "chartFrames")
-
-        orderTimeStamps.forEach((el,i)=>{
-
-          let order = el[0]
-          let rightTimeBorder = el[1]
-
-          framesContainer.append("clipPath")
-          .attr("id", "clip_for_frame_"+i)
-          .append("rect")
-          .attr("x", getXscale()(leftTimeBorder)-2)
-          .attr("y", 0)
-          .attr("height", stackedAreaMargin.height)
-          .attr("width", stackedAreaMargin.width)
-
-          order.forEach((chartId,j)=>{
-            let newIncompleteChart = createChart({
-              data: data,
-              id: chartId,
-              stacksSupperpose:stacksSupperpose,
-              xScale:getXscale(),
-              yScale:getYscale(),
-            })
-
-            //console.log(newIncompleteChart)
-
-
-            //add the area
-            framesContainer.append("path")
-            .data([newIncompleteChart.data.values])
-            .attr("class", "partOfchart")
-            .attr("d", newIncompleteChart.area)
-            .attr("fill", colorForIndex(newIncompleteChart.id))
-            .attr("clip-path", "url(#clip_for_frame_"+i+")")
-            .attr("id","partOfChart_"+i+"_"+j)
-            //.attr("opacity","0")
-            //.attr("stroke", "black")//colorForIndex(newIncompleteChart.id))
-            //.attr("stroke-width", 10)
-
-            //let newElem = document.getElementById("partOfChart_"+i+"_"+j)
-            //newElem.classList.add("animOpacity")
-
-
-          })
-          leftTimeBorder = rightTimeBorder
-        })
-
-
-
-      }
-
-
-
-      function removeFrontCharts(indexSelected,charts){
-        stackedArea.select(".frontAreasContainer").remove()
-        frontChartsPaths = null
-        indexSelected = null
-        chartsContainer.attr("opacity",1)
-        makeTitlesLookNormal()
-      }
-
-      function makeTitlesLookNormal(){
-        titles.forEach((title, i)=>{
-          title.style.color = colorForIndex(i)
-          title.style.border = null
-          title.style.background = null
-        })
-      }
-
-      function addFrontCharts(indexSelected,charts){
-        removeFrontCharts()
-        frontChartsPaths = []
-        chartsContainer.attr("opacity",0)
-        let container = stackedArea.append("g").attr("class", "frontAreasContainer")
-        charts.forEach(chart=>{
-          if(chart.id != indexSelected){
-            let path = container.append("path")
-            .data([chart.data.values])
-            .attr("class", "chart")
-            .attr('id', "front_chart_nb_"+chart.id)
-            .attr("d", chart.area)
-            .attr("fill",colorForFadingIndex(chart.id))
-            frontChartsPaths.push(path)
-          }
-        })
-
-        let chart = charts[indexSelected]
-        let path = container.append("path")
-        .data([chart.data.values])
+      lines.forEach(line=>{
+        line.path = linesContainer.append("path")
+        .data([line.data.values])
         .attr("class", "chart")
-        .attr('id', "front_chart_nb_"+chart.id)
-        .attr("d", chart.area)
-        .attr("fill",colorForIndex(chart.id))
-        .attr("stroke","black")
-        frontChartsPaths.push(path)
+        .attr('id', "chart_nb_"+line.id)
+        .attr("d", line.upperPath)
+        .attr("stroke", "black")
+        line.upperPathElem = document.getElementById("chart_nb_"+line.id)
+        /*.on("mousemove", function(d,i) {
+        let coordinateX= d3.mouse(this)[0];
+        let dateSelected =xScale.invert(coordinateX)
+        onHover(chart.id, dateSelected)})*/
+      })
+    }
 
-        lastIndexHighlighted = indexSelected
-        addEventListenersInFrontChart(indexSelected,frontChartsPaths,charts)
+    function removePartsOfChart(){
+      stackedArea.select(".chartFrames").remove()
+    }
 
-        titles.forEach((title, i)=>{
-          updateTitleUI(title, i, indexSelected == i)
+    function addPartsOfChart(leftTimeBorder,orderTimeStamps,stacksSupperpose,data){
+      removePartsOfChart()
+
+      let framesContainer = stackedArea.append("g")
+      .attr("class", "chartFrames")
+
+      orderTimeStamps.forEach((el,i)=>{
+
+        let order = el[0]
+        let rightTimeBorder = el[1]
+
+        framesContainer.append("clipPath")
+        .attr("id", "clip_for_frame_"+i)
+        .append("rect")
+        .attr("x", getXscale()(leftTimeBorder)-2)
+        .attr("y", 0)
+        .attr("height", stackedAreaMargin.height)
+        .attr("width", stackedAreaMargin.width)
+
+        order.forEach((chartId,j)=>{
+          let newIncompleteChart = createChart({
+            data: data,
+            id: chartId,
+            stacksSupperpose:stacksSupperpose,
+            xScale:getXscale(),
+            yScale:getYscale(),
+          })
+
+          //console.log(newIncompleteChart)
+
+
+          //add the area
+          framesContainer.append("path")
+          .data([newIncompleteChart.data.values])
+          .attr("class", "partOfchart")
+          .attr("d", newIncompleteChart.area)
+          .attr("fill", colorForIndex(newIncompleteChart.id))
+          .attr("clip-path", "url(#clip_for_frame_"+i+")")
+          .attr("id","partOfChart_"+i+"_"+j)
+          //.attr("opacity","0")
+          //.attr("stroke", "black")//colorForIndex(newIncompleteChart.id))
+          //.attr("stroke-width", 10)
+
+          //let newElem = document.getElementById("partOfChart_"+i+"_"+j)
+          //newElem.classList.add("animOpacity")
+
+
         })
-      }
+        leftTimeBorder = rightTimeBorder
+      })
 
-      function updateTitleUI(title,index, isSelected, isClicked){
-        title.style.color = isSelected ? colorForIndex(index) : colorForFadingIndex(index)
-        if(isSelected || isClicked){
-          title.style.border = "2px solid"
-          title.style.borderRadius = '0.5em'
-          if(isClicked){
-            title.style.background = colorForFadingIndex(index)
-          }else{
-            title.style.background = null
-          }
+
+
+    }
+
+
+
+    function removeFrontCharts(indexSelected,charts){
+      stackedArea.select(".frontAreasContainer").remove()
+      frontChartsPaths = null
+      indexSelected = null
+      chartsContainer.attr("opacity",1)
+      makeTitlesLookNormal()
+    }
+
+    function makeTitlesLookNormal(){
+      titles.forEach((title, i)=>{
+        title.style.color = colorForIndex(i)
+        title.style.border = null
+        title.style.background = null
+      })
+    }
+
+    function addFrontCharts(indexSelected,charts){
+      removeFrontCharts()
+      frontChartsPaths = []
+      chartsContainer.attr("opacity",0)
+      let container = stackedArea.append("g").attr("class", "frontAreasContainer")
+      charts.forEach(chart=>{
+        if(chart.id != indexSelected){
+          let path = container.append("path")
+          .data([chart.data.values])
+          .attr("class", "chart")
+          .attr('id', "front_chart_nb_"+chart.id)
+          .attr("d", chart.area)
+          .attr("fill",colorForFadingIndex(chart.id))
+          frontChartsPaths.push(path)
+        }
+      })
+
+      let chart = charts[indexSelected]
+      let path = container.append("path")
+      .data([chart.data.values])
+      .attr("class", "chart")
+      .attr('id', "front_chart_nb_"+chart.id)
+      .attr("d", chart.area)
+      .attr("fill",colorForIndex(chart.id))
+      .attr("stroke","black")
+      frontChartsPaths.push(path)
+
+      lastIndexHighlighted = indexSelected
+      addEventListenersInFrontChart(indexSelected,frontChartsPaths,charts)
+      updateTitles(indexSelected, -1)
+    }
+
+    function updateTitles(indexSelected, indexClicked){
+      titles.forEach((title, i)=>{
+        updateTitleUI(title, i, i == indexSelected, i==indexClicked)
+      })
+    }
+
+    function updateTitleUI(title,index, isSelected, isClicked){
+      title.style.color = isSelected ? colorForIndex(index) : colorForFadingIndex(index)
+      if(isSelected || isClicked){
+        title.style.border = "2px solid"
+        title.style.borderRadius = '0.5em'
+        if(isClicked){
+          title.style.background = colorForFadingIndex(index)
         }else{
-          title.style.border = null
           title.style.background = null
         }
+      }else{
+        title.style.border = null
+        title.style.background = null
       }
+    }
 
 
-      function addEventListenersInFrontChart(indexSelected, frontChartsPaths,charts){
-        frontChartsPaths.forEach((path,id)=>{
+    function addEventListenersInFrontChart(indexSelected, frontChartsPaths,charts){
+      frontChartsPaths.forEach((path,id)=>{
 
-          path.on("mousemove", function(e){
-            let coordinateX= d3.mouse(this)[0];
-            let dateSelected =getXscale().invert(coordinateX)
-            //App.Plot1.mouseMoveInFrontChart(chart.id, dateSelected)
-          })
-
-          let domEl = document.getElementById("front_chart_nb_"+id)
-          domEl.addEventListener("mousemove",function(e){
-            if(id != lastIndexHighlighted){
-              addFrontCharts(id, charts)
-            }
-            e.stopPropagation()
-          })
-
-
+        path.on("mousemove", function(e){
+          let coordinateX= d3.mouse(this)[0];
+          let dateSelected =getXscale().invert(coordinateX)
+          App.Plot1.mouseMoveInFrontChart(indexSelected, dateSelected)
         })
-      }
+
+        let domEl = document.getElementById("front_chart_nb_"+id)
+        domEl.addEventListener("mousemove",function(e){
+          if(id != lastIndexHighlighted && categorySelected == null){
+            addFrontCharts(id, charts)
+          }
+          e.stopPropagation()
+        })
+
+
+      })
+    }
 
 
 
 
 
 
+    function colorForIndex(index){
+      var colors = ["#32a852","#2b90ab","#d1d138","#fa8350","#b32929","#493782","#968a60"]
+      return colors[index%colors.length]
+    }
+    function colorForFadingIndex(index){
+      var colors = ["#bcf5cc","#bce9f5","#fafac5","#fad5c5","#f0b9b9","#c4b6f2","#ede3c0"]
+      return colors[index%colors.length]
+    }
 
 
 
 
 
 
+    return {
+      setData:setData,
+      prepareElements:function(){
+        createTitles()
+        prepareSVGElement()
+        createSlider()
+        drawXAxis()
+        drawYAxis()
 
-
-      function colorForIndex(index){
-        var colors = ["#32a852","#2b90ab","#d1d138","#fa8350","#b32929","#493782","#968a60"]
-        return colors[index%colors.length]
-      }
-      function colorForFadingIndex(index){
-        var colors = ["#bcf5cc","#bce9f5","#fafac5","#fad5c5","#f0b9b9","#c4b6f2","#ede3c0"]
-        return colors[index%colors.length]
-      }
-
-
-
-
-
-
-      return {
-        setData:setData,
-        prepareElements:function(){
-          createTitles()
-          prepareSVGElement()
-          createSlider()
-          drawXAxis()
-          drawYAxis()
-
-        },
-        getXscale:getXscale,
-        getYscale:getYscale,
-        drawYAxis:drawYAxis,
-        createChart: createChart,
-        createUpperLine:createUpperLine,
-        renderCharts:renderCharts,
-        renderUpperLines:renderUpperLines,
-        addPartsOfChart:addPartsOfChart,
-        removePartsOfChart:removePartsOfChart,
-        removeLines:removeLines,
-        removeCharts:removeCharts,
-        addFrontCharts:addFrontCharts,
-        removeFrontCharts:removeFrontCharts,
-      }
-    })();
-    App.Plot1UI = Plot1UI;
-    window.App = App;
-  })(window);
+      },
+      getXscale:getXscale,
+      getYscale:getYscale,
+      drawYAxis:drawYAxis,
+      createChart: createChart,
+      createUpperLine:createUpperLine,
+      renderCharts:renderCharts,
+      renderUpperLines:renderUpperLines,
+      addPartsOfChart:addPartsOfChart,
+      removePartsOfChart:removePartsOfChart,
+      removeLines:removeLines,
+      removeCharts:removeCharts,
+      addFrontCharts:addFrontCharts,
+      removeFrontCharts:removeFrontCharts,
+    }
+  })();
+  App.Plot1UI = Plot1UI;
+  window.App = App;
+})(window);

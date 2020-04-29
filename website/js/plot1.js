@@ -80,14 +80,14 @@
 
       upperLines = []
       if(!stacksSupperpose){
-      for (let i = 0; i < data.categories.length; i++) {
-        upperLines.push(UI.createUpperLine({
-          data: data,
-          id: i,
-          stacksSupperpose:stacksSupperpose,
-        }));
+        for (let i = 0; i < data.categories.length; i++) {
+          upperLines.push(UI.createUpperLine({
+            data: data,
+            id: i,
+            stacksSupperpose:stacksSupperpose,
+          }));
+        }
       }
-    }
 
       UI.removeCharts()
       UI.removeLines()
@@ -106,101 +106,101 @@
         //
       }
 
-}//end of create plot function
+    }//end of create plot function
 
 
-function addLines(timestamps) {
-  let previousContainer = stackedArea.select(".linesContainer")
-  previousContainer.remove()
-  let linesContainer = stackedArea.append("g")
-  .attr("class", "linesContainer")
+    function addLines(timestamps) {
+      let previousContainer = stackedArea.select(".linesContainer")
+      previousContainer.remove()
+      let linesContainer = stackedArea.append("g")
+      .attr("class", "linesContainer")
 
-  timestamps.forEach(t=>{
-    let y = 0;
-    let Y = stackedAreaMargin.height
-    let x = xScale(new Date(t))
-    linesContainer.append("line").attr("x1", x).attr("y1", y).attr("x2", x) .attr("y2", Y).attr("class", "verticalLines")
-  })
-}
-
-function adaptYScale(forInterval){
-  if(adapativeYScale){
-    var bounds = model.getMaxValuesBetween(data,forInterval[0],forInterval[1])
-    var maxBound = stacksSupperpose ? bounds.maxScoreAtTimeStamp : bounds.maxSingleScore
-    UI.setData({
-      data:data,
-      maxYscore:maxBound,
-      onBrush: userBrushed,
-    })
-    UI.drawYAxis()
-
-    for (var i = 0; i < charts.length; i++) {
-      charts[i].rescaleY(maxBound);
+      timestamps.forEach(t=>{
+        let y = 0;
+        let Y = stackedAreaMargin.height
+        let x = xScale(new Date(t))
+        linesContainer.append("line").attr("x1", x).attr("y1", y).attr("x2", x) .attr("y2", Y).attr("class", "verticalLines")
+      })
     }
-    for (var i = 0; i < upperLines.length; i++) {
-      upperLines[i].rescaleY(maxBound);
+
+    function adaptYScale(forInterval){
+      if(adapativeYScale){
+        var bounds = model.getMaxValuesBetween(data,forInterval[0],forInterval[1])
+        var maxBound = stacksSupperpose ? bounds.maxScoreAtTimeStamp : bounds.maxSingleScore
+        UI.setData({
+          data:data,
+          maxYscore:maxBound,
+          onBrush: userBrushed,
+        })
+        UI.drawYAxis()
+
+        for (var i = 0; i < charts.length; i++) {
+          charts[i].rescaleY(maxBound);
+        }
+        for (var i = 0; i < upperLines.length; i++) {
+          upperLines[i].rescaleY(maxBound);
+        }
+      }
     }
-  }
-}
 
 
-function userBrushed(b){
+    function userBrushed(b){
 
-  displayedXInterval = b
-  UI.getXscale().domain(b)
-  adaptYScale(b)
+      displayedXInterval = b
+      UI.getXscale().domain(b)
+      adaptYScale(b)
 
-  for (var i = 0; i < charts.length; i++) {
-    charts[i].showOnly(b);
+      for (var i = 0; i < charts.length; i++) {
+        charts[i].showOnly(b);
 
-  }
-  for (var i = 0; i < upperLines.length; i++) {
-    upperLines[i].showOnly(b);
-  }
+      }
+      for (var i = 0; i < upperLines.length; i++) {
+        upperLines[i].showOnly(b);
+      }
 
-  window.clearInterval(heavyComputationTimer)
-  UI.removePartsOfChart()
-  if(!stacksSupperpose && stackClever){
-    UI.removePartsOfChart()
-    UI.removeLines()
-    for (var i = 0; i < upperLines.length; i++) {
-      upperLines[i].showOnly(b);
+      window.clearInterval(heavyComputationTimer)
+      UI.removePartsOfChart()
+      if(!stacksSupperpose && stackClever){
+        UI.removePartsOfChart()
+        UI.removeLines()
+        for (var i = 0; i < upperLines.length; i++) {
+          upperLines[i].showOnly(b);
+        }
+        heavyComputationTimer = window.setTimeout(function(){
+          heavyCompute()
+          UI.renderUpperLines(upperLines)
+        }, 4000);
+
+      }
+      //addPartsOfChart()
     }
+
+    function heavyCompute(){
+      console.log("do calculuuus")
+
+      let orderTimeStamps = model.computeTimeStampsBreaks(upperLines, data, UI.getXscale(),[data.smallestDate, data.biggestDate])
+
+      UI.addPartsOfChart(data.smallestDate.getTime(),orderTimeStamps,stacksSupperpose,data)
+      console.log("donew")
+    }
+
+
+    /*function addPartsOfChart(){
+    window.clearInterval(heavyComputationTimer);
+
+    if(data.criticalIndexes != undefined){
+
+    //  console.log(leftTimeBorder)
+
+    stackedArea.select(".chartFrames").remove()
     heavyComputationTimer = window.setTimeout(function(){
-      heavyCompute()
-      UI.renderUpperLines(upperLines)
-    }, 4000);
+    console.log("do calculuuus")
+    heavyCompute()
+  }, 1000);
 
-  }
-  //addPartsOfChart()
-}
+  //heavyComputationTimer = window.setInterval(heavyCompute, 1000);
 
-function heavyCompute(){
-  console.log("do calculuuus")
-
-  let orderTimeStamps = model.computeTimeStampsBreaks(upperLines, data, UI.getXscale(),[data.smallestDate, data.biggestDate])
-
-  UI.addPartsOfChart(data.smallestDate.getTime(),orderTimeStamps,stacksSupperpose,data)
-  console.log("donew")
-}
-
-
-/*function addPartsOfChart(){
-window.clearInterval(heavyComputationTimer);
-
-if(data.criticalIndexes != undefined){
-
-//  console.log(leftTimeBorder)
-
-stackedArea.select(".chartFrames").remove()
-heavyComputationTimer = window.setTimeout(function(){
-console.log("do calculuuus")
-heavyCompute()
-}, 1000);
-
-//heavyComputationTimer = window.setInterval(heavyCompute, 1000);
-
-//pour supprimer l'action qui se répète
+  //pour supprimer l'action qui se répète
 
 
 }
@@ -221,32 +221,36 @@ function mouseLeftTitle(id){
   }
 }
 
-function mouseMoveInChart(chartId, date){
-  console.log("Mouse move in "+ chartId + " for the date " + date)
+function userSelectedCategory(catId){
+  categorySelected = catId
+  UI.addFrontCharts(catId,charts)
+  console.log("User just selected the category" + catId)
+}
+
+function mouseInChart(chartId){
+  console.log("Mouse went inside chart "+ chartId )
   UI.addFrontCharts(chartId,charts)
+
 }
-function mouseMoveOutOfCharts(){
-  console.log("Mouse move out of the charts")
+function mouseMoveOutOfCharts(atDate){
+  console.log("Mouse move out of the charts at Date"+atDate)
   if(categorySelected == null){
-  UI.removeFrontCharts()
-}
+    UI.removeFrontCharts()
+  }
 }
 
 function mouseMoveInFrontChart(chartId, date){
   console.log("Mouse move in Front "+ chartId + " for the date " + date)
 }
 
-function userSelectedCategory(catId){
-  categorySelected = catId
-  console.log("User just selected the category" + catId)
-}
+
 
 
 
 return {
   mouseOverTitle:mouseOverTitle,
   mouseLeftTitle:mouseLeftTitle,
-  mouseMoveInChart:mouseMoveInChart,
+  mouseInChart:mouseInChart,
   mouseMoveInFrontChart:mouseMoveInFrontChart,
   mouseMoveOutOfCharts:mouseMoveOutOfCharts,
   userSelectedCategory:userSelectedCategory,
