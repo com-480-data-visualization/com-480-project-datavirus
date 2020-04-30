@@ -360,16 +360,16 @@
           this.xScale.domain(b);
           this.path.data([this.data.values]).attr("d", this.area);
           if(this.frontPath != undefined){
-          this.frontPath.data([this.data.values]).attr("d", this.area);
-        }
+            this.frontPath.data([this.data.values]).attr("d", this.area);
+          }
         }
 
         this.rescaleY = function(maxY){
           this.yScale.domain([0,maxY]);
           this.path.data([this.data.values]).attr("d", this.area);
           if(this.frontPath != undefined){
-          this.frontPath.data([this.data.values]).attr("d", this.area);
-        }
+            this.frontPath.data([this.data.values]).attr("d", this.area);
+          }
         }
       }//end of constructor
 
@@ -664,22 +664,21 @@
           App.Plot1.mouseMoveInFrontChart(indexSelected, dateSelected)
         })
 
-
-
-        let domEl = document.getElementById("front_chart_nb_"+id)
-        let xS = getXscale()
-        domEl.addEventListener("click", function(e){
-
+        path.on("click",function(e){
+          let coordinateX= d3.mouse(this)[0];
+          let dateSelected =getXscale().invert(coordinateX)
+          let id = parseInt(path.attr('id').slice(-1))
           if(id == categorySelected){
             categorySelected = null
           }else{
             categorySelected = id
           }
-          removeVerticalLines()
           App.Plot1.userSelectedCategory(categorySelected)
+          App.Plot1.mouseMoveInFrontChart(id, dateSelected)
         })
 
 
+        let domEl = document.getElementById("front_chart_nb_"+id)
         domEl.addEventListener("mousemove",function(e){
           if(id != lastIndexHighlighted && categorySelected == null){
             addFrontCharts(id, charts)
