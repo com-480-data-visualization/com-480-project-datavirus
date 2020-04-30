@@ -25,6 +25,8 @@
 
     let interLeavingCheckBox = document.getElementById("interLeavingXb")
     let freezeYCheckBox = document.getElementById("freezeYAxis")
+    let streamGraphXbSpan = document.getElementById("streamGraphXbSpan")
+    let streamGraphCheckBox = document.getElementById("streamGraphXb")
     //define the position of the rect that will contain the stacked graphs
 
     //load the csv file and call addElementsToStackedArea(),createSlider() when done
@@ -51,8 +53,17 @@
       adapatYScale(!e.target.checked);
     });
 
+    streamGraphCheckBox.addEventListener("change", function(e){
+      setSteamGraph(e.target.checked);
+    });
+
     function setStackSupperposed(newValue){
       stacksSupperpose = newValue
+      if(!stacksSupperpose){
+        streamGraphXbSpan.style.display = "none"
+      }else{
+          streamGraphXbSpan.style.display = "inline"
+      }
       interLeavingCheckBox.checked = !newValue;
       maxYScore = stacksSupperpose ? data.maxScoreAtTimeStamp: data.maxSingleScore
       UI.setData({
@@ -80,6 +91,14 @@
       }
     }
 
+    function setSteamGraph(futureValue){
+      streamChartWhenSupperPosed = futureValue
+      streamGraphCheckBox.checked = streamChartWhenSupperPosed
+      if(stacksSupperpose){
+        addElementsToStackedArea(data)
+      }
+    }
+
 
 
 
@@ -94,10 +113,7 @@
       }
 
       if(char == 't'){
-        streamChartWhenSupperPosed = !streamChartWhenSupperPosed
-        if(stacksSupperpose){
-          addElementsToStackedArea(data)
-        }
+        setSteamGraph(!streamChartWhenSupperPosed)
       }
     });
 
@@ -204,14 +220,9 @@
     }
 
     function heavyCompute(){
-      console.log("do calculuuus")
-
       let orderTimeStamps = model.computeTimeStampsBreaks(upperLines, data, UI.getXscale(), displayedXInterval)
-
       let chartInterLeaving = model.computeChartInterLeaving(orderTimeStamps)
-      console.log("just before rendering the UI")
       UI.addPartsOfChart(data.smallestDate.getTime(),chartInterLeaving,stacksSupperpose,data)
-      console.log("donew")
     }
 
 
@@ -267,13 +278,14 @@
     }
     let color = categorySelected == null ? "black" : UI.colorForIndex(categorySelected)
     UI.addVerticalLines([atDate.getTime()],color)
+    console.log("Should display info for date "+atDate + " and category "+categorySelected)
   }
 
   function mouseMoveInFrontChart(chartId, atDate){
     //  UI.colorForIndex(chartId)
     let color = categorySelected == null ? "black" : UI.colorForIndex(categorySelected)
     UI.addVerticalLines([atDate.getTime()],color)
-    //console.log("Mouse move in Front "+ chartId + " for the date " + atDate)
+    console.log("Should display info for date "+atDate + " and category "+categorySelected)
   }
 
   function mouseClickedInPartOfChart(chartId){
