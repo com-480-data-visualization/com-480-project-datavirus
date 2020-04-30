@@ -4,6 +4,8 @@
   margin-left:50px;
   margin-right:50px;
   padding: 20px;
+  background-color: #262A2C;
+  color: #B1B1B1  ;
 }
 
 #plot1_container{
@@ -79,14 +81,21 @@ to {
   fill:none
 }*/
 
+.xAxis, .xAxis path, .xAxis .tick line{
+  stroke:#B1B1B1 ;
+}
 
-
-
-
-
-
+.yAxis, .yAxis path, .yAxis .tick line{
+  stroke:#B1B1B1 ;
+}
 
 /*------------AXIS OF THE TIME SLIDER-------------------*/
+.sliderBox g path, .sliderBox g line, .sliderBox g tick, .sliderBox .outerTick, .sliderBox text {
+stroke:#B1B1B1 ;
+}
+
+
+
 /*The line that divides the context from the above graph*/
 /*g.context>line{
   stroke: blue;

@@ -752,11 +752,11 @@
 
 
     function colorForIndex(index){
-      var colors = ["#32a852","#2b90ab","#d1d138","#fa8350","#b32929","#493782","#968a60"]
+      var colors = ["#00A749 ","#3097E9","#8328E1","#D3143C","#FD7D06","#DCED0D","#15E500 "]
       return colors[index%colors.length]
     }
     function colorForFadingIndex(index){
-      var colors = ["#bcf5cc","#bce9f5","#fafac5","#fad5c5","#f0b9b9","#c4b6f2","#ede3c0"]
+      var colors = ["#2E5763","#234B70","#502F5D","#5D2F2F","#5D4D2F","#5B5D2F","#1E5B18"]
       return colors[index%colors.length]
     }
 
