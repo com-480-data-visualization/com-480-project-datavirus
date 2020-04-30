@@ -61,18 +61,18 @@ To the extent of our knowledge, little is known about *what content* has prosper
 
 **Some ideas:**
 - [Stacked area in D3](https://www.d3-graph-gallery.com/stackedarea.html): The main way of representing the evolution of categories with time
-- [Ridgeline in D3](https://www.d3-graph-gallery.com/ridgeline.html): Maybe an idea to show the difference of some distributions per year
 - [Interactivity in D3](https://www.d3-graph-gallery.com/interactivity.html): As one of the main concern is interactivity, how to add it to D3. We also know that we will need to look into the `brush` effect to zoom in.
-
-
-### Questions to the reviewer
-
-- Do you have suggestions on how to handle large data in D3.js? It seems rather unrealistic to load all the dataframe in memory in a browser.
 
 
 ## Milestone 2 (Friday 1st May, 5pm)
 
 **10% of the final grade**
+
+### Report
+Please check our [Milestone 2 page](https://tvaucher.github.io/youtube-viz/milestone-2/) to get a presentation of the state of the project.
+
+### Prototype
+We have an early prototype online on our [Main page](https://tvaucher.github.io/youtube-viz/), please check it out!
 
 
 ## Milestone 3 (Thursday 28th May, 5pm)
