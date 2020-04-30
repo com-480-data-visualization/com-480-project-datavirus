@@ -16,7 +16,7 @@
     //'curveMonotoneX','curveLinear','curveBasis', 'curveCardinal', 'curveStepBefore',...
 
     const stackedAreaMargin = {
-      top: 30,
+      top: 0,
       left: 70,
       width: svgWidth*0.9,
       height: 350
@@ -40,6 +40,7 @@
     let frontChartsPaths = null
     let lastIndexHighlighted = null
     let categorySelected = null
+    let partOfChartContainer = null
 
     //the revelant data needed
     let smallestDate = null
@@ -75,6 +76,10 @@
       .attr("width", svgWidth)
       .attr("height", svgHeight);
 
+      svg.on("mouseout", function(){
+        removeVerticalLines()
+      });
+
       svg.append("clipPath")
       .attr("id", "clipForStackedArea")
       .append("rect")
@@ -96,13 +101,13 @@
 
       //file the stackedAreaBorderLines with the 4 lines:
       //top
-      stackedAreaBorderLines.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", stackedAreaMargin.width) .attr("y2", 0).attr("class", "stackedAreaBorder");
+      /*stackedAreaBorderLines.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", stackedAreaMargin.width) .attr("y2", 0).attr("class", "stackedAreaBorder");
       //bottom
       stackedAreaBorderLines.append("line") .attr("x1", 0) .attr("y1", stackedAreaMargin.height).attr("x2", stackedAreaMargin.width) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
       //left
       stackedAreaBorderLines.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", 0) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
       //right
-      stackedAreaBorderLines.append("line") .attr("x1", stackedAreaMargin.width) .attr("y1", 0).attr("x2", stackedAreaMargin.width) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
+      stackedAreaBorderLines.append("line") .attr("x1", stackedAreaMargin.width) .attr("y1", 0).attr("x2", stackedAreaMargin.width) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");*/
 
 
       svg.on("mousemove", function() {
@@ -222,7 +227,7 @@
       }
 
       //Now we do the brush
-      const minYBrushable = (contextHeight-selectedRectHeight)/2
+      const minYBrushable = 0//;(contextHeight-selectedRectHeight)/2
       const maxYBrushable = (contextHeight+selectedRectHeight)/2
       const minXBrushable = contextXScale(smallestDate) + (svgWidth -sliderWidth)/2
       const maxXBrushable = contextXScale(biggestDate) + (svgWidth -sliderWidth)/2
@@ -539,11 +544,24 @@
 
     function removePartsOfChart(){
       stackedArea.select(".chartFrames").remove()
+      partOfChartContainer = null
+    }
+
+    function hideFrameContainer(){
+      if(partOfChartContainer != null){
+        partOfChartContainer.attr("opacity",0)
+      }
+    }
+
+    function showFrameContainer(){
+      if(partOfChartContainer != null){
+        partOfChartContainer.attr("opacity",1)
+      }
     }
 
     function addPartsOfChart(leftTimeBorder,orderTimeStamps,stacksSupperpose,data){
       removePartsOfChart()
-      let framesContainer = stackedArea.append("g")
+       partOfChartContainer = stackedArea.append("g")
       .attr("class", "chartFrames")
 
       orderTimeStamps.forEach((interleavings,n)=>{
@@ -555,7 +573,7 @@
           let widthX = getXscale()(endingBorder)-getXscale()(startingBorder)
           if(widthX >=1.5){
 
-          framesContainer.append("clipPath")
+          partOfChartContainer.append("clipPath")
           .attr("id", "clip_for_frame_"+n+"_"+i)
           .append("rect")
           .attr("x", getXscale()(startingBorder))
@@ -573,15 +591,20 @@
           })
 
           //add the area
-          framesContainer.append("path")
+          partOfChartContainer.append("path")
           .data([newIncompleteChart.data.values])
           .attr("class", "partOfchart")
           .attr("d", newIncompleteChart.area)
           .attr("fill", colorForIndex(newIncompleteChart.id))
           .attr("clip-path", "url(#clip_for_frame_"+n+"_"+i+")")
           .attr("id","partOfChart_"+n+"_"+i)
-          .on("mousemove", function(e){
-            App.Plot1.mouseInPartOfChart(interleaving[0], null)
+          .on("click", function(e){
+            if(interleaving[0] == categorySelected){
+              categorySelected = null
+            }else{
+              categorySelected = interleaving[0]
+            }
+            App.Plot1.mouseClickedInPartOfChart(categorySelected)
           })
         }
           startingBorder = endingBorder
@@ -765,6 +788,8 @@
       addVerticalLines:addVerticalLines,
       colorForIndex:colorForIndex,
       setCategorySelectedToNull:setCategorySelectedToNull,
+      showFrameContainer:showFrameContainer,
+      hideFrameContainer: hideFrameContainer,
 
     }
   })();

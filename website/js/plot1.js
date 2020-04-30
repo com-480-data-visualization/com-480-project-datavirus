@@ -14,7 +14,7 @@
     let maxYScore = null
     let displayedXInterval = null
 
-    let stacksSupperpose = false
+    let stacksSupperpose = true
     let streamChartWhenSupperPosed = true
     let stackClever = true
     let adapativeYScale = true
@@ -190,74 +190,85 @@
     }
 
 
-function mouseOverTitle(id){
-  if(categorySelected == null){
-    console.log("Mouse over title " + data.categories[id])
-    UI.addFrontCharts(id,charts)
+    function mouseOverTitle(id){
+      if(categorySelected == null){
+        //console.log("Mouse over title " + data.categories[id])
+        UI.addFrontCharts(id,charts)
+        UI.hideFrameContainer()
+        UI.removeLines()
+      }
+    }
+
+    function mouseLeftTitle(id){
+      if(categorySelected == null){
+        //console.log("Mouse left title " + data.categories[id])
+        UI.removeFrontCharts()
+        UI.showFrameContainer()
+        UI.renderUpperLines(upperLines)
+      }
+    }
+
+    function userSelectedCategory(catId){
+      categorySelected = catId
+      if(catId == null){
+        UI.makeTitlesLookNormal()
+        if(!stacksSupperpose){
+          UI.removeFrontCharts()
+          UI.showFrameContainer()
+          UI.renderUpperLines(upperLines)
+        }
+      }else{
+        UI.addFrontCharts(catId,charts)
+        UI.updateTitles(catId, catId)
+      }
+
+      //console.log("User just selected the category" + catId)
+    }
+
+    function mouseInChart(chartId){
+      if(categorySelected == null){
+        //console.log("Mouse went inside chart "+ chartId)
+        UI.addFrontCharts(chartId,charts)
+        /*if(date != undefined){
+        UI.addVerticalLines([atDate.getTime()],"black")
+      }*/
+    }
   }
-}
-
-function mouseLeftTitle(id){
-  if(categorySelected == null){
-    console.log("Mouse left title " + data.categories[id])
-    UI.removeFrontCharts()
-  }
-}
-
-function userSelectedCategory(catId){
-  categorySelected = catId
-  if(catId == null){
-    UI.removeFrontCharts()
-    UI.makeTitlesLookNormal()
-  }else{
-    UI.addFrontCharts(catId,charts)
-    UI.updateTitles(catId, catId)
+  function mouseMoveOutOfCharts(atDate){
+    //console.log("Mouse move out of the charts at Date"+atDate)
+    if(categorySelected == null){
+      UI.removeFrontCharts()
+      UI.makeTitlesLookNormal()
+    }
+    let color = categorySelected == null ? "black" : UI.colorForIndex(categorySelected)
+    UI.addVerticalLines([atDate.getTime()],color)
   }
 
-  console.log("User just selected the category" + catId)
-}
-
-function mouseInChart(chartId){
-  if(categorySelected == null){
-    console.log("Mouse went inside chart "+ chartId)
-    UI.addFrontCharts(chartId,charts)
-    /*if(date != undefined){
-      UI.addVerticalLines([atDate.getTime()],"black")
-    }*/
+  function mouseMoveInFrontChart(chartId, atDate){
+    //  UI.colorForIndex(chartId)
+    let color = categorySelected == null ? "black" : UI.colorForIndex(categorySelected)
+    UI.addVerticalLines([atDate.getTime()],color)
+    //console.log("Mouse move in Front "+ chartId + " for the date " + atDate)
   }
-}
-function mouseMoveOutOfCharts(atDate){
-  console.log("Mouse move out of the charts at Date"+atDate)
-  if(categorySelected == null){
-    UI.removeFrontCharts()
-    UI.makeTitlesLookNormal()
+
+  function mouseClickedInPartOfChart(chartId){
+    userSelectedCategory(chartId)
+    UI.hideFrameContainer()
+    UI.removeLines()
+    //console.log("Mouse move in Part Of chart "+ chartId + " for the date " + atDate)
+
   }
-  let color = categorySelected == null ? "black" : UI.colorForIndex(categorySelected)
-  UI.addVerticalLines([atDate.getTime()],color)
-}
-
-function mouseMoveInFrontChart(chartId, atDate){
-//  UI.colorForIndex(chartId)
-  let color = categorySelected == null ? "black" : UI.colorForIndex(categorySelected)
-  UI.addVerticalLines([atDate.getTime()],color)
-  console.log("Mouse move in Front "+ chartId + " for the date " + atDate)
-}
-
-function mouseInPartOfChart(chartId, atDate){
-  console.log("Mouse move in Part Of chart "+ chartId + " for the date " + atDate)
-
-}
 
 
-return {
-  mouseOverTitle:mouseOverTitle,
-  mouseLeftTitle:mouseLeftTitle,
-  mouseInChart:mouseInChart,
-  mouseMoveInFrontChart:mouseMoveInFrontChart,
-  mouseMoveOutOfCharts:mouseMoveOutOfCharts,
-  userSelectedCategory:userSelectedCategory,
-  mouseInPartOfChart:mouseInPartOfChart,
-}
+  return {
+    mouseOverTitle:mouseOverTitle,
+    mouseLeftTitle:mouseLeftTitle,
+    mouseInChart:mouseInChart,
+    mouseMoveInFrontChart:mouseMoveInFrontChart,
+    mouseMoveOutOfCharts:mouseMoveOutOfCharts,
+    userSelectedCategory:userSelectedCategory,
+    mouseClickedInPartOfChart:mouseClickedInPartOfChart,
+  }
 })();
 App.Plot1 = Plot1;
 window.App = App;

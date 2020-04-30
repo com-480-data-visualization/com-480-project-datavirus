@@ -1,13 +1,17 @@
 
+.plot1{
+  border: 1px solid black;
+  margin-left:50px;
+  margin-right:50px;
+  padding: 20px;
+}
+
 #plot1_container{
-  border: 1px solid blue;
-  margin: 5px;
-  height: 500px;
+  /*border: 1px solid blue;*/
+  height: 430px;
 }
 
 #plot1_title_container{
-  border: 1px solid blue;
-  margin: 5px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -17,8 +21,9 @@
 }
 
 #plot1_title_container div{
-  margin-left: 40px;
+  margin-left: 20px;
   padding: 5px;
+  text-decoration: underline;
 }
 
 .stackedAreaBorder{
@@ -36,7 +41,7 @@
 
 
 .sliderBox .topLine{
-  stroke: black;
+  /*stroke: black;*/
   stroke-opacity: 1;
   stroke-width:1;
   fill:none
