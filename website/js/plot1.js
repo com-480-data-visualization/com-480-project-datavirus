@@ -22,6 +22,9 @@
 
     let data = null
     let categorySelected = null
+
+    let interLeavingCheckBox = document.getElementById("interLeavingXb")
+    let freezeYCheckBox = document.getElementById("freezeYAxis")
     //define the position of the rect that will contain the stacked graphs
 
     //load the csv file and call addElementsToStackedArea(),createSlider() when done
@@ -40,32 +43,54 @@
     });
 
 
+    interLeavingCheckBox.addEventListener("change", function(e){
+      setStackSupperposed(!e.target.checked);
+    });
+
+    freezeYCheckBox.addEventListener("change", function(e){
+      adapatYScale(!e.target.checked);
+    });
+
+    function setStackSupperposed(newValue){
+      stacksSupperpose = newValue
+      interLeavingCheckBox.checked = !newValue;
+      maxYScore = stacksSupperpose ? data.maxScoreAtTimeStamp: data.maxSingleScore
+      UI.setData({
+        data:data,
+        maxYscore:maxYScore,
+        onBrush: userBrushed,
+      })
+      UI.drawYAxis()
+
+      if(adapativeYScale){
+        adaptYScale(displayedXInterval)
+      }
+      addElementsToStackedArea(data)
+    }
+
+    function adapatYScale(shouldAdapt){
+      adapativeYScale = shouldAdapt
+      freezeYCheckBox.checked = !shouldAdapt;
+      if(adapativeYScale){
+        adaptYScale(displayedXInterval)
+        if(!stacksSupperpose){
+          heavyCompute()
+          UI.renderUpperLines(upperLines)
+        }
+      }
+    }
+
+
+
+
     document.addEventListener("keypress", function(e){
       const char = String.fromCharCode(e.charCode);
       if(char == 's'){
-        stacksSupperpose = !stacksSupperpose
-        maxYScore = stacksSupperpose ? data.maxScoreAtTimeStamp: data.maxSingleScore
-        UI.setData({
-          data:data,
-          maxYscore:maxYScore,
-          onBrush: userBrushed,
-        })
-        UI.drawYAxis()
-
-        if(adapativeYScale){
-          adaptYScale(displayedXInterval)
-        }
-        addElementsToStackedArea(data)
+        setStackSupperposed(!stacksSupperpose)
       }
+
       if(char == 'y'){
-        adapativeYScale = !adapativeYScale
-        if(adapativeYScale){
-          adaptYScale(displayedXInterval)
-          if(!stacksSupperpose){
-            heavyCompute()
-            UI.renderUpperLines(upperLines)
-          }
-        }
+        adapatYScale(!adapativeYScale)
       }
 
       if(char == 't'){

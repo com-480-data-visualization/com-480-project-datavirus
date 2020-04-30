@@ -256,7 +256,6 @@
 
 
 
-
       // Brush handler. Get time-range from a brush and pass it to the charts.
       function cleanBrushInterval() {
 
@@ -319,6 +318,8 @@
         onBrush()
       }
     }//end of createSlider
+
+
 
 
 
