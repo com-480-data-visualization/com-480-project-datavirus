@@ -213,6 +213,10 @@
         heavyComputationTimer = window.setTimeout(function(){
           heavyCompute()
           UI.renderUpperLines(upperLines)
+          if(categorySelected != null){
+            console.log("öJöLJöLJöLJöLJöLJöLJöLJöL")
+            UI.addFrontCharts(categorySelected,charts)
+          }
         }, 250);
 
       }
