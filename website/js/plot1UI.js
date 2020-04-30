@@ -752,7 +752,7 @@
 
 
     function colorForIndex(index){
-      var colors = ["#00A749 ","#3097E9","#8328E1","#D3143C","#FD7D06","#DCED0D","#15E500 "]
+      var colors = ["#0DEDBA  ","#3097E9","#8328E1","#D3143C","#FD7D06","#DCED0D","#15E500 "]
       return colors[index%colors.length]
     }
     function colorForFadingIndex(index){
