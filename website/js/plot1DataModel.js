@@ -165,7 +165,6 @@
     }
 
     function computeChartInterLeaving(timeStampsBreaks){
-      console.log(timeStampsBreaks)
       //order until, order until, order until
       let numberOfCat = timeStampsBreaks[0][0].length
       let chartInterLeaving = []
@@ -182,8 +181,7 @@
         chartInterLeavingForThisNumber.push([currentElem,timeStampsBreaks[timeStampsBreaks.length-1][1]])
         chartInterLeaving.push(chartInterLeavingForThisNumber)
       }
-      console.log(new Date(timeStampsBreaks[timeStampsBreaks.length-1][1]))
-      console.log(chartInterLeaving)
+      return chartInterLeaving
     }
 
 

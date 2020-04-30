@@ -529,6 +529,53 @@
 
     function addPartsOfChart(leftTimeBorder,orderTimeStamps,stacksSupperpose,data){
       removePartsOfChart()
+      let framesContainer = stackedArea.append("g")
+      .attr("class", "chartFrames")
+
+      orderTimeStamps.forEach((interleavings,n)=>{
+
+        let startingBorder = leftTimeBorder
+        interleavings.forEach((interleaving,i)=>{
+          let endingBorder = interleaving[1]
+          framesContainer.append("clipPath")
+          .attr("id", "clip_for_frame_"+n+"_"+i)
+          .append("rect")
+          .attr("x", getXscale()(startingBorder))
+          .attr("y", 0)
+          .attr("height", stackedAreaMargin.height)
+          .attr("width", getXscale()(endingBorder)-getXscale()(startingBorder))
+
+
+          let newIncompleteChart = createChart({
+            data: data,
+            id: interleaving[0],
+            stacksSupperpose:stacksSupperpose,
+            xScale:getXscale(),
+            yScale:getYscale(),
+          })
+
+          //add the area
+          framesContainer.append("path")
+          .data([newIncompleteChart.data.values])
+          .attr("class", "partOfchart")
+          .attr("d", newIncompleteChart.area)
+          .attr("fill", colorForIndex(newIncompleteChart.id))
+          .attr("clip-path", "url(#clip_for_frame_"+n+"_"+i+")")
+          .attr("id","partOfChart_"+n+"_"+i)
+
+          startingBorder = endingBorder
+
+        })
+
+
+      })
+
+
+
+    }
+
+    /*function addPartsOfChart(leftTimeBorder,orderTimeStamps,stacksSupperpose,data){
+      removePartsOfChart()
 
       let framesContainer = stackedArea.append("g")
       .attr("class", "chartFrames")
@@ -555,9 +602,6 @@
             yScale:getYscale(),
           })
 
-          //console.log(newIncompleteChart)
-
-
           //add the area
           framesContainer.append("path")
           .data([newIncompleteChart.data.values])
@@ -566,21 +610,13 @@
           .attr("fill", colorForIndex(newIncompleteChart.id))
           .attr("clip-path", "url(#clip_for_frame_"+i+")")
           .attr("id","partOfChart_"+i+"_"+j)
-          //.attr("opacity","0")
-          //.attr("stroke", "black")//colorForIndex(newIncompleteChart.id))
-          //.attr("stroke-width", 10)
-
-          //let newElem = document.getElementById("partOfChart_"+i+"_"+j)
-          //newElem.classList.add("animOpacity")
-
-
         })
         leftTimeBorder = rightTimeBorder
       })
 
 
 
-    }
+    }*/
 
 
 

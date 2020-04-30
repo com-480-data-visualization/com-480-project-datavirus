@@ -24,8 +24,8 @@
     //define the position of the rect that will contain the stacked graphs
 
     //load the csv file and call addElementsToStackedArea(),createSlider() when done
-    d3.csv("/data/plot1data2.csv",function(d) {
-    //d3.csv("/data/video_count/count_week.csv",function(d) {
+    //d3.csv("/data/plot1data2.csv",function(d) {
+    d3.csv("/data/video_count/count_week.csv",function(d) {
       data = model.prepareData(d)
       maxYScore = stacksSupperpose ? data.maxScoreAtTimeStamp: data.maxSingleScore
       displayedXInterval = [data.smallestDate, data.biggestDate]
@@ -172,7 +172,7 @@
 
       let chartInterLeaving = model.computeChartInterLeaving(orderTimeStamps)
 
-      UI.addPartsOfChart(data.smallestDate.getTime(),orderTimeStamps,stacksSupperpose,data)
+      UI.addPartsOfChart(data.smallestDate.getTime(),chartInterLeaving,stacksSupperpose,data)
       console.log("donew")
     }
 
