@@ -80,8 +80,7 @@
       let orderBeforeChanges = []
       let orderAfterChanges = []
 
-      let startingOrder = valuesSorted[0].map(x=>{return x[1]})
-      let previousOrder = startingOrder
+      let previousOrder = valuesSorted[0].map(x=>{return x[1]})
       for(let i = 1; i < valuesSorted.length; i++){
         let actualOrder = valuesSorted[i].map(x=>{return x[1]})
 
@@ -98,7 +97,6 @@
         indexesBeforeChanges:indexesBeforeChanges,
         orderBeforeChanges:orderBeforeChanges,
         orderAfterChanges:orderAfterChanges,
-        startingOrder:startingOrder,
       }
     }
 
@@ -107,18 +105,19 @@
     function computeTimeStampsBreaks(lines,data,xScale,dateDisplayedInterval){
 
       //how much pixels separate two values on screen for the actual scale
-      let pixelIntervalBetweenDates = xScale(data.values[1].date) - xScale(data.values[0].date)
-      let timeIntervalBetweenDates = data.values[1].date.getTime() - data.values[0].date.getTime()
-      let nbOfInterval = Math.max(2,Math.ceil(pixelIntervalBetweenDates/pixelStepWidth))
+      let pixelIntervalBetween2Dates = xScale(data.values[1].date) - xScale(data.values[0].date)
+      let timeIntervalBetween2Dates = data.values[1].date.getTime() - data.values[0].date.getTime()
+      let nbOfInterval = Math.max(2,Math.ceil(pixelIntervalBetween2Dates/pixelStepWidth))
 
-      let realStepWidth = timeIntervalBetweenDates/nbOfInterval
-      let delta_x = pixelIntervalBetweenDates/nbOfInterval
+      //how big is an interval temporary
+      let realStepWidth = timeIntervalBetween2Dates/nbOfInterval
+      //how many pixel represent an interval
+      let delta_x = pixelIntervalBetween2Dates/nbOfInterval
 
       const smallestTimeStamp = dateDisplayedInterval[0].getTime()
       const largestTimeStamp = dateDisplayedInterval[1].getTime()
 
-
-      let actualOrder = data.criticalIndexes.startingOrder
+      let actualOrder = data.criticalIndexes.orderBeforeChanges[0]
       let orderUntil = []
       let afterMinDate = false
       let beforeMaxDate = true
@@ -136,7 +135,8 @@
               beforeMaxDate = false
             }
             if(afterMinDate && beforeMaxDate){
-              let orderAtT = getChartOrderNearTimeStamp(lines, newTimeStamp,delta_x,xScale)
+              let orderAtT = nbOfInterval == 2 ? expectedFinalOrder :getChartOrderNearTimeStamp(lines, newTimeStamp,delta_x,xScale)
+
               if(!arraysEqual(orderAtT,actualOrder)){
                 orderUntil.push([actualOrder, newTimeStamp])
                 actualOrder = orderAtT
@@ -164,6 +164,28 @@
       return orderUntil
     }
 
+    function computeChartInterLeaving(timeStampsBreaks){
+      console.log(timeStampsBreaks)
+      //order until, order until, order until
+      let numberOfCat = timeStampsBreaks[0][0].length
+      let chartInterLeaving = []
+      for(var n = 0; n<numberOfCat; n++){
+        let chartInterLeavingForThisNumber = []
+        let currentElem = timeStampsBreaks[0][0][n]
+        for(var i = 1; i<timeStampsBreaks.length; i++){
+          let nextElement = timeStampsBreaks[i][0][n]
+          if(nextElement!= currentElem){
+            chartInterLeavingForThisNumber.push([currentElem,timeStampsBreaks[i-1][1]])
+            currentElem = nextElement
+          }
+        }
+        chartInterLeavingForThisNumber.push([currentElem,timeStampsBreaks[timeStampsBreaks.length-1][1]])
+        chartInterLeaving.push(chartInterLeavingForThisNumber)
+      }
+      console.log(new Date(timeStampsBreaks[timeStampsBreaks.length-1][1]))
+      console.log(chartInterLeaving)
+    }
+
 
 
     function arraysEqual(a, b) {
@@ -179,8 +201,6 @@
 
 
     function getChartOrderNearTimeStamp(lines, timeStamp, delta_x, xScale){
-
-
       let toSort = []
       let x = xScale(timeStamp)
       lines.forEach(line=>{
@@ -217,8 +237,6 @@
     }
 
     function getMaxValuesBetween(data, startDate, endDate){
-
-
       let firstIndex = 0
       let lastIndex = 0
 
@@ -252,7 +270,6 @@
         maxSingleScore:maxSingleScore,
         maxScoreAtTimeStamp:maxScoreAtTimeStamp,
       }
-
     }
 
 
@@ -261,6 +278,7 @@
     return {
       prepareData:prepareData,
       computeTimeStampsBreaks:computeTimeStampsBreaks,
+      computeChartInterLeaving:computeChartInterLeaving,
       getMaxValuesBetween:getMaxValuesBetween,
     }
   })();

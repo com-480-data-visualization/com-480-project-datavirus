@@ -14,7 +14,7 @@
     let maxYScore = null
     let displayedXInterval = null
 
-    let stacksSupperpose = true
+    let stacksSupperpose = false
     let stackClever = true
     let adapativeYScale = true
 
@@ -24,8 +24,8 @@
     //define the position of the rect that will contain the stacked graphs
 
     //load the csv file and call addElementsToStackedArea(),createSlider() when done
-    //d3.csv("/data/plot1data.csv",function(d) {
-    d3.csv("/data/video_count/count_week.csv",function(d) {
+    d3.csv("/data/plot1data2.csv",function(d) {
+    //d3.csv("/data/video_count/count_week.csv",function(d) {
       data = model.prepareData(d)
       maxYScore = stacksSupperpose ? data.maxScoreAtTimeStamp: data.maxSingleScore
       displayedXInterval = [data.smallestDate, data.biggestDate]
@@ -168,33 +168,13 @@
     function heavyCompute(){
       console.log("do calculuuus")
 
-      let orderTimeStamps = model.computeTimeStampsBreaks(upperLines, data, UI.getXscale(),[data.smallestDate, data.biggestDate])
+      let orderTimeStamps = model.computeTimeStampsBreaks(upperLines, data, UI.getXscale(), displayedXInterval)
+
+      let chartInterLeaving = model.computeChartInterLeaving(orderTimeStamps)
 
       UI.addPartsOfChart(data.smallestDate.getTime(),orderTimeStamps,stacksSupperpose,data)
       console.log("donew")
     }
-
-
-    /*function addPartsOfChart(){
-    window.clearInterval(heavyComputationTimer);
-
-    if(data.criticalIndexes != undefined){
-
-    //  console.log(leftTimeBorder)
-
-    stackedArea.select(".chartFrames").remove()
-    heavyComputationTimer = window.setTimeout(function(){
-    console.log("do calculuuus")
-    heavyCompute()
-  }, 1000);
-
-  //heavyComputationTimer = window.setInterval(heavyCompute, 1000);
-
-  //pour supprimer l'action qui se répète
-
-
-}
-}*/
 
 
 function mouseOverTitle(id){
