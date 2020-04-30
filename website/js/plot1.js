@@ -15,6 +15,7 @@
     let displayedXInterval = null
 
     let stacksSupperpose = false
+    let streamChartWhenSupperPosed = true
     let stackClever = true
     let adapativeYScale = true
 
@@ -66,6 +67,13 @@
           }
         }
       }
+
+      if(char == 't'){
+        streamChartWhenSupperPosed = !streamChartWhenSupperPosed
+        if(stacksSupperpose){
+          addElementsToStackedArea(data)
+        }
+      }
     });
 
 
@@ -77,6 +85,7 @@
           data: data,
           id: i,
           stacksSupperpose:stacksSupperpose,
+          streamChartWhenSupperPosed:streamChartWhenSupperPosed,
         }));
       }
 
@@ -94,6 +103,10 @@
       UI.removeCharts()
       UI.removeLines()
       UI.removePartsOfChart()
+      UI.removeFrontCharts()
+      UI.setCategorySelectedToNull()
+      categorySelected = null
+      UI.makeTitlesLookNormal()
 
       if(stacksSupperpose){
         UI.renderCharts(charts,true)
@@ -152,14 +165,14 @@
       UI.removePartsOfChart()
       if(!stacksSupperpose && stackClever){
         UI.removePartsOfChart()
-        UI.removeLines()
+        //UI.removeLines()
         for (var i = 0; i < upperLines.length; i++) {
           upperLines[i].showOnly(b);
         }
         heavyComputationTimer = window.setTimeout(function(){
           heavyCompute()
           UI.renderUpperLines(upperLines)
-        }, 4000);
+        }, 250);
 
       }
       //addPartsOfChart()
@@ -171,7 +184,7 @@
       let orderTimeStamps = model.computeTimeStampsBreaks(upperLines, data, UI.getXscale(), displayedXInterval)
 
       let chartInterLeaving = model.computeChartInterLeaving(orderTimeStamps)
-
+      console.log("just before rendering the UI")
       UI.addPartsOfChart(data.smallestDate.getTime(),chartInterLeaving,stacksSupperpose,data)
       console.log("donew")
     }
@@ -208,6 +221,9 @@ function mouseInChart(chartId){
   if(categorySelected == null){
     console.log("Mouse went inside chart "+ chartId)
     UI.addFrontCharts(chartId,charts)
+    /*if(date != undefined){
+      UI.addVerticalLines([atDate.getTime()],"black")
+    }*/
   }
 }
 function mouseMoveOutOfCharts(atDate){
@@ -227,6 +243,11 @@ function mouseMoveInFrontChart(chartId, atDate){
   console.log("Mouse move in Front "+ chartId + " for the date " + atDate)
 }
 
+function mouseInPartOfChart(chartId, atDate){
+  console.log("Mouse move in Part Of chart "+ chartId + " for the date " + atDate)
+
+}
+
 
 return {
   mouseOverTitle:mouseOverTitle,
@@ -235,7 +256,7 @@ return {
   mouseMoveInFrontChart:mouseMoveInFrontChart,
   mouseMoveOutOfCharts:mouseMoveOutOfCharts,
   userSelectedCategory:userSelectedCategory,
-  //  playVideo:showVideo,
+  mouseInPartOfChart:mouseInPartOfChart,
 }
 })();
 App.Plot1 = Plot1;

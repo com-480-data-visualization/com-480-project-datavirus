@@ -11,7 +11,7 @@
 
     //-------------SOME UI PARAMTER TO TUNE-------------
 
-    let minNumberOfPointInScreen = 5
+    let minNumberOfPointInScreen = 50
     let curveType = d3.curveLinear
     //'curveMonotoneX','curveLinear','curveBasis', 'curveCardinal', 'curveStepBefore',...
 
@@ -325,6 +325,7 @@
         this.xScale = getXscale()
         this.yScale = getYscale()
         const stacksSupperpose = options.stacksSupperpose
+        const streamChartWhenSupperPosed = options.streamChartWhenSupperPosed
 
         let localName = this.data.categories[this.id]
         let localId = this.id
@@ -337,10 +338,17 @@
         })
         .y0(function(d) {
           if(stacksSupperpose){
+            let toAdd = 0
+            if(streamChartWhenSupperPosed){
+              let totalSum = d.values.slice().reduce((a,b) => a + b, 0)
+              let halfHeight = yS(totalSum/2)
+              toAdd = +stackedAreaMargin.height/2-halfHeight
+            }
+
             let values = d.values.slice(0, localId)
             let previousSum = values.reduce((a,b) => a + b, 0)
 
-            return yS(previousSum)
+            return yS(previousSum) + toAdd
           }else{
             return yS(0)
           }
@@ -348,9 +356,15 @@
         }.bind(this))
         .y1(function(d) {
           if(stacksSupperpose){
+            let toAdd = 0
+            if(streamChartWhenSupperPosed){
+              let totalSum = d.values.slice().reduce((a,b) => a + b, 0)
+              let halfHeight = yS(totalSum/2)
+              toAdd = +stackedAreaMargin.height/2-halfHeight
+            }
             let values = d.values.slice(0, localId+1)
             let previousSum = values.reduce((a,b) => a + b, 0)
-            return yS(previousSum)
+            return yS(previousSum) + toAdd
           }else{
             return yS(d.values[this.id])
           }
@@ -537,13 +551,17 @@
         let startingBorder = leftTimeBorder
         interleavings.forEach((interleaving,i)=>{
           let endingBorder = interleaving[1]
+
+          let widthX = getXscale()(endingBorder)-getXscale()(startingBorder)
+          if(widthX >=1.5){
+
           framesContainer.append("clipPath")
           .attr("id", "clip_for_frame_"+n+"_"+i)
           .append("rect")
           .attr("x", getXscale()(startingBorder))
           .attr("y", 0)
           .attr("height", stackedAreaMargin.height)
-          .attr("width", getXscale()(endingBorder)-getXscale()(startingBorder))
+          .attr("width", widthX)
 
 
           let newIncompleteChart = createChart({
@@ -562,68 +580,24 @@
           .attr("fill", colorForIndex(newIncompleteChart.id))
           .attr("clip-path", "url(#clip_for_frame_"+n+"_"+i+")")
           .attr("id","partOfChart_"+n+"_"+i)
-
+          .on("mousemove", function(e){
+            App.Plot1.mouseInPartOfChart(interleaving[0], null)
+          })
+        }
           startingBorder = endingBorder
 
         })
-
-
       })
-
-
-
     }
-
-    /*function addPartsOfChart(leftTimeBorder,orderTimeStamps,stacksSupperpose,data){
-      removePartsOfChart()
-
-      let framesContainer = stackedArea.append("g")
-      .attr("class", "chartFrames")
-
-      orderTimeStamps.forEach((el,i)=>{
-
-        let order = el[0]
-        let rightTimeBorder = el[1]
-
-        framesContainer.append("clipPath")
-        .attr("id", "clip_for_frame_"+i)
-        .append("rect")
-        .attr("x", getXscale()(leftTimeBorder)-2)
-        .attr("y", 0)
-        .attr("height", stackedAreaMargin.height)
-        .attr("width", stackedAreaMargin.width)
-
-        order.forEach((chartId,j)=>{
-          let newIncompleteChart = createChart({
-            data: data,
-            id: chartId,
-            stacksSupperpose:stacksSupperpose,
-            xScale:getXscale(),
-            yScale:getYscale(),
-          })
-
-          //add the area
-          framesContainer.append("path")
-          .data([newIncompleteChart.data.values])
-          .attr("class", "partOfchart")
-          .attr("d", newIncompleteChart.area)
-          .attr("fill", colorForIndex(newIncompleteChart.id))
-          .attr("clip-path", "url(#clip_for_frame_"+i+")")
-          .attr("id","partOfChart_"+i+"_"+j)
-        })
-        leftTimeBorder = rightTimeBorder
-      })
-
-
-
-    }*/
 
 
 
     function removeFrontCharts(){
       stackedArea.select(".frontAreasContainer").remove()
       frontChartsPaths = null
-      chartsContainer.attr("opacity",1)
+      if(chartsContainer!=null){
+        chartsContainer.attr("opacity",1)
+      }
     }
 
     function makeTitlesLookNormal(){
@@ -748,6 +722,10 @@
       })
     }
 
+    function setCategorySelectedToNull(){
+      categorySelected = null
+    }
+
 
     function colorForIndex(index){
       var colors = ["#32a852","#2b90ab","#d1d138","#fa8350","#b32929","#493782","#968a60"]
@@ -786,6 +764,7 @@
       makeTitlesLookNormal:makeTitlesLookNormal,
       addVerticalLines:addVerticalLines,
       colorForIndex:colorForIndex,
+      setCategorySelectedToNull:setCategorySelectedToNull,
 
     }
   })();
