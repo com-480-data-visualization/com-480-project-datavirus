@@ -270,6 +270,27 @@
       }
     }
 
+    function getClosestIndex(forDate,data){
+      if(forDate<data.values[0].date){
+        return 0
+      }else if(forDate>data.values[data.values.length-1].date){
+        return data.values.length-1
+      }
+
+      for(var i = 0 ; i < data.values.length-1; i++){
+
+        let leftDate = data.values[i].date
+        let rightDate = data.values[i+1].date
+
+        if(leftDate <= forDate && rightDate >= forDate){
+          let intervalBetweenCurentAndPrevious = forDate.getTime() - leftDate.getTime()
+          let intervalBetweenCurentAndNext = rightDate.getTime() - forDate.getTime()
+          return intervalBetweenCurentAndPrevious < intervalBetweenCurentAndNext ? i:i+1
+        }
+
+    }
+  }
+
 
 
 
@@ -278,6 +299,7 @@
       computeTimeStampsBreaks:computeTimeStampsBreaks,
       computeChartInterLeaving:computeChartInterLeaving,
       getMaxValuesBetween:getMaxValuesBetween,
+      getClosestIndex:getClosestIndex,
     }
   })();
   App.Plot1DataModel = Plot1DataModel;

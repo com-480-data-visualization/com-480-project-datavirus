@@ -214,7 +214,6 @@
           heavyCompute()
           UI.renderUpperLines(upperLines)
           if(categorySelected != null){
-            console.log("öJöLJöLJöLJöLJöLJöLJöLJöL")
             UI.addFrontCharts(categorySelected,charts)
           }
         }, 250);
@@ -269,9 +268,6 @@
       if(categorySelected == null){
         //console.log("Mouse went inside chart "+ chartId)
         UI.addFrontCharts(chartId,charts)
-        /*if(date != undefined){
-        UI.addVerticalLines([atDate.getTime()],"black")
-      }*/
     }
   }
   function mouseMoveOutOfCharts(atDate){
@@ -280,15 +276,17 @@
       UI.removeFrontCharts()
       UI.makeTitlesLookNormal()
     }
-    let color = categorySelected == null ? "black" : UI.colorForIndex(categorySelected)
-    UI.addVerticalLines([atDate.getTime()],color)
+    let color = categorySelected == null ? "#B1B1B1" : UI.colorForIndex(categorySelected)
+    let closestIndex = model.getClosestIndex(atDate,data)
+    UI.addVerticalLines([atDate.getTime()],color, data.values[closestIndex].date)
     console.log("Should display info for date "+atDate + " and category "+categorySelected)
-  }
+    }
 
   function mouseMoveInFrontChart(chartId, atDate){
     //  UI.colorForIndex(chartId)
-    let color = categorySelected == null ? "black" : UI.colorForIndex(categorySelected)
-    UI.addVerticalLines([atDate.getTime()],color)
+    let color = categorySelected == null ? "#B1B1B1" : UI.colorForIndex(categorySelected)
+    let closestIndex = model.getClosestIndex(atDate,data)
+    UI.addVerticalLines([atDate.getTime()],color, data.values[closestIndex].date)
     console.log("Should display info for date "+atDate + " and category "+categorySelected)
   }
 
