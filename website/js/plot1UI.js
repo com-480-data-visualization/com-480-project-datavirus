@@ -18,14 +18,13 @@
 
     const stackedAreaMargin = {
       top: 20,
-      left: 70,
+      left: 95,
       width: svgWidth*0.9,
       height: 350
     }
 
     const sliderBoxPreferences = {
       height:60,
-      sliderWidth:0.9,
       tickHeight:10,
       displayNiceAxis:false,
       selectedRectHeight:50,
@@ -168,7 +167,7 @@
     function createSlider() {
       timeIntervalSelected = [smallestDate, biggestDate]
 
-      let sliderWidth = sliderBoxPreferences.sliderWidth * svgWidth
+      let sliderWidth = stackedAreaMargin.width
       let niceAxis = sliderBoxPreferences.displayNiceAxis
       let tickHeight = sliderBoxPreferences.tickHeight
       let contextHeight = sliderBoxPreferences.height
@@ -177,7 +176,7 @@
       //1)First we add the context and we draw a horizontal line so we see it well
       let silderBox = svg.append("g")
       .attr("class", "sliderBox")
-      .attr("transform", "translate(" + 0 + "," + (svgHeight - sliderBoxPreferences.height) + ")")
+      .attr("transform", "translate(" + stackedAreaMargin.left + "," + (svgHeight - sliderBoxPreferences.height) + ")")
 
       //drawing the separation line
       silderBox.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", svgWidth) .attr("y2", 0).attr("class", "topLine");
@@ -204,7 +203,7 @@
 
       //append the axis to the svg element
       silderBox.append("g")
-      .attr("transform", "translate("+(svgWidth -sliderWidth)/2+","+contextHeight/2+")")
+      .attr("transform", "translate("+0+","+contextHeight/2+")")
       .call(contextAxis)
 
       //move the ticks to position them in the middle of the horizontal line
@@ -221,7 +220,7 @@
         const outerTickSize = tickHeight * 1.5
         const yTop = (contextHeight - outerTickSize)/2
         const yBottom = (contextHeight + outerTickSize)/2
-        const xLeft = (svgWidth -sliderWidth)/2
+        const xLeft = 0
         const xRight = xLeft + sliderWidth
         silderBox.append("line") .attr("x1", xLeft) .attr("y1", yTop).attr("x2", xLeft) .attr("y2", yBottom).attr("class", "outerTick")
         silderBox.append("line") .attr("x1", xRight) .attr("y1", yTop).attr("x2", xRight) .attr("y2", yBottom).attr("class", "outerTick")

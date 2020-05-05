@@ -14,7 +14,7 @@
     let maxYScore = null
     let displayedXInterval = null
 
-    let stacksSupperpose = true
+    let stacksSupperpose = false
     let streamChartWhenSupperPosed = true
     let stackClever = true
     let adapativeYScale = true
@@ -224,14 +224,14 @@
 
     function heavyCompute(){
       let orderTimeStamps = model.computeTimeStampsBreaks(upperLines, data, UI.getXscale(), displayedXInterval)
-      //console.log("--orderTimeStamps--")
+      console.log("--orderTimeStamps--")
       var timeStampsToPrint = []
       orderTimeStamps.forEach(o=>{
         timeStampsToPrint.push([o[0], new Date(o[1])])
       })
-      //console.log(timeStampsToPrint)
+      console.log(timeStampsToPrint)
       let chartInterLeaving = model.computeChartInterLeaving(orderTimeStamps)
-      //console.log("--chartInterLeaving--")
+      console.log("--chartInterLeaving--")
       var chartsToPrint = []
       chartInterLeaving.forEach(l=>{
         var line = []
@@ -241,7 +241,7 @@
         chartsToPrint.push(line)
 
       })
-      //console.log(chartsToPrint)
+      console.log(chartsToPrint)
 
       UI.addPartsOfChart(data.smallestDate.getTime(),chartInterLeaving,stacksSupperpose,data)
     }
