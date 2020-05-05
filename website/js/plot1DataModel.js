@@ -121,7 +121,7 @@
       let orderUntil = []
       let afterMinDate = false
       let beforeMaxDate = true
-      let maxLineLength = [0,0,0,0,0,0,0,0,0,0,0,0,0]
+      let maxLineLength = getMaxLengthOfLinesToConsider(lines, delta_x)
 
       data.criticalIndexes.indexesBeforeChanges.forEach((criticalIndex,i)=>{
         let expectedFinalOrder = data.criticalIndexes.orderAfterChanges[i]
@@ -164,6 +164,41 @@
 
       return orderUntil
     }
+
+    function getMaxLengthOfLinesToConsider(lines, delta_x){
+      let toReturn = []
+      lines.forEach(l=>{
+        let path = l.upperPathElem
+        let totalLength = path.getTotalLength()
+        let startJumpFromX = 0
+        let frontJumpLength = totalLength/2
+
+
+        //let point0x = path.getPointAtLength(startJumpFromX).x
+        let i = 0
+        while(i<100 && frontJumpLength > delta_x/4){
+        let point1x = path.getPointAtLength(startJumpFromX+frontJumpLength).x
+        let point2x = path.getPointAtLength(startJumpFromX+2*frontJumpLength).x
+        if(point2x>point1x){
+          startJumpFromX += frontJumpLength
+        }else{
+          frontJumpLength /=2
+        }
+        i++
+      }
+      if(frontJumpLength > delta_x/4){
+        console.error("Did not converge")
+      }
+
+      toReturn.push(startJumpFromX)
+
+
+      })
+
+
+      return toReturn
+    }
+
 
     function computeChartInterLeaving(timeStampsBreaks){
       //order until, order until, order until
