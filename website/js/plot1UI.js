@@ -13,6 +13,7 @@
 
     let minNumberOfPointInScreen = 10
     let curveType = d3.curveLinear
+    let minVerticalBand = 3.5
     //'curveMonotoneX','curveLinear','curveBasis', 'curveCardinal', 'curveStepBefore',...
 
     const stackedAreaMargin = {
@@ -511,6 +512,15 @@
         chart.path.on("mouseover", function(e) {
           App.Plot1.mouseInChart(chart.id)
         })
+
+        chart.path.on("click", function(e) {
+          if(chart.id == categorySelected){
+            categorySelected = null
+          }else{
+            categorySelected = chart.id
+          }
+          App.Plot1.mouseClickedInPartOfChart(categorySelected)
+        })
       })
     }
 
@@ -570,9 +580,17 @@
         let startingBorder = leftTimeBorder
         interleavings.forEach((interleaving,i)=>{
           let endingBorder = interleaving[1]
+          //trick to go beyong if the next border is too small
+          if(i+1 < interleavings.length){
+            let nextEndingBorder = interleavings[i+1][1]
+            let nextWidth = getXscale()(nextEndingBorder)-getXscale()(endingBorder)
+            if(nextWidth<minVerticalBand){
+              endingBorder = nextEndingBorder
+            }
+          }
 
           let widthX = getXscale()(endingBorder)-getXscale()(startingBorder)
-          if(widthX >=0){
+          if(widthX >=minVerticalBand){
 
           partOfChartContainer.append("clipPath")
           .attr("id", "clip_for_frame_"+n+"_"+i)

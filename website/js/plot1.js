@@ -14,7 +14,7 @@
     let maxYScore = null
     let displayedXInterval = null
 
-    let stacksSupperpose = false
+    let stacksSupperpose = true
     let streamChartWhenSupperPosed = true
     let stackClever = true
     let adapativeYScale = true
@@ -31,7 +31,7 @@
 
     //load the csv file and call addElementsToStackedArea(),createSlider() when done
     //d3.csv("/data/plot1data2.csv",function(d) {
-    d3.csv("/data/score/score_weekT.csv",function(d) {
+    d3.csv("/data/score/score_week.csv",function(d) {
       data = model.prepareData(d)
       maxYScore = stacksSupperpose ? data.maxScoreAtTimeStamp: data.maxSingleScore
       displayedXInterval = [data.smallestDate, data.biggestDate]
@@ -224,14 +224,14 @@
 
     function heavyCompute(){
       let orderTimeStamps = model.computeTimeStampsBreaks(upperLines, data, UI.getXscale(), displayedXInterval)
-      console.log("--orderTimeStamps--")
+      //console.log("--orderTimeStamps--")
       var timeStampsToPrint = []
       orderTimeStamps.forEach(o=>{
         timeStampsToPrint.push([o[0], new Date(o[1])])
       })
-      console.log(timeStampsToPrint)
+      //console.log(timeStampsToPrint)
       let chartInterLeaving = model.computeChartInterLeaving(orderTimeStamps)
-      console.log("--chartInterLeaving--")
+      //console.log("--chartInterLeaving--")
       var chartsToPrint = []
       chartInterLeaving.forEach(l=>{
         var line = []
@@ -241,7 +241,7 @@
         chartsToPrint.push(line)
 
       })
-      console.log(chartsToPrint)
+      //console.log(chartsToPrint)
 
       UI.addPartsOfChart(data.smallestDate.getTime(),chartInterLeaving,stacksSupperpose,data)
     }
@@ -283,7 +283,7 @@
     }
 
     function mouseInChart(chartId){
-      if(categorySelected == null){
+      if(categorySelected == null && stacksSupperpose){
         //console.log("Mouse went inside chart "+ chartId)
         UI.addFrontCharts(chartId,charts)
     }

@@ -3,7 +3,7 @@
   var App = window.App || {};
   let Plot1DataModel = (function() {
 
-    let pixelStepWidth = 0.5
+    let pixelStepWidth = 3
 
     /**From the csv file, task is to return the data object*/
     function prepareData(csvData){
