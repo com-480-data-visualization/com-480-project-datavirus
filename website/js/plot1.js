@@ -14,7 +14,7 @@
     let maxYScore = null
     let displayedXInterval = null
 
-    let stacksSupperpose = false
+    let stacksSupperpose = true
     let streamChartWhenSupperPosed = true
     let stackClever = true
     let adapativeYScale = true
