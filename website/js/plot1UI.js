@@ -572,7 +572,7 @@
           let endingBorder = interleaving[1]
 
           let widthX = getXscale()(endingBorder)-getXscale()(startingBorder)
-          if(widthX >=1.5){
+          if(widthX >=0){
 
           partOfChartContainer.append("clipPath")
           .attr("id", "clip_for_frame_"+n+"_"+i)

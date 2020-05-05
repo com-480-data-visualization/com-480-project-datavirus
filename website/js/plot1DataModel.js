@@ -3,7 +3,7 @@
   var App = window.App || {};
   let Plot1DataModel = (function() {
 
-    let pixelStepWidth = 3
+    let pixelStepWidth = 0.5
 
     /**From the csv file, task is to return the data object*/
     function prepareData(csvData){
@@ -173,10 +173,9 @@
         let startJumpFromX = 0
         let frontJumpLength = totalLength/2
 
-
         //let point0x = path.getPointAtLength(startJumpFromX).x
         let i = 0
-        while(i<100 && frontJumpLength > delta_x/4){
+        while(i<100 && frontJumpLength >= delta_x/8){
         let point1x = path.getPointAtLength(startJumpFromX+frontJumpLength).x
         let point2x = path.getPointAtLength(startJumpFromX+2*frontJumpLength).x
         if(point2x>point1x){
@@ -186,16 +185,11 @@
         }
         i++
       }
-      if(frontJumpLength > delta_x/4){
+      if(frontJumpLength >= delta_x/8){
         console.error("Did not converge")
       }
-
       toReturn.push(startJumpFromX)
-
-
       })
-
-
       return toReturn
     }
 
@@ -269,16 +263,42 @@
         }else{
           maxX = middle
         }
+        lastMiddle = middle
         middle = (minX + maxX)/2
         middlePoint = path.getPointAtLength(middle)
         i++
-        lastMiddle = middle
       }
       if(Math.abs(x-middlePoint.x)>delta/2){
-        console.error("Did not convergeed")
+        console.error("Did not converged in "+ i + " epoch")
         console.log("Computed y at :"+ x + " for path nb "+ pathId)
         console.log("with delta : "+ delta)
         console.log("and min-max " +omin+"-"+omax)
+         middle = (omax+omin)/2
+         lastMiddle  = Number.MIN_VALUE
+         middlePoint = path.getPointAtLength(middle)
+         i = 0
+        while (Math.abs(x-middlePoint.x)>=delta/2 && i < 30 && Math.abs(lastMiddle-middle)>=delta/2) {
+          if(middlePoint.x < x){
+            minX = middle
+          }else{
+            maxX = middle
+          }
+          middle = (minX + maxX)/2
+          middlePoint = path.getPointAtLength(middle)
+          i++
+          lastMiddle = middle
+          console.log("-"+i+"-")
+          console.log(middle+"->"+middlePoint.x)
+          console.log("Target "+x)
+        }
+
+
+
+
+
+
+
+
 
       }
       return middlePoint
