@@ -121,6 +121,7 @@
       let orderUntil = []
       let afterMinDate = false
       let beforeMaxDate = true
+      let maxLineLength = [0,0,0,0,0,0,0,0,0,0,0,0,0]
 
       data.criticalIndexes.indexesBeforeChanges.forEach((criticalIndex,i)=>{
         let expectedFinalOrder = data.criticalIndexes.orderAfterChanges[i]
@@ -135,7 +136,7 @@
               beforeMaxDate = false
             }
             if(afterMinDate && beforeMaxDate){
-              let orderAtT = nbOfInterval == 2 ? expectedFinalOrder :getChartOrderNearTimeStamp(lines, newTimeStamp,delta_x,xScale)
+              let orderAtT = nbOfInterval == 2 ? expectedFinalOrder :getChartOrderNearTimeStamp(lines,maxLineLength, newTimeStamp,delta_x,xScale)
 
               if(!arraysEqual(orderAtT,actualOrder)){
                 orderUntil.push([actualOrder, newTimeStamp])
@@ -198,12 +199,13 @@
     }
 
 
-    function getChartOrderNearTimeStamp(lines, timeStamp, delta_x, xScale){
+    function getChartOrderNearTimeStamp(lines,maxLineLength, timeStamp, delta_x, xScale){
       let toSort = []
       let x = xScale(timeStamp)
-      lines.forEach(line=>{
-        let totalLength = line.upperPathElem.getTotalLength()
-        toSort.push([line.id, getPointAtX(x,delta_x,0,totalLength,line.upperPathElem).y])
+      lines.forEach((line,indice)=>{
+        //let totalLength = line.upperPathElem.getTotalLength()
+        let totalLength = maxLineLength[indice]
+        toSort.push([line.id, getPointAtX(x,delta_x,0,totalLength,line.upperPathElem, line.id).y])
       })
       toSort =  toSort.sort((a,b)=>{
         return a[1]-b[1]
@@ -213,15 +215,20 @@
       toSort.forEach(el=>{
         order.push(el[0])
       })
+      //console.log("order at timestamp "+timeStamp +"("+new Date(timeStamp)+")"+ " : "+ order)
       return order
     }
 
 
-    function getPointAtX(x,delta,minX,maxX, path){
+    function getPointAtX(x,delta,minX,maxX, path, pathId){
+      let omin = minX
+      let omax = maxX
+
       let middle = (maxX+minX)/2
+      let lastMiddle  = Number.MIN_VALUE
       let middlePoint = path.getPointAtLength(middle)
       var i = 0
-      while (Math.abs(x-middlePoint.x)>=delta/2 && i < 100) {
+      while (Math.abs(x-middlePoint.x)>=delta/2 && i < 30 && Math.abs(lastMiddle-middle)>=delta/2) {
         if(middlePoint.x < x){
           minX = middle
         }else{
@@ -230,6 +237,14 @@
         middle = (minX + maxX)/2
         middlePoint = path.getPointAtLength(middle)
         i++
+        lastMiddle = middle
+      }
+      if(Math.abs(x-middlePoint.x)>delta/2){
+        console.error("Did not convergeed")
+        console.log("Computed y at :"+ x + " for path nb "+ pathId)
+        console.log("with delta : "+ delta)
+        console.log("and min-max " +omin+"-"+omax)
+
       }
       return middlePoint
     }
