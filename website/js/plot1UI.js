@@ -13,7 +13,6 @@
 
     let minNumberOfPointInScreen = 10
     let curveType = d3.curveLinear
-    let minVerticalBand = 3.5
     //'curveMonotoneX','curveLinear','curveBasis', 'curveCardinal', 'curveStepBefore',...
 
     const stackedAreaMargin = {
@@ -574,6 +573,8 @@
        partOfChartContainer = stackedArea.append("g")
       .attr("class", "chartFrames")
 
+      let mvb = App.Plot1DataModel.pixelStepWidth()
+
       orderTimeStamps.forEach((interleavings,n)=>{
 
         let startingBorder = leftTimeBorder
@@ -583,13 +584,13 @@
           if(i+1 < interleavings.length){
             let nextEndingBorder = interleavings[i+1][1]
             let nextWidth = getXscale()(nextEndingBorder)-getXscale()(endingBorder)
-            if(nextWidth<minVerticalBand){
+            if(nextWidth<mvb){
               endingBorder = nextEndingBorder
             }
           }
 
           let widthX = getXscale()(endingBorder)-getXscale()(startingBorder)
-          if(widthX >=minVerticalBand){
+          if(widthX >=mvb){
 
           partOfChartContainer.append("clipPath")
           .attr("id", "clip_for_frame_"+n+"_"+i)

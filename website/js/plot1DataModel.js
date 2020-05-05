@@ -3,8 +3,6 @@
   var App = window.App || {};
   let Plot1DataModel = (function() {
 
-    let pixelStepWidth = 3
-
     /**From the csv file, task is to return the data object*/
     function prepareData(csvData){
       //getting all the categories
@@ -102,12 +100,30 @@
 
 
 
+    function pixelStepWidth(data, dateDisplayedInterval){
+      timeStampBetween2Values = data.values[1].date.getTime()-data.values[0].date.getTime()
+      smallestTsOnScreen = dateDisplayedInterval[0].getTime()
+      biggestTsOnscreen = dateDisplayedInterval[1].getTime()
+      return pixelStepWidth2()
+    }
+
+    let smallestTsOnScreen = null
+    let biggestTsOnscreen = null
+    let timeStampBetween2Values = null
+    function pixelStepWidth2(){
+      let timeIntervalDisplayed = biggestTsOnscreen - smallestTsOnScreen
+      let numberOfPointOnScreen = timeIntervalDisplayed/timeStampBetween2Values
+      return Math.min(3,Math.max(numberOfPointOnScreen / 30,1))
+    }
+
+
+
     function computeTimeStampsBreaks(lines,data,xScale,dateDisplayedInterval){
 
       //how much pixels separate two values on screen for the actual scale
       let pixelIntervalBetween2Dates = xScale(data.values[1].date) - xScale(data.values[0].date)
       let timeIntervalBetween2Dates = data.values[1].date.getTime() - data.values[0].date.getTime()
-      let nbOfInterval = Math.max(2,Math.ceil(pixelIntervalBetween2Dates/pixelStepWidth))
+      let nbOfInterval = Math.max(2,Math.ceil(pixelIntervalBetween2Dates/pixelStepWidth(data,dateDisplayedInterval)))
 
       //how big is an interval temporary
       let realStepWidth = timeIntervalBetween2Dates/nbOfInterval
@@ -148,7 +164,7 @@
         if(!arraysEqual(actualOrder,expectedFinalOrder) && beforeMaxDate){
           if(afterMinDate){
             //we missed something
-            orderUntil.push([actualOrder, baseTemp + (nbOfInterval-1) * realStepWidth])
+            orderUntil.push([actualOrder, baseTemp + (nbOfInterval-0) * realStepWidth])
           }
           actualOrder = expectedFinalOrder
         }
@@ -293,13 +309,6 @@
         }
 
 
-
-
-
-
-
-
-
       }
       return middlePoint
     }
@@ -370,6 +379,7 @@
       computeChartInterLeaving:computeChartInterLeaving,
       getMaxValuesBetween:getMaxValuesBetween,
       getClosestIndex:getClosestIndex,
+      pixelStepWidth:pixelStepWidth2,
     }
   })();
   App.Plot1DataModel = Plot1DataModel;
