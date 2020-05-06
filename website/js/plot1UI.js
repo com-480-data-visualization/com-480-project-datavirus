@@ -546,10 +546,7 @@
         chart.path.on("click", function(e) {
           //click inside a chart
 
-
           if(mouseDownCoordinates == null || !isADrag(d3.event.clientX, d3.event.clientY, mouseDownCoordinates.x, mouseDownCoordinates.y)){
-
-
             if(chart.id == categorySelected){
               categorySelected = null
             }else{
@@ -657,12 +654,14 @@
             .attr("clip-path", "url(#clip_for_frame_"+n+"_"+i+")")
             .attr("id","partOfChart_"+n+"_"+i)
             .on("click", function(e){
-              if(interleaving[0] == categorySelected){
-                categorySelected = null
-              }else{
-                categorySelected = interleaving[0]
+              if(mouseDownCoordinates == null || !isADrag(d3.event.clientX, d3.event.clientY, mouseDownCoordinates.x, mouseDownCoordinates.y)){
+                if(interleaving[0] == categorySelected){
+                  categorySelected = null
+                }else{
+                  categorySelected = interleaving[0]
+                }
+                App.Plot1.mouseClickedInPartOfChart(categorySelected)
               }
-              App.Plot1.mouseClickedInPartOfChart(categorySelected)
             })
           }
           startingBorder = endingBorder
@@ -758,19 +757,20 @@
         path.on("click",function(){
 
 
+          if(mouseDownCoordinates == null || !isADrag(d3.event.clientX, d3.event.clientY, mouseDownCoordinates.x, mouseDownCoordinates.y)){
 
 
-
-          let coordinateX= d3.mouse(this)[0];
-          let dateSelected =getXscale().invert(coordinateX)
-          let id = parseInt(path.attr('id').slice(-1))
-          if(id == categorySelected){
-            categorySelected = null
-          }else{
-            categorySelected = id
+            let coordinateX= d3.mouse(this)[0];
+            let dateSelected =getXscale().invert(coordinateX)
+            let id = parseInt(path.attr('id').slice(-1))
+            if(id == categorySelected){
+              categorySelected = null
+            }else{
+              categorySelected = id
+            }
+            App.Plot1.userSelectedCategory(categorySelected)
+            App.Plot1.mouseMoveInFrontChart(id, dateSelected)
           }
-          App.Plot1.userSelectedCategory(categorySelected)
-          App.Plot1.mouseMoveInFrontChart(id, dateSelected)
         })
 
 
