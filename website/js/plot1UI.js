@@ -29,7 +29,7 @@
     }
 
 
-const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaMargin.left
+    const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaMargin.left
     //------------------------------------------------
     let svg = null
     let stackedArea = null
@@ -66,10 +66,11 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
     }
 
     //some mouse magic
+    let isMouseDown = false
     let mouseDownCoordinates = null
 
     function isMovingDown(e){
-      if(mouseDownCoordinates != null){
+      if(isMouseDown){
         console.log("dragging" + e)
       }
     }
@@ -86,12 +87,16 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
 
       document.getElementById("plot1_container").addEventListener("mouseup",function(e){
         console.log("mouse up")
-        mouseDownCoordinates = null
+        isMouseDown = false
       })
 
       document.getElementById("plot1_container").addEventListener("mousedown",function(e){
         console.log("mouse down")
-        mouseDownCoordinates = e
+        mouseDownCoordinates = {
+          x:e.clientX  ,
+          y:e.clientY
+        }
+        console.log(mouseDownCoordinates)
       })
 
       document.getElementById("plot1_container").addEventListener("mousemove",function(e){
@@ -148,7 +153,7 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
           App.Plot1.mouseMoveOutOfCharts(dateSelected)
         }else{
           removeVerticalLines()
-          mouseDownCoordinates = null
+          isMouseDown = false
         }
       })
 
@@ -500,6 +505,12 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
       .call(yAxis)
     }
 
+    function isADrag(x1,y1, x2, y2){
+      let dragDistance = 5
+      let norm = Math.pow(Math.pow((x1-x2),2) + Math.pow((y1-y2),2),0.5)
+      return norm > dragDistance
+    }
+
     function renderCharts(charts, withStroke){
       removeCharts()
       chartsContainer = stackedArea.append("g")
@@ -522,7 +533,9 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
 
         let domElement = document.getElementById("chart_nb_"+chart.id)
         domElement.addEventListener("mousemove",function(e){
+          //mouse is moving in a chart
           isMovingDown(e)
+          //so the function moving outside a chart will not be called
           e.stopPropagation()
         })
 
@@ -531,13 +544,19 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
         })
 
         chart.path.on("click", function(e) {
+          //click inside a chart
 
-          if(chart.id == categorySelected){
-            categorySelected = null
-          }else{
-            categorySelected = chart.id
+
+          if(mouseDownCoordinates == null || !isADrag(d3.event.clientX, d3.event.clientY, mouseDownCoordinates.x, mouseDownCoordinates.y)){
+
+
+            if(chart.id == categorySelected){
+              categorySelected = null
+            }else{
+              categorySelected = chart.id
+            }
+            App.Plot1.mouseClickedInPartOfChart(categorySelected)
           }
-          App.Plot1.mouseClickedInPartOfChart(categorySelected)
         })
       })
     }
@@ -590,7 +609,7 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
 
     function addPartsOfChart(leftTimeBorder,orderTimeStamps,stacksSupperpose,data){
       removePartsOfChart()
-       partOfChartContainer = stackedArea.append("g")
+      partOfChartContainer = stackedArea.append("g")
       .attr("class", "chartFrames")
 
       let mvb = App.Plot1DataModel.pixelStepWidth()
@@ -612,40 +631,40 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
           let widthX = getXscale()(endingBorder)-getXscale()(startingBorder)
           if(widthX >=mvb){
 
-          partOfChartContainer.append("clipPath")
-          .attr("id", "clip_for_frame_"+n+"_"+i)
-          .append("rect")
-          .attr("x", getXscale()(startingBorder))
-          .attr("y", 0)
-          .attr("height", stackedAreaMargin.height)
-          .attr("width", widthX)
+            partOfChartContainer.append("clipPath")
+            .attr("id", "clip_for_frame_"+n+"_"+i)
+            .append("rect")
+            .attr("x", getXscale()(startingBorder))
+            .attr("y", 0)
+            .attr("height", stackedAreaMargin.height)
+            .attr("width", widthX)
 
 
-          let newIncompleteChart = createChart({
-            data: data,
-            id: interleaving[0],
-            stacksSupperpose:stacksSupperpose,
-            xScale:getXscale(),
-            yScale:getYscale(),
-          })
+            let newIncompleteChart = createChart({
+              data: data,
+              id: interleaving[0],
+              stacksSupperpose:stacksSupperpose,
+              xScale:getXscale(),
+              yScale:getYscale(),
+            })
 
-          //add the area
-          partOfChartContainer.append("path")
-          .data([newIncompleteChart.data.values])
-          .attr("class", "partOfchart")
-          .attr("d", newIncompleteChart.area)
-          .attr("fill", colorForIndex(newIncompleteChart.id))
-          .attr("clip-path", "url(#clip_for_frame_"+n+"_"+i+")")
-          .attr("id","partOfChart_"+n+"_"+i)
-          .on("click", function(e){
-            if(interleaving[0] == categorySelected){
-              categorySelected = null
-            }else{
-              categorySelected = interleaving[0]
-            }
-            App.Plot1.mouseClickedInPartOfChart(categorySelected)
-          })
-        }
+            //add the area
+            partOfChartContainer.append("path")
+            .data([newIncompleteChart.data.values])
+            .attr("class", "partOfchart")
+            .attr("d", newIncompleteChart.area)
+            .attr("fill", colorForIndex(newIncompleteChart.id))
+            .attr("clip-path", "url(#clip_for_frame_"+n+"_"+i+")")
+            .attr("id","partOfChart_"+n+"_"+i)
+            .on("click", function(e){
+              if(interleaving[0] == categorySelected){
+                categorySelected = null
+              }else{
+                categorySelected = interleaving[0]
+              }
+              App.Plot1.mouseClickedInPartOfChart(categorySelected)
+            })
+          }
           startingBorder = endingBorder
 
         })
@@ -757,10 +776,12 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
 
         let domEl = document.getElementById("front_chart_nb_"+id)
         domEl.addEventListener("mousemove",function(e){
+          //moving in front chart
           if(id != lastIndexHighlighted && categorySelected == null){
             addFrontCharts(id, charts)
           }
           isMovingDown(e)
+          //wont call moving outside a chart
           e.stopPropagation()
         })
       })
@@ -782,7 +803,7 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
       let day = ("0" + date.getDate()).slice(-2)
       let x = getXscale()(new Date(timestamp)) + stackedAreaMargin.left
       let y = stackedAreaMargin.top
-       svg.append("text")
+      svg.append("text")
       .attr("id", "currentDateDisplayed")
       .attr("transform", "translate("+x+"," +  (y-3) + ")")
       .text(day+"-"+ month  +"-"+year)
