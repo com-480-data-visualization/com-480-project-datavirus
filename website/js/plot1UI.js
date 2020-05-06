@@ -71,8 +71,17 @@
 
     function isMovingDown(e){
       if(isMouseDown){
-        console.log("dragging" + e)
+        drawSelectionRect(e)
       }
+    }
+
+    function removeSelectionRect(e){
+      let shouldZoom = e != null && isMouseDown
+      isMouseDown = false
+      console.log("SHOULD ZOOM "+shouldZoom)
+    }
+    function drawSelectionRect(e){
+      console.log("should draw toooo" + e.clientX)
     }
 
     function prepareSVGElement(){
@@ -87,7 +96,7 @@
 
       document.getElementById("plot1_container").addEventListener("mouseup",function(e){
         console.log("mouse up")
-        isMouseDown = false
+        removeSelectionRect(e)
       })
 
       document.getElementById("plot1_container").addEventListener("mousedown",function(e){
@@ -96,7 +105,7 @@
           x:e.clientX  ,
           y:e.clientY
         }
-        console.log(mouseDownCoordinates)
+        isMouseDown = true
       })
 
       document.getElementById("plot1_container").addEventListener("mousemove",function(e){
@@ -153,7 +162,7 @@
           App.Plot1.mouseMoveOutOfCharts(dateSelected)
         }else{
           removeVerticalLines()
-          isMouseDown = false
+          removeSelectionRect(null)
         }
       })
 
