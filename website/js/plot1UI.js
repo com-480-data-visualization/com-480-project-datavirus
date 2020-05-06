@@ -16,9 +16,9 @@
     //'curveMonotoneX','curveLinear','curveBasis', 'curveCardinal', 'curveStepBefore',...
 
     const stackedAreaMargin = {
-      top: 20,
+      top: 15,
       left: 95,
-      width: svgWidth*0.9,
+      right:40,
       height: 350
     }
 
@@ -30,6 +30,7 @@
     }
 
 
+const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaMargin.left
     //------------------------------------------------
     let svg = null
     let stackedArea = null
@@ -85,7 +86,7 @@
       .attr("x", 0)
       .attr("y", 0)
       .attr("height", stackedAreaMargin.height)
-      .attr("width", stackedAreaMargin.width)
+      .attr("width", stackedAreaMarginWidth)
 
       //add a container for the stacked area
       stackedArea = svg.append("g")
@@ -100,13 +101,13 @@
 
       //file the stackedAreaBorderLines with the 4 lines:
       //top
-      /*stackedAreaBorderLines.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", stackedAreaMargin.width) .attr("y2", 0).attr("class", "stackedAreaBorder");
+      stackedAreaBorderLines.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", stackedAreaMarginWidth) .attr("y2", 0).attr("class", "stackedAreaBorder");
       //bottom
-      stackedAreaBorderLines.append("line") .attr("x1", 0) .attr("y1", stackedAreaMargin.height).attr("x2", stackedAreaMargin.width) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
+      stackedAreaBorderLines.append("line") .attr("x1", 0) .attr("y1", stackedAreaMargin.height).attr("x2", stackedAreaMarginWidth) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
       //left
       stackedAreaBorderLines.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", 0) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
       //right
-      stackedAreaBorderLines.append("line") .attr("x1", stackedAreaMargin.width) .attr("y1", 0).attr("x2", stackedAreaMargin.width) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");*/
+      stackedAreaBorderLines.append("line") .attr("x1", stackedAreaMarginWidth) .attr("y1", 0).attr("x2", stackedAreaMarginWidth) .attr("y2", stackedAreaMargin.height).attr("class", "stackedAreaBorder");
 
 
       svg.on("mousemove", function() {
@@ -114,7 +115,7 @@
         let coordinateY= d3.mouse(this)[1];
         let tolerancePixel = 10
         if(coordinateX > stackedAreaMargin.left - tolerancePixel
-          && coordinateX < stackedAreaMargin.left +stackedAreaMargin.width + tolerancePixel
+          && coordinateX < stackedAreaMargin.left +stackedAreaMarginWidth + tolerancePixel
           && coordinateY > stackedAreaMargin.top - tolerancePixel
           && coordinateY < stackedAreaMargin.top +stackedAreaMargin.height + tolerancePixel
         ){
@@ -166,7 +167,7 @@
     function createSlider() {
       timeIntervalSelected = [smallestDate, biggestDate]
 
-      let sliderWidth = stackedAreaMargin.width
+      let sliderWidth = stackedAreaMarginWidth
       let niceAxis = sliderBoxPreferences.displayNiceAxis
       let tickHeight = sliderBoxPreferences.tickHeight
       let contextHeight = sliderBoxPreferences.height
@@ -448,7 +449,7 @@
 
     function getXscale(){
       return d3.scaleTime()
-      .range([0, stackedAreaMargin.width])
+      .range([0, stackedAreaMarginWidth])
       .domain(timeIntervalSelected);
     }
 
@@ -755,9 +756,10 @@
       let month = ("0" + (date.getMonth()+1)).slice(-2)
       let day = ("0" + date.getDate()).slice(-2)
       let x = getXscale()(new Date(timestamp)) + stackedAreaMargin.left
+      let y = stackedAreaMargin.top
        svg.append("text")
       .attr("id", "currentDateDisplayed")
-      .attr("transform", "translate("+x+"," +  19 + ")")
+      .attr("transform", "translate("+x+"," +  (y-3) + ")")
       .text(day+"-"+ month  +"-"+year)
       .attr("fill", color)
       .attr("text-anchor","middle")

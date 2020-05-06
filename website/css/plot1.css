@@ -1,9 +1,15 @@
 
+svg{
+  border: 1px solid red;
+}
+
 .plot1{
   border: 1px solid #B1B1B1;
   margin-left:50px;
   margin-right:50px;
-  padding: 20px;
+  padding: 10px;
+  padding-left: 10px;
+  padding-right: 0px;
   background-color: #262A2C;
   color: #B1B1B1  ;
 }
@@ -39,7 +45,7 @@ svg text::selection {
 }
 
 .stackedAreaBorder{
-  stroke: black;
+  stroke: red;
   stroke-opacity: 1;
   stroke-width:1;
   fill:none
@@ -72,27 +78,6 @@ svg text::selection {
   stroke-width:1px;
 }
 
-.animOpacity{
-animation: monAnimationEnCSS 2s;
-}
-
-@keyframes monAnimationEnCSS {
-from {
-opacity: 0;}
-
-to {
-  opacity: 1;
-}
-}
-
-
-
-/*g.stackedArea .upperPath{
-  stroke: black;
-  stroke-width:1;
-  fill:none
-}*/
-
 .xAxis, .xAxis path, .xAxis .tick line{
   stroke:#B1B1B1 ;
 }
@@ -104,63 +89,4 @@ to {
 /*------------AXIS OF THE TIME SLIDER-------------------*/
 .sliderBox g path, .sliderBox g line, .sliderBox g tick, .sliderBox .outerTick, .sliderBox text {
 stroke:#B1B1B1 ;
-}
-
-
-
-/*The line that divides the context from the above graph*/
-/*g.context>line{
-  stroke: blue;
-  stroke-opacity: 1;
-  stroke-width: 1;
-}*/
-/*The end ticks if the time interval displayed is not .nice()*/
-/*g.context .outerTick{
-  stroke: black;
-  stroke-opacity: 1;
-  stroke-width: 1;
-}*/
-
-/*horizontal axis line*/
-/*g.context g.axis path {
-	stroke-opacity: 1;
-  stroke: black;
-}*/
-
-/*vertical ticks*/
-/*g.context g.axis line {
-	stroke-opacity: 1;
-  /*stroke-width: 3;*/
-  /*stroke: black;
-}*/
-
-/*text of axis (temporal labels)*/
-/*g.context g.axis text {
-  stroke-width: 0.3;
-  stroke: black;
-  text-anchor: middle;/* middle or start or end */
-/*}
-/*------------BRUSH-------------------*/
-/*g.context g.xbrush rect.selection{
-	fill: yellow;
-  cursor: ew-resize;
-  stroke: black;
-  /*height:16px;
-  transform: translate(0px,17px)*/
-/*}
-
-g.context g.xbrush rect.handle{
-  /*cursor: ew-resize;
-  stroke: black;
-  height:16px;
-  transform: translate(0px,17px)*/
-/*}
-g.stackedArea .verticalLines{
-  stroke: black;
-  stroke-width: 1;
-}
-
-g.stackedArea .chartFrames .partOfchart{
-  stroke: black;
-  stroke-width: 1;
 }

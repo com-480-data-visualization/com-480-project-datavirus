@@ -6,45 +6,35 @@
     const model = App.Plot1DataModel
     const UI = App.Plot1UI
 
+    /*When this timer fires, it compute the chart interleaving order*/
     var heavyComputationTimer = null
 
-    //the charts that will be displayed
+    //the data from the csv file
+    let data = null
+
+    /*The graphicals elements in the chartArea*/
     let charts = [];
     let upperLines = [];
+
+    /*Some actual states about the graph*/
     let maxYScore = null
     let displayedXInterval = null
-
-    let stacksSupperpose = true
-    let streamChartWhenSupperPosed = true
-    let stackClever = true
-    let adapativeYScale = true
-
-
-    let data = null
     let categorySelected = null
 
+
+
+//-------------SOME DISPLAYED PREFERENCES ABOUT THE GRAPH --------------------------------------------
+    let stacksSupperpose = true
+    let streamChartWhenSupperPosed = true
+    let adapativeYScale = true
+
+    //the user controls
     let interLeavingCheckBox = document.getElementById("interLeavingXb")
     let freezeYCheckBox = document.getElementById("freezeYAxis")
     let streamGraphXbSpan = document.getElementById("streamGraphXbSpan")
     let streamGraphCheckBox = document.getElementById("streamGraphXb")
-    //define the position of the rect that will contain the stacked graphs
 
-    //load the csv file and call addElementsToStackedArea(),createSlider() when done
-    //d3.csv("/data/plot1data2.csv",function(d) {
-    d3.csv("/data/score/score_week.csv",function(d) {
-      data = model.prepareData(d)
-      maxYScore = stacksSupperpose ? data.maxScoreAtTimeStamp: data.maxSingleScore
-      displayedXInterval = [data.smallestDate, data.biggestDate]
-      UI.setData({
-        data:data,
-        maxYscore:maxYScore,
-        onBrush: userBrushed,
-      })
-      UI.prepareElements()
-      addElementsToStackedArea(data)
-    });
-
-
+    //the related event listeners
     interLeavingCheckBox.addEventListener("change", function(e){
       setStackSupperposed(!e.target.checked);
     });
@@ -55,6 +45,22 @@
 
     streamGraphCheckBox.addEventListener("change", function(e){
       setSteamGraph(e.target.checked);
+    });
+
+    //the keyboard shortcuts for theses functions
+    document.addEventListener("keypress", function(e){
+      const char = String.fromCharCode(e.charCode);
+      if(char == 's'){
+        setStackSupperposed(!stacksSupperpose)
+      }
+
+      if(char == 'y'){
+        adapatYScale(!adapativeYScale)
+      }
+
+      if(char == 't'){
+        setSteamGraph(!streamChartWhenSupperPosed)
+      }
     });
 
     function setStackSupperposed(newValue){
@@ -100,21 +106,25 @@
     }
 
 
+//--------------------------------------------------------------------------------------------------
 
 
-    document.addEventListener("keypress", function(e){
-      const char = String.fromCharCode(e.charCode);
-      if(char == 's'){
-        setStackSupperposed(!stacksSupperpose)
-      }
 
-      if(char == 'y'){
-        adapatYScale(!adapativeYScale)
-      }
 
-      if(char == 't'){
-        setSteamGraph(!streamChartWhenSupperPosed)
-      }
+
+    //load the csv file and call addElementsToStackedArea(),createSlider() when done
+    //d3.csv("/data/plot1data2.csv",function(d) {
+    d3.csv("/data/score/score_week.csv",function(d) {
+      data = model.prepareData(d)
+      maxYScore = stacksSupperpose ? data.maxScoreAtTimeStamp: data.maxSingleScore
+      displayedXInterval = [data.smallestDate, data.biggestDate]
+      UI.setData({
+        data:data,
+        maxYscore:maxYScore,
+        onBrush: userBrushed,
+      })
+      UI.prepareElements()
+      addElementsToStackedArea(data)
     });
 
 
@@ -153,12 +163,11 @@
         UI.renderCharts(charts,true)
       }else{
         UI.renderCharts(charts,false)
-        if(stackClever){
           UI.renderUpperLines(upperLines)
           heavyCompute()
           UI.renderUpperLines(upperLines)
 
-        }
+
         //
       }
 
@@ -204,7 +213,7 @@
 
       window.clearInterval(heavyComputationTimer)
       UI.removePartsOfChart()
-      if(!stacksSupperpose && stackClever){
+      if(!stacksSupperpose){
         UI.removePartsOfChart()
         //UI.removeLines()
         for (var i = 0; i < upperLines.length; i++) {
