@@ -69,19 +69,35 @@
     let isMouseDown = false
     let mouseDownCoordinates = null
 
-    function isMovingDown(e){
+    function isMovingDown(toDate){
       if(isMouseDown){
-        drawSelectionRect(e)
+        let fromDate = mouseDownCoordinates == null ? null : mouseDownCoordinates.fromDate
+        console.log("Moving down from "+ fromDate + " to " + toDate)
+        //drawSelectionRect(e)
       }
     }
 
     function removeSelectionRect(e){
       let shouldZoom = e != null && isMouseDown
       isMouseDown = false
-      console.log("SHOULD ZOOM "+shouldZoom)
+      stackedArea.select("#aboveRectContainer").remove()
+      //console.log("SHOULD ZOOM "+shouldZoom)
     }
     function drawSelectionRect(e){
-      console.log("should draw toooo" + e.clientX)
+      console.log(mouseDownCoordinates)
+      removeSelectionRect(null)
+      isMouseDown = true
+      let container = stackedArea.append("g")
+      .attr("id", "aboveRectContainer")
+
+      container.append('rect')
+      .attr("x", e.clientX)//(mouseDownCoordinates.x - stackedAreaMargin.left))
+      .attr("y",10)
+      .attr("width",10)
+      .attr("height",10)
+      .attr("fill","red")
+
+
     }
 
     function prepareSVGElement(){
@@ -94,24 +110,23 @@
       .attr("height", svgHeight);
 
 
-      document.getElementById("plot1_container").addEventListener("mouseup",function(e){
+        svg.on("mouseup",function(e){
         console.log("mouse up")
-        removeSelectionRect(e)
+        removeSelectionRect(d3.mouse(this)[0])
       })
 
-      document.getElementById("plot1_container").addEventListener("mousedown",function(e){
+      //document.getElementById("plot1_container").addEventListener("mousedown",function(e){
+
+        svg.on("mousedown",function(e){
         console.log("mouse down")
+        let coordinateX= d3.mouse(this)[0];
         mouseDownCoordinates = {
-          x:e.clientX  ,
-          y:e.clientY
+          x:d3.event.clientX,
+          y:d3.event.clientY,
+          fromDate:getXscale().invert(coordinateX - stackedAreaMargin.left),
         }
         isMouseDown = true
       })
-
-      document.getElementById("plot1_container").addEventListener("mousemove",function(e){
-        isMovingDown(e)
-      })
-
 
       svg.append("clipPath")
       .attr("id", "clipForStackedArea")
@@ -159,6 +174,8 @@
           }else if(dateSelected > biggestDate){
             dateSelected = biggestDate
           }
+
+          isMovingDown(dateSelected)
           App.Plot1.mouseMoveOutOfCharts(dateSelected)
         }else{
           removeVerticalLines()
@@ -540,10 +557,17 @@
 
         }
 
+
+        chart.path.on("mousemove", function(e) {
+          let coordinateX= d3.mouse(this)[0];
+          let dateSelected =getXscale().invert(coordinateX)
+          isMovingDown(dateSelected)
+        })
+
         let domElement = document.getElementById("chart_nb_"+chart.id)
         domElement.addEventListener("mousemove",function(e){
           //mouse is moving in a chart
-          isMovingDown(e)
+
           //so the function moving outside a chart will not be called
           e.stopPropagation()
         })
@@ -761,6 +785,7 @@
           let coordinateX= d3.mouse(this)[0];
           let dateSelected =getXscale().invert(coordinateX)
           App.Plot1.mouseMoveInFrontChart(indexSelected, dateSelected)
+          isMovingDown(dateSelected)
         })
 
         path.on("click",function(){
@@ -782,14 +807,13 @@
           }
         })
 
-
         let domEl = document.getElementById("front_chart_nb_"+id)
         domEl.addEventListener("mousemove",function(e){
           //moving in front chart
           if(id != lastIndexHighlighted && categorySelected == null){
             addFrontCharts(id, charts)
           }
-          isMovingDown(e)
+
           //wont call moving outside a chart
           e.stopPropagation()
         })
