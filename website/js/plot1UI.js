@@ -8,7 +8,6 @@
     const svgWidth = document.getElementById(containerName).clientWidth
     const svgHeight = document.getElementById(containerName).clientHeight
 
-
     //-------------SOME UI PARAMTER TO TUNE-------------
 
     let minNumberOfPointInScreen = 20
@@ -66,6 +65,14 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
       return timeIntervalBetweenDates * (minActualNbOfPoint-1)
     }
 
+    //some mouse magic
+    let mouseDownCoordinates = null
+
+    function isMovingDown(e){
+      if(mouseDownCoordinates != null){
+        console.log("dragging" + e)
+      }
+    }
 
     function prepareSVGElement(){
       //delete the previous svg element
@@ -76,9 +83,21 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
       .attr("width", svgWidth)
       .attr("height", svgHeight);
 
-      svg.on("mouseout", function(){
-        removeVerticalLines()
-      });
+
+      document.getElementById("plot1_container").addEventListener("mouseup",function(e){
+        console.log("mouse up")
+        mouseDownCoordinates = null
+      })
+
+      document.getElementById("plot1_container").addEventListener("mousedown",function(e){
+        console.log("mouse down")
+        mouseDownCoordinates = e
+      })
+
+      document.getElementById("plot1_container").addEventListener("mousemove",function(e){
+        isMovingDown(e)
+      })
+
 
       svg.append("clipPath")
       .attr("id", "clipForStackedArea")
@@ -129,6 +148,7 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
           App.Plot1.mouseMoveOutOfCharts(dateSelected)
         }else{
           removeVerticalLines()
+          mouseDownCoordinates = null
         }
       })
 
@@ -228,9 +248,9 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
 
       //Now we do the brush
       const minYBrushable = 0//;(contextHeight-selectedRectHeight)/2
-      const maxYBrushable = (contextHeight+selectedRectHeight)/2
-      const minXBrushable = contextXScale(smallestDate) + (svgWidth -sliderWidth)/2
-      const maxXBrushable = contextXScale(biggestDate) + (svgWidth -sliderWidth)/2
+      const maxYBrushable = contextHeight
+      const minXBrushable = 0
+      const maxXBrushable = stackedAreaMarginWidth
       var brush = d3.brushX()
       .extent([
         //sets the brushable part
@@ -241,16 +261,16 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
       .on("brush", cleanBrushInterval)
 
 
-
-
       //The selection rectangle
       silderBox.append("g")
       .attr("class", "xbrush")
       .call(brush)
       .selectAll("rect")
       .attr("rx",5)
+
       let elem = silderBox.select(".xbrush").select(".overlay").on("click",function(){
         timeIntervalSelected = [smallestDate,biggestDate]
+        console.log("clicked inside the brush")
         onBrush(timeIntervalSelected)
       })
 
@@ -262,9 +282,8 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
         //d3.event.selection looks like [622,698] for example
         //b is then an array of 2 dates: [from, to]
         var b = d3.event.selection === null ? contextXScale.domain() : d3.event.selection.map(x=>{
-          return contextXScale.invert(x-(svgWidth -sliderWidth)/2)
+          return contextXScale.invert(x)
         });
-
 
         //first we make sure that we cannot zoom too much
         if(minNumberOfPointInScreen>0){
@@ -296,8 +315,6 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
           let big_date = b[1]
           //now we should adapt the brush!!
 
-
-
           let brushSelected = silderBox.select(".xbrush")
           let selection = brushSelected.select(".selection")
           let leftSlider = brushSelected.select(".handle--w")
@@ -305,7 +322,7 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
 
           let widthForBrush = contextXScale(big_date)-contextXScale(small_date)
           let leftSliderWidth = leftSlider.attr("width")
-          let xForLeft = contextXScale(small_date) + (svgWidth -sliderWidth - leftSliderWidth)/2
+          let xForLeft = contextXScale(small_date) //+ (svgWidth -sliderWidth - leftSliderWidth)/2
           let xForRight = xForLeft + widthForBrush
 
           selection.attr("width",widthForBrush)
@@ -505,6 +522,7 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
 
         let domElement = document.getElementById("chart_nb_"+chart.id)
         domElement.addEventListener("mousemove",function(e){
+          isMovingDown(e)
           e.stopPropagation()
         })
 
@@ -513,6 +531,7 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
         })
 
         chart.path.on("click", function(e) {
+
           if(chart.id == categorySelected){
             categorySelected = null
           }else{
@@ -717,7 +736,12 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
           App.Plot1.mouseMoveInFrontChart(indexSelected, dateSelected)
         })
 
-        path.on("click",function(e){
+        path.on("click",function(){
+
+
+
+
+
           let coordinateX= d3.mouse(this)[0];
           let dateSelected =getXscale().invert(coordinateX)
           let id = parseInt(path.attr('id').slice(-1))
@@ -736,6 +760,7 @@ const stackedAreaMarginWidth = svgWidth - stackedAreaMargin.right - stackedAreaM
           if(id != lastIndexHighlighted && categorySelected == null){
             addFrontCharts(id, charts)
           }
+          isMovingDown(e)
           e.stopPropagation()
         })
       })
