@@ -62,6 +62,8 @@
       }
     }
 
+    
+
     function getMinTimeIntervalWeCanSee(){
       let timeIntervalBetweenDates = data.values[1].date.getTime() - data.values[0].date.getTime()
       let minActualNbOfPoint = Math.min(data.values.length, minNumberOfPointInScreen)

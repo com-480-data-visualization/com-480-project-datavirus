@@ -20,7 +20,7 @@
     let maxYScore = null
     let displayedXInterval = null
     let categorySelected = null
-    let scaleSelected = 3
+    let scaleSelected = 7
 
 //-------------SOME DISPLAYED PREFERENCES ABOUT THE GRAPH --------------------------------------------
     let stacksSupperpose = true
@@ -33,6 +33,7 @@
     let streamGraphXbSpan = document.getElementById("streamGraphXbSpan")
     let streamGraphCheckBox = document.getElementById("streamGraphXb")
     let yAxisSelector = document.getElementById("yAxisSelector")
+    let yAxisBox = document.getElementById("yAxisSelectorWrapper")
 
     //the related event listeners
     interLeavingCheckBox.addEventListener("change", function(e){
@@ -78,6 +79,7 @@
       }
       interLeavingCheckBox.checked = !newValue;
       maxYScore = stacksSupperpose ? data.maxScoreAtTimeStamp: data.maxSingleScore
+
       UI.setData({
         data:data,
         maxYscore:maxYScore,
@@ -89,6 +91,8 @@
         adaptYScale(displayedXInterval)
       }
       addElementsToStackedArea(data)
+
+      isSelectBoxHidden(stacksSupperpose && streamChartWhenSupperPosed)
     }
 
     function shouldAdaptYScale(shouldAdapt){
@@ -101,6 +105,7 @@
           UI.renderUpperLines(upperLines)
         }
       }
+      isSelectBoxHidden(stacksSupperpose && streamChartWhenSupperPosed)
     }
 
     function setSteamGraph(futureValue){
@@ -112,12 +117,17 @@
           yAxisSelectorChanged(scaleSelected)
         }
       }
+      isSelectBoxHidden(stacksSupperpose && streamChartWhenSupperPosed)
     }
 
     function yAxisSelectorChanged(newValue){
       scaleSelected = newValue
       shouldAdaptYScale(adapativeYScale)
       addElementsToStackedArea(data)
+    }
+
+    function isSelectBoxHidden(bool){
+      yAxisBox.style.visibility = bool ? "hidden" : "visible"
     }
 
 
@@ -134,6 +144,13 @@
       prepareYAxisSelector(data)
       maxYScore = stacksSupperpose ? data.maxScoreAtTimeStamp: data.maxSingleScore
       displayedXInterval = [data.smallestDate, data.biggestDate]
+
+      let selectBoxHidden = false
+      if(stacksSupperpose && streamChartWhenSupperPosed){
+        selectBoxHidden = true
+      }
+      isSelectBoxHidden(selectBoxHidden)
+
       UI.setData({
         data:data,
         maxYscore:maxYScore,
@@ -155,8 +172,10 @@
         newOption.textContent = c
         yAxisSelector.appendChild(newOption)
       })
-
     }
+
+
+
 
 
     function addElementsToStackedArea(data) {
@@ -233,6 +252,7 @@
         }
         var bounds = model.getMaxValuesBetween(data,forInterval[0],forInterval[1],scaleToUse )
         var maxBound = stacksSupperpose ? bounds.maxScoreAtTimeStamp : bounds.maxSingleScore
+
         UI.setData({
           data:data,
           maxYscore:maxBound,
