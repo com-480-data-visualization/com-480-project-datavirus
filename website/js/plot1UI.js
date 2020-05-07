@@ -78,7 +78,7 @@
         if(Math.abs(clientY - mouseDownCoordinates.y) < 40){
           rectTemporarilyDisappeared = false
           let fromDate = mouseDownCoordinates == null ? null : mouseDownCoordinates.fromDate
-          drawSelectionRect(fromDate, toDate)
+          drawSelectionRect(fromDate, toDate, clientX)
         }else{
           rectTemporarilyDisappeared = true
           removeSelectionRect(null)
@@ -87,9 +87,9 @@
 
       }
     }
-
+    let xTolerance = 2
     function removeSelectionRect(toDate,clientX){
-      let shouldZoom = toDate != null && isMouseDown && !rectTemporarilyDisappeared && Math.abs(clientX - mouseDownCoordinates.x)>0
+      let shouldZoom = toDate != null && isMouseDown && !rectTemporarilyDisappeared && Math.abs(clientX - mouseDownCoordinates.x)>xTolerance
       isMouseDown = false
       stackedArea.select("#aboveRectContainer").remove()
       if(shouldZoom){
@@ -110,10 +110,14 @@
       }
       //console.log("SHOULD ZOOM "+shouldZoom)
     }
-    function drawSelectionRect(fromDate, toDate){
+    function drawSelectionRect(fromDate, toDate,clientX){
       removeVerticalLines()
       removeSelectionRect(null)
       isMouseDown = true
+
+      if(Math.abs(clientX - mouseDownCoordinates.x)<=xTolerance){
+        return
+      }
 
       let x1 = getXscale()(fromDate)
       let x2 = getXscale()(toDate)
