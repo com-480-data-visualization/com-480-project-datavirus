@@ -1,6 +1,6 @@
 
 svg{
-  border: 1px solid red;
+  /*border: 1px solid red;*/
 }
 
 .plot1{
@@ -45,7 +45,7 @@ svg text::selection {
 }
 
 .stackedAreaBorder{
-  stroke: red;
+  stroke: none;
   stroke-opacity: 1;
   stroke-width:1;
   fill:none
@@ -71,9 +71,12 @@ svg text::selection {
   fill:none
 }
 
-.sliderBox .xbrush .selection, .sliderBox .xbrush .handle{
-  stroke:red;
+.sliderBox .xbrush rect.selection, .sliderBox .xbrush .handle{
+  /*stroke:red;*/
   /*visibility: hidden;*/
+  height: 10px;
+  transform: translate(0px, 25px);
+  rx: 0px;
 }
 
 .upperLinesContainer path {
@@ -91,12 +94,17 @@ svg text::selection {
 }
 #aboveRectContainer rect{
   fill: rgba(255,255,255,0.2);
+}
+#aboveRectContainer line{
   stroke:#B1B1B1 ;
 }
 #aboveRectContainer rect.redWarning{
   fill: rgba(255,0,0,0.2);
+}
+#aboveRectContainer line.redWarning{
   stroke:red;
 }
+
 
 /*------------AXIS OF THE TIME SLIDER-------------------*/
 .sliderBox g path, .sliderBox g line, .sliderBox g tick, .sliderBox .outerTick, .sliderBox text {

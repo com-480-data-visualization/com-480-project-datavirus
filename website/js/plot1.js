@@ -293,7 +293,7 @@
 
     function mouseInChart(chartId){
       if(categorySelected == null && stacksSupperpose){
-        console.log("Mouse went inside chart "+ chartId)
+        //console.log("Mouse went inside chart "+ chartId)
         UI.addFrontCharts(chartId,charts)
     }
   }
@@ -321,7 +321,7 @@
     userSelectedCategory(chartId)
     UI.hideFrameContainer()
     UI.removeLines()
-    console.log("Mouse move in Part Of chart "+ chartId)
+    //console.log("Mouse move in Part Of chart "+ chartId)
 
   }
 

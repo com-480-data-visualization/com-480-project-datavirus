@@ -23,9 +23,8 @@
 
     const sliderBoxPreferences = {
       height:60,
-      tickHeight:10,
+      tickHeight:5,
       displayNiceAxis:false,
-      selectedRectHeight:50,
     }
 
 
@@ -105,13 +104,8 @@
         if(redWarning){
             positionBrush(null, null)
         }else{
-          console.log(timeIntervalSelected)
           positionBrush(timeIntervalSelected[0],timeIntervalSelected[1])
         }
-
-
-
-
 
       }
       //console.log("SHOULD ZOOM "+shouldZoom)
@@ -125,6 +119,7 @@
       let x2 = getXscale()(toDate)
       let xLeft = x1 < x2 ? x1 : x2
       let width = Math.abs(x1-x2)
+      let xRight = xLeft + width
 
       let smD = fromDate < toDate ? fromDate : toDate
       let biD = fromDate < toDate ? toDate : fromDate
@@ -144,6 +139,28 @@
       if(redWarning){
         rect.attr("class","redWarning")
       }
+
+      let line1 =
+      container.append("line")
+      .attr("x1", xLeft)
+      .attr("y1", 0)
+      .attr("x2", xLeft)
+      .attr("y2", stackedAreaMargin.height)
+      if(redWarning){
+        line1.attr("class","redWarning")
+      }
+
+      let line2 =
+      container.append("line")
+      .attr("x1", xRight)
+      .attr("y1", 0)
+      .attr("x2", xRight)
+      .attr("y2", stackedAreaMargin.height)
+      if(redWarning){
+        line2.attr("class","redWarning")
+      }
+
+
     }
 
     function prepareSVGElement(){
@@ -157,7 +174,7 @@
 
 
       svg.on("mouseup",function(e){
-        console.log("mouse up")
+        //console.log("mouse up")
         let coordinateX= d3.mouse(this)[0];
         let dateSelected =getXscale().invert(coordinateX- stackedAreaMargin.left)
         removeSelectionRect(dateSelected)
@@ -166,7 +183,7 @@
       //document.getElementById("plot1_container").addEventListener("mousedown",function(e){
 
       svg.on("mousedown",function(e){
-        console.log("mouse down")
+        //console.log("mouse down")
         let coordinateX= d3.mouse(this)[0];
         mouseDownCoordinates = {
           x:d3.event.clientX,
@@ -272,7 +289,6 @@
       let niceAxis = sliderBoxPreferences.displayNiceAxis
       let tickHeight = sliderBoxPreferences.tickHeight
       let contextHeight = sliderBoxPreferences.height
-      let selectedRectHeight = sliderBoxPreferences.selectedRectHeight
 
       //1)First we add the context and we draw a horizontal line so we see it well
        sliderBox = svg.append("g")
@@ -341,17 +357,6 @@
       ])
       .on("brush", cleanBrushInterval)
 
-
-
-
-      //The selection rectangle
-      /*toCallForBrush = sliderBox.append("g")
-      .attr("class", "xbrush")
-      .call(bbrush)
-      .call(bbrush.move, [minXBrushable, maxXBrushable])
-      .selectAll("rect")
-      .attr("rx",5)*/
-
       positionBrush(null, null)
 
       let elem = sliderBox.select(".xbrush").select(".overlay").on("mousedown",function(){
@@ -394,8 +399,6 @@
       .call(bbrush)
       .call(bbrush.move, position)
       .selectAll("rect")
-      .attr("rx",5)
-
     }
 
 
