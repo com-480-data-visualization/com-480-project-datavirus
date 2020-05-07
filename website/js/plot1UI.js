@@ -73,8 +73,8 @@
     let mouseDownCoordinates = null
     let rectTemporarilyDisappeared = false
 
-    function isMovingDown(toDate, clientY){
-      if(isMouseDown){
+    function isMovingDown(toDate, clientY, clientX){
+      if(isMouseDown ){
         if(Math.abs(clientY - mouseDownCoordinates.y) < 40){
           rectTemporarilyDisappeared = false
           let fromDate = mouseDownCoordinates == null ? null : mouseDownCoordinates.fromDate
@@ -88,8 +88,8 @@
       }
     }
 
-    function removeSelectionRect(toDate){
-      let shouldZoom = toDate != null && isMouseDown && !rectTemporarilyDisappeared
+    function removeSelectionRect(toDate,clientX){
+      let shouldZoom = toDate != null && isMouseDown && !rectTemporarilyDisappeared && Math.abs(clientX - mouseDownCoordinates.x)>0
       isMouseDown = false
       stackedArea.select("#aboveRectContainer").remove()
       if(shouldZoom){
@@ -177,7 +177,7 @@
         //console.log("mouse up")
         let coordinateX= d3.mouse(this)[0];
         let dateSelected =getXscale().invert(coordinateX- stackedAreaMargin.left)
-        removeSelectionRect(dateSelected)
+        removeSelectionRect(dateSelected,d3.event.clientX)
       })
 
       //document.getElementById("plot1_container").addEventListener("mousedown",function(e){
@@ -240,7 +240,7 @@
             dateSelected = biggestDate
           }
 
-          isMovingDown(dateSelected,d3.event.clientY)
+          isMovingDown(dateSelected,d3.event.clientY,d3.event.clientX)
           if(!isMouseDown){
           App.Plot1.mouseMoveOutOfCharts(dateSelected)
         }
@@ -658,7 +658,7 @@
         chart.path.on("mousemove", function(e) {
           let coordinateX= d3.mouse(this)[0];
           let dateSelected =getXscale().invert(coordinateX)
-          isMovingDown(dateSelected,d3.event.clientY)
+          isMovingDown(dateSelected,d3.event.clientY,d3.event.clientX)
         })
 
         let domElement = document.getElementById("chart_nb_"+chart.id)
@@ -883,7 +883,7 @@
           if(!isMouseDown){
           App.Plot1.mouseMoveInFrontChart(indexSelected, dateSelected)
         }
-          isMovingDown(dateSelected,d3.event.clientY)
+          isMovingDown(dateSelected,d3.event.clientY,d3.event.clientX)
         })
 
         path.on("click",function(){
