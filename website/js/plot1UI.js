@@ -492,6 +492,7 @@
         this.yScale = getYscale()
         const stacksSupperpose = options.stacksSupperpose
         const streamChartWhenSupperPosed = options.streamChartWhenSupperPosed
+        const scaleSelected = options.scaleSelected
 
         let localName = this.data.categories[this.id]
         let localId = this.id
@@ -511,11 +512,38 @@
               toAdd = +stackedAreaMargin.height/2-halfHeight
             }
 
+            if(scaleSelected == 0){
             let values = d.values.slice(0, localId)
             let previousSum = values.reduce((a,b) => a + b, 0)
-
             return yS(previousSum) + toAdd
           }else{
+            //a special scale
+            //console.log("--")
+            //console.log(scaleSelected)
+            let values = d.values.slice()
+            //console.log(values)
+            let popped = values.splice(scaleSelected-1,1)[0]
+            values.unshift(popped)
+            //console.log(values)
+            let sliceUntil = 0
+            if(localId != scaleSelected-1){
+              if(localId < scaleSelected-1){
+                sliceUntil = localId + 1
+              }else{
+                sliceUntil = localId
+              }
+            }
+            //console.log(localId)
+            //console.log("sliceUntil "+sliceUntil)
+
+            values = values.slice(0, sliceUntil)
+            //console.log(values)
+            let previousSum = values.reduce((a,b) => a + b, 0)
+            return yS(previousSum) + toAdd
+          }
+
+          }else{
+            //chart interleaving, everything from zero
             return yS(0)
           }
 
@@ -528,9 +556,33 @@
               let halfHeight = yS(totalSum/2)
               toAdd = +stackedAreaMargin.height/2-halfHeight
             }
-            let values = d.values.slice(0, localId+1)
+
+
+
+            if(scaleSelected == 0){
+              let values = d.values.slice(0, localId+1)
+              let previousSum = values.reduce((a,b) => a + b, 0)
+              return yS(previousSum) + toAdd
+          }else{
+            let values = d.values.slice()
+            let popped = values.splice(scaleSelected-1,1)[0]
+            values.unshift(popped)
+
+            let sliceUntil = 0
+            if(localId != scaleSelected-1){
+              if(localId < scaleSelected-1 ){
+                sliceUntil = localId + 1
+              }else{
+                sliceUntil = localId
+              }
+            }
+
+
+            values = values.slice(0, sliceUntil+1)
             let previousSum = values.reduce((a,b) => a + b, 0)
-            return yS(previousSum) + toAdd
+            return yS(previousSum) //+ toAdd
+          }
+
           }else{
             return yS(d.values[this.id])
           }

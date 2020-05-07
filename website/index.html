@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <title>DataVis-Project</title>
-    <link rel="stylesheet" href="css/plot1.css" />
-  </head>
-  <body>
+<head>
+  <meta charset="utf-8">
+  <title>DataVis-Project</title>
+  <link rel="stylesheet" href="css/plot1.css" />
+</head>
+<body>
 
   <div class="plot1">
     <div id="plot1_title_container">
+    </div>
+    <div class="yAxisSelectorWrapper">
+      <label for="yAxisSelector">Scale Y axis perfectly for:</label><br>
+      <select name = "yAxisSelector" id="yAxisSelector">
+      </select>
     </div>
     <div id="plot1_container">
     </div>
@@ -26,16 +31,13 @@
         <input type="checkbox" name="streamGraphXb" checked id="streamGraphXb"  />
         <label for="streamGraphXb">See as stream graph </label>
       </span>
-
     </div>
   </div>
-
-
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.0.0/d3.js"></script>
   <script type="module" src="js/plot1DataModel.js"></script>
   <script type="module" src="js/plot1UI.js"></script>
   <!--<script type="module" src="js/worker.js"></script>-->
   <script type="module" src="js/plot1.js"></script>
-  </body>
+</body>
 </html>

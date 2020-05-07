@@ -20,12 +20,11 @@
     let maxYScore = null
     let displayedXInterval = null
     let categorySelected = null
-
-
+    let scaleSelected = 3
 
 //-------------SOME DISPLAYED PREFERENCES ABOUT THE GRAPH --------------------------------------------
     let stacksSupperpose = true
-    let streamChartWhenSupperPosed = true
+    let streamChartWhenSupperPosed = false
     let adapativeYScale = true
 
     //the user controls
@@ -33,6 +32,7 @@
     let freezeYCheckBox = document.getElementById("freezeYAxis")
     let streamGraphXbSpan = document.getElementById("streamGraphXbSpan")
     let streamGraphCheckBox = document.getElementById("streamGraphXb")
+    let yAxisSelector = document.getElementById("yAxisSelector")
 
     //the related event listeners
     interLeavingCheckBox.addEventListener("change", function(e){
@@ -40,12 +40,18 @@
     });
 
     freezeYCheckBox.addEventListener("change", function(e){
-      adapatYScale(!e.target.checked);
+      shouldAdaptYScale(!e.target.checked);
     });
 
     streamGraphCheckBox.addEventListener("change", function(e){
       setSteamGraph(e.target.checked);
     });
+
+    yAxisSelector.addEventListener("change", function(e){
+      yAxisSelectorChanged(e.target.value);
+    });
+
+
 
     //the keyboard shortcuts for theses functions
     document.addEventListener("keypress", function(e){
@@ -55,7 +61,7 @@
       }
 
       if(char == 'y'){
-        adapatYScale(!adapativeYScale)
+        shouldAdaptYScale(!adapativeYScale)
       }
 
       if(char == 't'){
@@ -85,7 +91,7 @@
       addElementsToStackedArea(data)
     }
 
-    function adapatYScale(shouldAdapt){
+    function shouldAdaptYScale(shouldAdapt){
       adapativeYScale = shouldAdapt
       freezeYCheckBox.checked = !shouldAdapt;
       if(adapativeYScale){
@@ -105,6 +111,12 @@
       }
     }
 
+    function yAxisSelectorChanged(newValue){
+      scaleSelected = newValue
+      shouldAdaptYScale(adapativeYScale)
+      addElementsToStackedArea(data)
+    }
+
 
 //--------------------------------------------------------------------------------------------------
 
@@ -116,6 +128,7 @@
     //d3.csv("/data/plot1data2.csv",function(d) {
     d3.csv("/data/score/score_week.csv",function(d) {
       data = model.prepareData(d)
+      prepareYAxisSelector(data)
       maxYScore = stacksSupperpose ? data.maxScoreAtTimeStamp: data.maxSingleScore
       displayedXInterval = [data.smallestDate, data.biggestDate]
       UI.setData({
@@ -127,6 +140,21 @@
       addElementsToStackedArea(data)
     });
 
+    function prepareYAxisSelector(data){
+      yAxisSelector.innerHTML = ""
+      let defautOption = document.createElement("option");
+      defautOption.value = "0"
+      defautOption.textContent = "All"
+      yAxisSelector.appendChild(defautOption)
+      data.categories.forEach((c,i)=>{
+        let newOption = document.createElement("option");
+        newOption.value = i+1
+        newOption.textContent = c
+        yAxisSelector.appendChild(newOption)
+      })
+
+    }
+
 
     function addElementsToStackedArea(data) {
       //draw the complete charts
@@ -137,6 +165,7 @@
           id: i,
           stacksSupperpose:stacksSupperpose,
           streamChartWhenSupperPosed:streamChartWhenSupperPosed,
+          scaleSelected:scaleSelected,
         }));
       }
 
@@ -147,6 +176,7 @@
             data: data,
             id: i,
             stacksSupperpose:stacksSupperpose,
+            scaleSelected:scaleSelected,
           }));
         }
       }
@@ -159,10 +189,12 @@
       categorySelected = null
       UI.makeTitlesLookNormal()
 
+      let chartInOrder = getChartInOrder(charts)
+
       if(stacksSupperpose){
-        UI.renderCharts(charts,true)
+        UI.renderCharts(chartInOrder,true)
       }else{
-        UI.renderCharts(charts,false)
+        UI.renderCharts(chartInOrder,false)
           UI.renderUpperLines(upperLines)
           heavyCompute()
           UI.renderUpperLines(upperLines)
@@ -170,15 +202,32 @@
 
         //
       }
-
     }//end of create plot function
+
+    function getChartInOrder(charts){
+      if(scaleSelected == 0){
+        return charts
+      }
+      let ordered = []
+      ordered.push(charts[scaleSelected -1])
+      charts.forEach(c=>{
+        if(c.id != scaleSelected -1 ){
+            ordered.push(c)
+        }
+      })
+      return ordered
+    }
 
 
 
 
     function adaptYScale(forInterval){
       if(adapativeYScale){
-        var bounds = model.getMaxValuesBetween(data,forInterval[0],forInterval[1])
+        let scaleToUse = scaleSelected
+        if(stacksSupperpose && streamChartWhenSupperPosed){
+          scaleToUse = 0
+        }
+        var bounds = model.getMaxValuesBetween(data,forInterval[0],forInterval[1],scaleToUse )
         var maxBound = stacksSupperpose ? bounds.maxScoreAtTimeStamp : bounds.maxSingleScore
         UI.setData({
           data:data,

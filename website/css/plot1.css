@@ -26,6 +26,15 @@ svg{
   font-size: large;
   font-family:verdana;
   height: 40px;
+  border: 1px solid red;
+}
+
+#yAxisSelector{
+  background-color: #B1B1B1;
+ position: relative;
+   left: 0px;
+   top: 0px;
+   z-index: 1;
 }
 
 #plot1_title_container div{
@@ -45,7 +54,7 @@ svg text::selection {
 }
 
 .stackedAreaBorder{
-  stroke: none;
+  stroke: red;
   stroke-opacity: 1;
   stroke-width:1;
   fill:none

@@ -313,7 +313,7 @@
       return middlePoint
     }
 
-    function getMaxValuesBetween(data, startDate, endDate){
+    function getMaxValuesBetween(data, startDate, endDate, forCat){
       let firstIndex = 0
       let lastIndex = 0
 
@@ -335,6 +335,10 @@
         let values = data.values[i].values
         let localSingleMax = values.reduce((a,b) => a > b ? a:b, 0)
         let localTemporalMax = values.reduce((a,b) => a + b, 0)
+        if(forCat != 0){
+          localSingleMax = values[forCat-1]
+          localTemporalMax = localSingleMax
+        }
         if(localSingleMax>maxSingleScore){
           maxSingleScore = localSingleMax
         }
