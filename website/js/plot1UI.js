@@ -40,6 +40,7 @@
     let lastIndexHighlighted = null
     let categorySelected = null
     let partOfChartContainer = null
+    let sliderBox = null
 
     //the revelant data needed
     let smallestDate = null
@@ -68,34 +69,71 @@
     //some mouse magic
     let isMouseDown = false
     let mouseDownCoordinates = null
+    let rectTemporarilyDisappeared = false
 
-    function isMovingDown(toDate){
+    function isMovingDown(toDate, clientY){
       if(isMouseDown){
-        let fromDate = mouseDownCoordinates == null ? null : mouseDownCoordinates.fromDate
-        console.log("Moving down from "+ fromDate + " to " + toDate)
-        //drawSelectionRect(e)
+        if(Math.abs(clientY - mouseDownCoordinates.y) < 40){
+          rectTemporarilyDisappeared = false
+          let fromDate = mouseDownCoordinates == null ? null : mouseDownCoordinates.fromDate
+          drawSelectionRect(fromDate, toDate)
+        }else{
+          rectTemporarilyDisappeared = true
+          removeSelectionRect(null)
+          isMouseDown = true
+        }
+
       }
     }
 
-    function removeSelectionRect(e){
-      let shouldZoom = e != null && isMouseDown
+    function removeSelectionRect(toDate){
+      let shouldZoom = toDate != null && isMouseDown && !rectTemporarilyDisappeared
       isMouseDown = false
       stackedArea.select("#aboveRectContainer").remove()
+      if(shouldZoom){
+        let fromDate = mouseDownCoordinates == null ? null : mouseDownCoordinates.fromDate
+        let smD = fromDate < toDate ? fromDate : toDate
+        let biD = fromDate < toDate ? toDate : fromDate
+        let originalInterval = [smD, biD]
+
+        let cleanedInterval = getCleanedInterval(originalInterval)
+        let redWarning = cleanedInterval[0] != originalInterval[0] || cleanedInterval[1] != originalInterval[1]
+        timeIntervalSelected = redWarning ? [smallestDate, biggestDate] : cleanedInterval
+        updateXBrushFromInterval(timeIntervalSelected)
+        onBrush()
+
+      }
       //console.log("SHOULD ZOOM "+shouldZoom)
     }
-    function drawSelectionRect(e){
-      console.log(mouseDownCoordinates)
+    function drawSelectionRect(fromDate, toDate){
+      removeVerticalLines()
       removeSelectionRect(null)
       isMouseDown = true
+
+      let x1 = getXscale()(fromDate)
+      let x2 = getXscale()(toDate)
+      let xLeft = x1 < x2 ? x1 : x2
+      let width = Math.abs(x1-x2)
+
+      let smD = fromDate < toDate ? fromDate : toDate
+      let biD = fromDate < toDate ? toDate : fromDate
+      let originalInterval = [smD, biD]
+
+      let cleanedInterval = getCleanedInterval(originalInterval)
+      let redWarning = cleanedInterval[0] != originalInterval[0] || cleanedInterval[1] != originalInterval[1]
+
       let container = stackedArea.append("g")
       .attr("id", "aboveRectContainer")
 
-      container.append('rect')
-      .attr("x", e.clientX)//(mouseDownCoordinates.x - stackedAreaMargin.left))
-      .attr("y",10)
-      .attr("width",10)
-      .attr("height",10)
-      .attr("fill","red")
+      let rect = container.append('rect')
+      .attr("x", xLeft)//(mouseDownCoordinates.x - stackedAreaMargin.left))
+      .attr("y",0)
+      .attr("width",width)
+      .attr("height",stackedAreaMargin.height)
+      if(redWarning){
+        rect.attr("class","redWarning")
+      }
+
 
 
     }
@@ -110,14 +148,17 @@
       .attr("height", svgHeight);
 
 
-        svg.on("mouseup",function(e){
+      svg.on("mouseup",function(e){
         console.log("mouse up")
-        removeSelectionRect(d3.mouse(this)[0])
+        let coordinateX= d3.mouse(this)[0];
+        let dateSelected =getXscale().invert(coordinateX- stackedAreaMargin.left)
+        console.log(dateSelected)
+        removeSelectionRect(dateSelected)
       })
 
       //document.getElementById("plot1_container").addEventListener("mousedown",function(e){
 
-        svg.on("mousedown",function(e){
+      svg.on("mousedown",function(e){
         console.log("mouse down")
         let coordinateX= d3.mouse(this)[0];
         mouseDownCoordinates = {
@@ -175,8 +216,10 @@
             dateSelected = biggestDate
           }
 
-          isMovingDown(dateSelected)
+          isMovingDown(dateSelected,d3.event.clientY)
+          if(!isMouseDown){
           App.Plot1.mouseMoveOutOfCharts(dateSelected)
+        }
         }else{
           removeVerticalLines()
           removeSelectionRect(null)
@@ -225,12 +268,12 @@
       let selectedRectHeight = sliderBoxPreferences.selectedRectHeight
 
       //1)First we add the context and we draw a horizontal line so we see it well
-      let silderBox = svg.append("g")
+       sliderBox = svg.append("g")
       .attr("class", "sliderBox")
       .attr("transform", "translate(" + stackedAreaMargin.left + "," + (svgHeight - sliderBoxPreferences.height) + ")")
 
       //drawing the separation line
-      silderBox.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", svgWidth) .attr("y2", 0).attr("class", "topLine");
+      sliderBox.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", svgWidth) .attr("y2", 0).attr("class", "topLine");
       // Create a domain
       var contextXScale = d3.scaleTime()
       .range([0, sliderWidth])//length of the slider
@@ -253,16 +296,16 @@
       //.tickFormat(x => /[AEIOUY]/.test(x) ? x : "")
 
       //append the axis to the svg element
-      silderBox.append("g")
+      sliderBox.append("g")
       .attr("transform", "translate("+0+","+contextHeight/2+")")
       .call(contextAxis)
 
       //move the ticks to position them in the middle of the horizontal line
-      silderBox.selectAll(".tick line")
+      sliderBox.selectAll(".tick line")
       .attr("transform", "translate(0,-"+tickHeight/2+")");
 
       //moves the text accordingly
-      silderBox.selectAll(".tick text")
+      sliderBox.selectAll(".tick text")
       .attr("transform", "translate(0,-"+tickHeight/2+")");
 
 
@@ -273,8 +316,8 @@
         const yBottom = (contextHeight + outerTickSize)/2
         const xLeft = 0
         const xRight = xLeft + sliderWidth
-        silderBox.append("line") .attr("x1", xLeft) .attr("y1", yTop).attr("x2", xLeft) .attr("y2", yBottom).attr("class", "outerTick")
-        silderBox.append("line") .attr("x1", xRight) .attr("y1", yTop).attr("x2", xRight) .attr("y2", yBottom).attr("class", "outerTick")
+        sliderBox.append("line") .attr("x1", xLeft) .attr("y1", yTop).attr("x2", xLeft) .attr("y2", yBottom).attr("class", "outerTick")
+        sliderBox.append("line") .attr("x1", xRight) .attr("y1", yTop).attr("x2", xRight) .attr("y2", yBottom).attr("class", "outerTick")
       }
 
       //Now we do the brush
@@ -292,17 +335,25 @@
       .on("brush", cleanBrushInterval)
 
 
+
+
       //The selection rectangle
-      silderBox.append("g")
+      sliderBox.append("g")
       .attr("class", "xbrush")
       .call(brush)
+      .call(brush.move, [minXBrushable, maxXBrushable])
       .selectAll("rect")
       .attr("rx",5)
+      /*.attr("display","block")
+      .attr("x",0)
+      .attr("x",0)
+      .attr("width",100)
+      .attr("height",100)*/
 
-      let elem = silderBox.select(".xbrush").select(".overlay").on("click",function(){
+      let elem = sliderBox.select(".xbrush").select(".overlay").on("click",function(){
         timeIntervalSelected = [smallestDate,biggestDate]
         console.log("clicked inside the brush")
-        onBrush(timeIntervalSelected)
+        //onBrush()
       })
 
 
@@ -318,55 +369,74 @@
 
         //first we make sure that we cannot zoom too much
         if(minNumberOfPointInScreen>0){
-          //in case we have a limit
-          let differenceInTime = b[1].getTime() - b[0].getTime();
-          let minTimeInterval = getMinTimeIntervalWeCanSee()
-          if(differenceInTime<minTimeInterval){
-            //in case the brush does not respect the limit
-            let middleTime = (b[1].getTime() + b[0].getTime())/2;
-
-            let timeToAdd = minTimeInterval/2
-            let upperDate = middleTime + timeToAdd;
-            let lowerDate = middleTime - timeToAdd;
-
-            if(upperDate>biggestDate.getTime()){
-              let timeToShift = upperDate-biggestDate.getTime();
-              upperDate -= timeToShift;
-              lowerDate -= timeToShift;
-            }else if (lowerDate<smallestDate.getTime()){
-              let timeToShift = smallestDate.getTime()-lowerDate;
-              upperDate += timeToShift;
-              lowerDate += timeToShift;
-            }
-            let small_date = new Date(lowerDate)
-            let big_date = new Date(upperDate)
-            b = [small_date,big_date]
-          }
-          let small_date = b[0]
-          let big_date = b[1]
-          //now we should adapt the brush!!
-
-          let brushSelected = silderBox.select(".xbrush")
-          let selection = brushSelected.select(".selection")
-          let leftSlider = brushSelected.select(".handle--w")
-          let rightSlider = brushSelected.select(".handle--e")
-
-          let widthForBrush = contextXScale(big_date)-contextXScale(small_date)
-          let leftSliderWidth = leftSlider.attr("width")
-          let xForLeft = contextXScale(small_date) //+ (svgWidth -sliderWidth - leftSliderWidth)/2
-          let xForRight = xForLeft + widthForBrush
-
-          selection.attr("width",widthForBrush)
-          selection.style("x", (xForLeft+leftSliderWidth/2))
-          leftSlider.style("x", xForLeft)
-          rightSlider.style("x", xForRight)
-
+          b = getCleanedInterval(b)
+          updateXBrushFromInterval(b)
         }
         timeIntervalSelected = b
         onBrush()
       }
     }//end of createSlider
 
+    function getCleanedInterval(b){
+
+      if(minNumberOfPointInScreen>0){
+        //in case we have a limit
+        let differenceInTime = b[1].getTime() - b[0].getTime();
+        let minTimeInterval = getMinTimeIntervalWeCanSee()
+        if(differenceInTime<minTimeInterval){
+          //in case the brush does not respect the limit
+          let middleTime = (b[1].getTime() + b[0].getTime())/2;
+
+          let timeToAdd = minTimeInterval/2
+          let upperDate = middleTime + timeToAdd;
+          let lowerDate = middleTime - timeToAdd;
+
+          if(upperDate>biggestDate.getTime()){
+            let timeToShift = upperDate-biggestDate.getTime();
+            upperDate -= timeToShift;
+            lowerDate -= timeToShift;
+          }else if (lowerDate<smallestDate.getTime()){
+            let timeToShift = smallestDate.getTime()-lowerDate;
+            upperDate += timeToShift;
+            lowerDate += timeToShift;
+          }
+          let small_date = new Date(lowerDate)
+          let big_date = new Date(upperDate)
+          b = [small_date,big_date]
+        }
+        let small_date = b[0]
+        let big_date = b[1]
+        return [small_date,big_date]
+      }
+      return b
+
+    }
+
+    function updateXBrushFromInterval(b){
+      let small_date = b[0]
+      let big_date = b[1]
+      //now we should adapt the brush!!
+
+      let brushSelected = sliderBox.select(".xbrush")
+      let selection = brushSelected.select(".selection")
+      let leftSlider = brushSelected.select(".handle--w")
+      let rightSlider = brushSelected.select(".handle--e")
+
+      var contextXScale = d3.scaleTime()
+      .range([0, stackedAreaMarginWidth])//length of the slider
+      .domain([smallestDate, biggestDate])
+
+      let widthForBrush = contextXScale(big_date)-contextXScale(small_date)
+      let leftSliderWidth = leftSlider.attr("width")
+      let xForLeft = contextXScale(small_date) //+ (svgWidth -sliderWidth - leftSliderWidth)/2
+      let xForRight = xForLeft + widthForBrush
+
+      selection.attr("width",widthForBrush)
+      selection.style("x", (xForLeft+leftSliderWidth/2))
+      leftSlider.style("x", xForLeft)
+      rightSlider.style("x", xForRight)
+
+    }
 
 
 
@@ -561,7 +631,7 @@
         chart.path.on("mousemove", function(e) {
           let coordinateX= d3.mouse(this)[0];
           let dateSelected =getXscale().invert(coordinateX)
-          isMovingDown(dateSelected)
+          isMovingDown(dateSelected,d3.event.clientY)
         })
 
         let domElement = document.getElementById("chart_nb_"+chart.id)
@@ -573,7 +643,9 @@
         })
 
         chart.path.on("mouseover", function(e) {
+          if(!isMouseDown){
           App.Plot1.mouseInChart(chart.id)
+        }
         })
 
         chart.path.on("click", function(e) {
@@ -613,10 +685,7 @@
         .attr("d", line.upperPath)
         .attr("stroke", "black")
         line.upperPathElem = document.getElementById("chart_nb_"+line.id)
-        /*.on("mousemove", function(d,i) {
-        let coordinateX= d3.mouse(this)[0];
-        let dateSelected =xScale.invert(coordinateX)
-        onHover(chart.id, dateSelected)})*/
+
       })
     }
 
@@ -784,8 +853,10 @@
         path.on("mousemove", function(e){
           let coordinateX= d3.mouse(this)[0];
           let dateSelected =getXscale().invert(coordinateX)
+          if(!isMouseDown){
           App.Plot1.mouseMoveInFrontChart(indexSelected, dateSelected)
-          isMovingDown(dateSelected)
+        }
+          isMovingDown(dateSelected,d3.event.clientY)
         })
 
         path.on("click",function(){
@@ -810,7 +881,7 @@
         let domEl = document.getElementById("front_chart_nb_"+id)
         domEl.addEventListener("mousemove",function(e){
           //moving in front chart
-          if(id != lastIndexHighlighted && categorySelected == null){
+          if(id != lastIndexHighlighted && categorySelected == null && !isMouseDown){
             addFrontCharts(id, charts)
           }
 

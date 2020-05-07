@@ -293,7 +293,7 @@
 
     function mouseInChart(chartId){
       if(categorySelected == null && stacksSupperpose){
-        //console.log("Mouse went inside chart "+ chartId)
+        console.log("Mouse went inside chart "+ chartId)
         UI.addFrontCharts(chartId,charts)
     }
   }
@@ -306,7 +306,7 @@
     let color = categorySelected == null ? "#B1B1B1" : UI.colorForIndex(categorySelected)
     let closestIndex = model.getClosestIndex(atDate,data)
     UI.addVerticalLines([atDate.getTime()],color, data.values[closestIndex].date)
-    //console.log("Should display info for date "+atDate + " and category "+categorySelected)
+    console.log("Should display info for date "+atDate + " and category "+categorySelected)
     }
 
   function mouseMoveInFrontChart(chartId, atDate){
@@ -314,14 +314,14 @@
     let color = categorySelected == null ? "#B1B1B1" : UI.colorForIndex(categorySelected)
     let closestIndex = model.getClosestIndex(atDate,data)
     UI.addVerticalLines([atDate.getTime()],color, data.values[closestIndex].date)
-    //console.log("Should display info for date "+atDate + " and category "+categorySelected)
+    console.log("Should display info for date "+atDate + " and category "+categorySelected)
   }
 
   function mouseClickedInPartOfChart(chartId){
     userSelectedCategory(chartId)
     UI.hideFrameContainer()
     UI.removeLines()
-    //console.log("Mouse move in Part Of chart "+ chartId)
+    console.log("Mouse move in Part Of chart "+ chartId)
 
   }
 
