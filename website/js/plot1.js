@@ -108,6 +108,9 @@
       streamGraphCheckBox.checked = streamChartWhenSupperPosed
       if(stacksSupperpose){
         addElementsToStackedArea(data)
+        if(scaleSelected != 0){
+          yAxisSelectorChanged(scaleSelected)
+        }
       }
     }
 
@@ -180,6 +183,7 @@
           }));
         }
       }
+
 
       UI.removeCharts()
       UI.removeLines()

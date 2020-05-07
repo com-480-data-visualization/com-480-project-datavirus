@@ -513,7 +513,7 @@
               toAdd = stackedAreaMargin.height/2-halfHeight
               let values = d.values.slice(0, localId)
               let previousSum = values.reduce((a,b) => a + b, 0)
-              return yS(previousSum + toAdd)
+              return yS(previousSum) + toAdd
             }else{
               //normal stacked area
               if(scaleSelected == 0){
@@ -557,7 +557,7 @@
               //steam chart
               let totalSum = d.values.slice().reduce((a,b) => a + b, 0)
               let halfHeight = yS(totalSum/2)
-              let toAdd = +stackedAreaMargin.height/2-halfHeight
+              let toAdd = stackedAreaMargin.height/2-halfHeight
               let values = d.values.slice(0, localId+1)
               let previousSum = values.reduce((a,b) => a + b, 0)
               return yS(previousSum) + toAdd
@@ -566,7 +566,7 @@
               if(scaleSelected == 0){
                 let values = d.values.slice(0, localId+1)
                 let previousSum = values.reduce((a,b) => a + b, 0)
-                return yS(previousSum) + toAdd
+                return yS(previousSum)
               }else{
                 let values = d.values.slice()
                 let popped = values.splice(scaleSelected-1,1)[0]
