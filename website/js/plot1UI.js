@@ -89,6 +89,11 @@
     }
     let xTolerance = 2
     function removeSelectionRect(toDate,clientX){
+      if(toDate > biggestDate){
+        toDate = biggestDate
+      }else if (toDate < smallestDate){
+        toDate = smallestDate
+      }
       let shouldZoom = toDate != null && isMouseDown && !rectTemporarilyDisappeared && Math.abs(clientX - mouseDownCoordinates.x)>xTolerance
       isMouseDown = false
       stackedArea.select("#aboveRectContainer").remove()
@@ -189,10 +194,16 @@
       svg.on("mousedown",function(e){
         //console.log("mouse down")
         let coordinateX= d3.mouse(this)[0];
+        let fromDate = getXscale().invert(coordinateX - stackedAreaMargin.left)
+        if(fromDate < smallestDate){
+          fromDate = smallestDate
+        }else if (fromDate > biggestDate){
+          fromDate = biggestDate
+        }
         mouseDownCoordinates = {
           x:d3.event.clientX,
           y:d3.event.clientY,
-          fromDate:getXscale().invert(coordinateX - stackedAreaMargin.left),
+          fromDate:fromDate,
         }
         isMouseDown = true
       })
@@ -230,7 +241,7 @@
       svg.on("mousemove", function() {
         let coordinateX= d3.mouse(this)[0];
         let coordinateY= d3.mouse(this)[1];
-        let tolerancePixel = 10
+        let tolerancePixel = 30
         if(coordinateX > stackedAreaMargin.left - tolerancePixel
           && coordinateX < stackedAreaMargin.left +stackedAreaMarginWidth + tolerancePixel
           && coordinateY > stackedAreaMargin.top - tolerancePixel
