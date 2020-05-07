@@ -41,6 +41,9 @@
     let categorySelected = null
     let partOfChartContainer = null
     let sliderBox = null
+    let bbrush = null
+    let brushXScale = null
+    let toCallForBrush = null
 
     //the revelant data needed
     let smallestDate = null
@@ -99,8 +102,16 @@
         let cleanedInterval = getCleanedInterval(originalInterval)
         let redWarning = cleanedInterval[0] != originalInterval[0] || cleanedInterval[1] != originalInterval[1]
         timeIntervalSelected = redWarning ? [smallestDate, biggestDate] : cleanedInterval
-        updateXBrushFromInterval(timeIntervalSelected)
-        onBrush()
+        if(redWarning){
+            positionBrush(null, null)
+        }else{
+          console.log(timeIntervalSelected)
+          positionBrush(timeIntervalSelected[0],timeIntervalSelected[1])
+        }
+
+
+
+
 
       }
       //console.log("SHOULD ZOOM "+shouldZoom)
@@ -133,9 +144,6 @@
       if(redWarning){
         rect.attr("class","redWarning")
       }
-
-
-
     }
 
     function prepareSVGElement(){
@@ -152,7 +160,6 @@
         console.log("mouse up")
         let coordinateX= d3.mouse(this)[0];
         let dateSelected =getXscale().invert(coordinateX- stackedAreaMargin.left)
-        console.log(dateSelected)
         removeSelectionRect(dateSelected)
       })
 
@@ -275,16 +282,16 @@
       //drawing the separation line
       sliderBox.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", svgWidth) .attr("y2", 0).attr("class", "topLine");
       // Create a domain
-      var contextXScale = d3.scaleTime()
+       brushXScale = d3.scaleTime()
       .range([0, sliderWidth])//length of the slider
       .domain([smallestDate, biggestDate])
 
 
       if(niceAxis){
-        contextXScale = contextXScale.nice()
+        brushXScale = brushXScale.nice()
       }
       // a function thag generates a bunch of SVG elements.
-      var contextAxis = d3.axisBottom(contextXScale)
+      var contextAxis = d3.axisBottom(brushXScale)
       .tickPadding(5)//height of the date on the axis
       .tickSizeInner(tickHeight)
       .tickSizeOuter(0)
@@ -325,7 +332,7 @@
       const maxYBrushable = contextHeight
       const minXBrushable = 0
       const maxXBrushable = stackedAreaMarginWidth
-      var brush = d3.brushX()
+       bbrush = d3.brushX()
       .extent([
         //sets the brushable part
         //idea use this to avoid selecting outside the range when nice axis is displayed
@@ -338,33 +345,29 @@
 
 
       //The selection rectangle
-      sliderBox.append("g")
+      /*toCallForBrush = sliderBox.append("g")
       .attr("class", "xbrush")
-      .call(brush)
-      .call(brush.move, [minXBrushable, maxXBrushable])
+      .call(bbrush)
+      .call(bbrush.move, [minXBrushable, maxXBrushable])
       .selectAll("rect")
-      .attr("rx",5)
-      /*.attr("display","block")
-      .attr("x",0)
-      .attr("x",0)
-      .attr("width",100)
-      .attr("height",100)*/
+      .attr("rx",5)*/
 
-      let elem = sliderBox.select(".xbrush").select(".overlay").on("click",function(){
+      positionBrush(null, null)
+
+      let elem = sliderBox.select(".xbrush").select(".overlay").on("mousedown",function(){
         timeIntervalSelected = [smallestDate,biggestDate]
         console.log("clicked inside the brush")
-        //onBrush()
+        onBrush()
       })
 
 
 
       // Brush handler. Get time-range from a brush and pass it to the charts.
       function cleanBrushInterval() {
-
         //d3.event.selection looks like [622,698] for example
         //b is then an array of 2 dates: [from, to]
-        var b = d3.event.selection === null ? contextXScale.domain() : d3.event.selection.map(x=>{
-          return contextXScale.invert(x)
+        var b = d3.event.selection === null ? brushXScale.domain() : d3.event.selection.map(x=>{
+          return brushXScale.invert(x)
         });
 
         //first we make sure that we cannot zoom too much
@@ -376,6 +379,27 @@
         onBrush()
       }
     }//end of createSlider
+
+    function positionBrush(fromDate,toDate){
+
+      let position = null
+      if(fromDate != null && toDate != null){
+        let minX = brushXScale(fromDate)
+        let maxX = brushXScale(toDate)
+        position = [minX,maxX]
+      }
+      sliderBox.select(".xbrush").remove()
+      toCallForBrush = sliderBox.append("g")
+      .attr("class", "xbrush")
+      .call(bbrush)
+      .call(bbrush.move, position)
+      .selectAll("rect")
+      .attr("rx",5)
+
+    }
+
+
+
 
     function getCleanedInterval(b){
 
@@ -422,13 +446,13 @@
       let leftSlider = brushSelected.select(".handle--w")
       let rightSlider = brushSelected.select(".handle--e")
 
-      var contextXScale = d3.scaleTime()
+      var brushXScale = d3.scaleTime()
       .range([0, stackedAreaMarginWidth])//length of the slider
       .domain([smallestDate, biggestDate])
 
-      let widthForBrush = contextXScale(big_date)-contextXScale(small_date)
+      let widthForBrush = brushXScale(big_date)-brushXScale(small_date)
       let leftSliderWidth = leftSlider.attr("width")
-      let xForLeft = contextXScale(small_date) //+ (svgWidth -sliderWidth - leftSliderWidth)/2
+      let xForLeft = brushXScale(small_date) //+ (svgWidth -sliderWidth - leftSliderWidth)/2
       let xForRight = xForLeft + widthForBrush
 
       selection.attr("width",widthForBrush)

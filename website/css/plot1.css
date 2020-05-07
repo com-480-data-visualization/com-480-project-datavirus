@@ -73,6 +73,7 @@ svg text::selection {
 
 .sliderBox .xbrush .selection, .sliderBox .xbrush .handle{
   stroke:red;
+  /*visibility: hidden;*/
 }
 
 .upperLinesContainer path {
