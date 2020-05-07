@@ -20,11 +20,11 @@
     let maxYScore = null
     let displayedXInterval = null
     let categorySelected = null
-    let scaleSelected = 7
+    let scaleSelected = 0
 
 //-------------SOME DISPLAYED PREFERENCES ABOUT THE GRAPH --------------------------------------------
     let stacksSupperpose = true
-    let streamChartWhenSupperPosed = true
+    let streamChartWhenSupperPosed = false
     let adapativeYScale = true
 
     //the user controls
