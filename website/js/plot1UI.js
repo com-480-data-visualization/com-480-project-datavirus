@@ -107,7 +107,7 @@
         let redWarning = cleanedInterval[0] != originalInterval[0] || cleanedInterval[1] != originalInterval[1]
         timeIntervalSelected = redWarning ? [smallestDate, biggestDate] : cleanedInterval
         if(redWarning){
-            positionBrush(null, null)
+          positionBrush(null, null)
         }else{
           positionBrush(timeIntervalSelected[0],timeIntervalSelected[1])
         }
@@ -257,8 +257,8 @@
 
           isMovingDown(dateSelected,d3.event.clientY,d3.event.clientX)
           if(!isMouseDown){
-          App.Plot1.mouseMoveOutOfCharts(dateSelected)
-        }
+            App.Plot1.mouseMoveOutOfCharts(dateSelected)
+          }
         }else{
           removeVerticalLines()
           removeSelectionRect(null)
@@ -306,14 +306,14 @@
       let contextHeight = sliderBoxPreferences.height
 
       //1)First we add the context and we draw a horizontal line so we see it well
-       sliderBox = svg.append("g")
+      sliderBox = svg.append("g")
       .attr("class", "sliderBox")
       .attr("transform", "translate(" + stackedAreaMargin.left + "," + (svgHeight - sliderBoxPreferences.height) + ")")
 
       //drawing the separation line
       sliderBox.append("line") .attr("x1", 0) .attr("y1", 0).attr("x2", svgWidth) .attr("y2", 0).attr("class", "topLine");
       // Create a domain
-       brushXScale = d3.scaleTime()
+      brushXScale = d3.scaleTime()
       .range([0, sliderWidth])//length of the slider
       .domain([smallestDate, biggestDate])
 
@@ -363,7 +363,7 @@
       const maxYBrushable = contextHeight
       const minXBrushable = 0
       const maxXBrushable = stackedAreaMarginWidth
-       bbrush = d3.brushX()
+      bbrush = d3.brushX()
       .extent([
         //sets the brushable part
         //idea use this to avoid selecting outside the range when nice axis is displayed
@@ -505,42 +505,45 @@
         })
         .y0(function(d) {
           if(stacksSupperpose){
-            let toAdd = 0
             if(streamChartWhenSupperPosed){
+              //steam chart
+              let toAdd = 0
               let totalSum = d.values.slice().reduce((a,b) => a + b, 0)
               let halfHeight = yS(totalSum/2)
-              toAdd = +stackedAreaMargin.height/2-halfHeight
-            }
-
-            if(scaleSelected == 0){
-            let values = d.values.slice(0, localId)
-            let previousSum = values.reduce((a,b) => a + b, 0)
-            return yS(previousSum) + toAdd
-          }else{
-            //a special scale
-            //console.log("--")
-            //console.log(scaleSelected)
-            let values = d.values.slice()
-            //console.log(values)
-            let popped = values.splice(scaleSelected-1,1)[0]
-            values.unshift(popped)
-            //console.log(values)
-            let sliceUntil = 0
-            if(localId != scaleSelected-1){
-              if(localId < scaleSelected-1){
-                sliceUntil = localId + 1
+              toAdd = stackedAreaMargin.height/2-halfHeight
+              let values = d.values.slice(0, localId)
+              let previousSum = values.reduce((a,b) => a + b, 0)
+              return yS(previousSum + toAdd)
+            }else{
+              //normal stacked area
+              if(scaleSelected == 0){
+                //no chart to put before an other
+                let values = d.values.slice(0, localId)
+                let previousSum = values.reduce((a,b) => a + b, 0)
+                return yS(previousSum)
               }else{
-                sliceUntil = localId
+                let values = d.values.slice()
+                //extracting the value to but before
+                let popped = values.splice(scaleSelected-1,1)[0]
+                //putting the value before
+                values.unshift(popped)
+                //console.log(values)
+                let sliceUntil = 0
+                if(localId != scaleSelected-1){
+                  if(localId < scaleSelected-1){
+                    sliceUntil = localId + 1
+                  }else{
+                    sliceUntil = localId
+                  }
+                }
+                //console.log(localId)
+                //console.log("sliceUntil "+sliceUntil)
+                values = values.slice(0, sliceUntil)
+                //console.log(values)
+                let previousSum = values.reduce((a,b) => a + b, 0)
+                return yS(previousSum)
               }
             }
-            //console.log(localId)
-            //console.log("sliceUntil "+sliceUntil)
-
-            values = values.slice(0, sliceUntil)
-            //console.log(values)
-            let previousSum = values.reduce((a,b) => a + b, 0)
-            return yS(previousSum) + toAdd
-          }
 
           }else{
             //chart interleaving, everything from zero
@@ -550,40 +553,47 @@
         }.bind(this))
         .y1(function(d) {
           if(stacksSupperpose){
-            let toAdd = 0
             if(streamChartWhenSupperPosed){
+              //steam chart
               let totalSum = d.values.slice().reduce((a,b) => a + b, 0)
               let halfHeight = yS(totalSum/2)
-              toAdd = +stackedAreaMargin.height/2-halfHeight
-            }
-
-
-
-            if(scaleSelected == 0){
+              let toAdd = +stackedAreaMargin.height/2-halfHeight
               let values = d.values.slice(0, localId+1)
               let previousSum = values.reduce((a,b) => a + b, 0)
               return yS(previousSum) + toAdd
-          }else{
-            let values = d.values.slice()
-            let popped = values.splice(scaleSelected-1,1)[0]
-            values.unshift(popped)
-
-            let sliceUntil = 0
-            if(localId != scaleSelected-1){
-              if(localId < scaleSelected-1 ){
-                sliceUntil = localId + 1
+            }else{
+              //normal stacked area
+              if(scaleSelected == 0){
+                let values = d.values.slice(0, localId+1)
+                let previousSum = values.reduce((a,b) => a + b, 0)
+                return yS(previousSum) + toAdd
               }else{
-                sliceUntil = localId
+                let values = d.values.slice()
+                let popped = values.splice(scaleSelected-1,1)[0]
+                values.unshift(popped)
+
+                let sliceUntil = 0
+                if(localId != scaleSelected-1){
+                  if(localId < scaleSelected-1 ){
+                    sliceUntil = localId + 1
+                  }else{
+                    sliceUntil = localId
+                  }
+                }
+
+
+                values = values.slice(0, sliceUntil+1)
+                let previousSum = values.reduce((a,b) => a + b, 0)
+                return yS(previousSum) //+ toAdd
               }
             }
 
 
-            values = values.slice(0, sliceUntil+1)
-            let previousSum = values.reduce((a,b) => a + b, 0)
-            return yS(previousSum) //+ toAdd
-          }
+
+
 
           }else{
+            //chart interleaving, simply return the top value
             return yS(d.values[this.id])
           }
         }.bind(this))
@@ -738,8 +748,8 @@
 
         chart.path.on("mouseover", function(e) {
           if(!isMouseDown){
-          App.Plot1.mouseInChart(chart.id)
-        }
+            App.Plot1.mouseInChart(chart.id)
+          }
         })
 
         chart.path.on("click", function(e) {
@@ -948,8 +958,8 @@
           let coordinateX= d3.mouse(this)[0];
           let dateSelected =getXscale().invert(coordinateX)
           if(!isMouseDown){
-          App.Plot1.mouseMoveInFrontChart(indexSelected, dateSelected)
-        }
+            App.Plot1.mouseMoveInFrontChart(indexSelected, dateSelected)
+          }
           isMovingDown(dateSelected,d3.event.clientY,d3.event.clientX)
         })
 

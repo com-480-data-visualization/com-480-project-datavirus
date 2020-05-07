@@ -24,7 +24,7 @@
 
 //-------------SOME DISPLAYED PREFERENCES ABOUT THE GRAPH --------------------------------------------
     let stacksSupperpose = true
-    let streamChartWhenSupperPosed = false
+    let streamChartWhenSupperPosed = true
     let adapativeYScale = true
 
     //the user controls
