@@ -24,7 +24,7 @@
 
 //-------------SOME DISPLAYED PREFERENCES ABOUT THE GRAPH --------------------------------------------
     let stacksSupperpose = true
-    let streamChartWhenSupperPosed = true
+    let streamChartWhenSupperPosed = false
     let adapativeYScale = true
 
     //the user controls
@@ -124,6 +124,9 @@
       scaleSelected = newValue
       shouldAdaptYScale(adapativeYScale)
       addElementsToStackedArea(data)
+      //console.log(newValue)
+      //yAxisSelector.style.backgroundColor = newValue == 0 ? "#B1B1B1" : UI.colorForFadingIndex(newValue-1)
+      //yAxisSelector.style.color = newValue == 0 ? "black" : "#B1B1B1"
     }
 
     function isSelectBoxHidden(bool){
@@ -165,11 +168,16 @@
       let defautOption = document.createElement("option");
       defautOption.value = "0"
       defautOption.textContent = "All"
+      defautOption.style.backgroundColor = "#B1B1B1"
       yAxisSelector.appendChild(defautOption)
       data.categories.forEach((c,i)=>{
         let newOption = document.createElement("option");
         newOption.value = i+1
         newOption.textContent = c
+        let backGroundColor = UI.colorForFadingIndex(i+1)
+        let color = UI.colorForIndex(i+1)
+        //newOption.style.backgroundColor = backGroundColor
+        //newOption.style.color = color
         yAxisSelector.appendChild(newOption)
       })
     }

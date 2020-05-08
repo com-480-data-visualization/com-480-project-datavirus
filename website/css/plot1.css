@@ -3,6 +3,7 @@ svg{
   /*border: 1px solid red;*/
 }
 
+
 .plot1{
   border: 1px solid #B1B1B1;
   margin-left:50px;
@@ -39,6 +40,7 @@ svg{
 
 #yAxisSelector{
   background-color: #B1B1B1;
+   -webkit -appearance:none
 }
 
 #plot1_title_container div{
