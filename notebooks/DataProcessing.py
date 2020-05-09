@@ -1,7 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # YouTube - viz Data Processing
+# YouTube - viz Data Processing
+"""
+Please execute those lines afterwards, update the destination folder
+(printf "[" && head -c-2 weekly_data/*.json && printf "]") > ~/code/com-480-project-datavirus/website/data/weekly_data.json
+(printf "[" && head -c-2 top_v/*.json && printf "]") > ~/code/com-480-project-datavirus/website/data/top_videos.json
+cat weekly_score/*.csv > ~/code/com-480-project-datavirus/website/data/weekly_score.csv
+"""
 
 import os
 from functools import partial
@@ -105,43 +111,59 @@ top_v = (
     )
     .filter("rank <= 5")
     .drop("rank")
-    .groupBy("date", "categories")
-    .agg(
-        F.collect_list(
-            F.struct(
-                "display_id", "view_count", "like_count", "dislike_count", "duration"
-            )
-        ).alias("best_videos")
-    )
-    .orderBy(F.desc("date"), "categories")
+    # .groupBy("date", "categories")
+    # .agg(
+    #     F.collect_list(
+    #         F.struct(
+    #             "display_id", "view_count", "like_count", "dislike_count", "duration"
+    #         )
+    #     ).alias("best_videos")
+    # )
+    .orderBy("date", "categories")
 )
 
-week_score = (
+top_v.coalesce(1).write.json(
+    "top_v", mode="overwrite", timestampFormat="yyyy-MM-dd", lineSep=",\n"
+)
+
+weekly_data = (
     scaled.withColumn("date", F.date_trunc("week", "upload_date"))
     .withColumn("score", scaled.view_count * scaled.weight)
     .groupBy("date", "categories")
     .agg(
-        F.struct(
-            _sum("score").alias("score"),
-            _count("display_id").alias("count"),
-            hist_v_count("view_count").alias("view_count"),
-            hist_l_count("like_count").alias("like_count"),
-            hist_d_count("dislike_count").alias("dislike_count"),
-        ).alias("data")
+        _sum("score").alias("score"),
+        _count("display_id").alias("count"),
+        hist_v_count("view_count").alias("view_count"),
+        hist_l_count("like_count").alias("like_count"),
+        hist_d_count("dislike_count").alias("dislike_count"),
     )
-    .join(top_v, on=["date", "categories"])
-    .groupBy("date")
+    # .join(top_v, on=["date", "categories"])
+    # .groupBy("date")
+    # .pivot("categories", all_cat)
+    # .agg(
+    #     F.struct(
+    #         F.first("data").alias("data"), F.first("best_videos").alias("best_videos")
+    #     )
+    # )
+    .orderBy("date", "categories")
+    .cache()
+)
+
+weekly_data.coalesce(1).write.json(
+    "weekly_data", mode="overwrite", timestampFormat="yyyy-MM-dd", lineSep=",\n"
+)
+
+weekly_score = (
+    weekly_data.groupBy("date")
     .pivot("categories", all_cat)
-    .agg(
-        F.struct(
-            F.first("data").alias("data"), F.first("best_videos").alias("best_videos")
-        )
-    )
+    .agg(F.first("score").alias("score"))
     .orderBy("date")
 )
 
-week_score.coalesce(1).write.json(
-    "output", mode="overwrite", timestampFormat="yyyy-MM-dd", lineSep=",\n"
+weekly_score.coalesce(1).write.csv(
+    "weekly_score",
+    mode="overwrite",
+    timestampFormat="yyyy-MM-dd",
+    header=True,
+    nullValue=0,
 )
-
-# !(printf "[" && head -c-2 output/*.json && printf "]") > weekly_data.json
