@@ -29,6 +29,7 @@ spark = (
 )
 
 df = spark.read.parquet("/scratch/tvaucher/data/helper.parquet.gzip")
+big_df = spark.read.json("/dlabdata1/manoel/useful_stuff_all/")
 cats = df.select("categories").distinct().collect()
 all_cat = sorted([x["categories"] for x in cats])
 start_date = "2008-01-07"
@@ -101,15 +102,19 @@ top_v = (
     scaled.withColumn("date", F.date_trunc("week", "upload_date"))
     .select(
         "date",
+        "upload_date",
         "categories",
         "display_id",
         "view_count",
         "like_count",
         "dislike_count",
         "duration",
+        ((F.col("like_count") + F.col("dislike_count")) / F.col("view_count")).alias(
+            "engagement_score"
+        ),
         F.rank().over(w).alias("rank"),
     )
-    .filter("rank <= 5")
+    .filter("rank <= 20")
     .drop("rank")
     # .groupBy("date", "categories")
     # .agg(
@@ -122,6 +127,8 @@ top_v = (
     .orderBy("date", "categories")
 )
 
+top_v = top_v.join(big_df.select("display_id", "title"), on="display_id")
+
 top_v.coalesce(1).write.json(
     "top_v", mode="overwrite", timestampFormat="yyyy-MM-dd", lineSep=",\n"
 )
@@ -133,6 +140,7 @@ weekly_data = (
     .agg(
         _sum("score").alias("score"),
         _count("display_id").alias("count"),
+        hist_duration("duration").alias("duration"),
         hist_v_count("view_count").alias("view_count"),
         hist_l_count("like_count").alias("like_count"),
         hist_d_count("dislike_count").alias("dislike_count"),
