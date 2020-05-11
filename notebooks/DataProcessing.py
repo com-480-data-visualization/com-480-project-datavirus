@@ -73,27 +73,27 @@ def _count(x):
 
 def histogram(values, bins=20):
     y, x = np.histogram(values, bins=bins)
-    return [y.tolist(), x.tolist()]
+    return y.tolist()  # , x.tolist()]
 
 
 hist_duration = F.pandas_udf(
     partial(histogram, bins=np.linspace(0, 1800, 31)),
-    ArrayType(ArrayType(IntegerType())),
+    ArrayType(IntegerType()),
     F.PandasUDFType.GROUPED_AGG,
 )
 hist_v_count = F.pandas_udf(
     partial(histogram, bins=np.logspace(0, 32, 33, base=2)),
-    ArrayType(ArrayType(LongType())),
+    ArrayType(LongType()),
     F.PandasUDFType.GROUPED_AGG,
 )
 hist_l_count = F.pandas_udf(
     partial(histogram, bins=np.logspace(0, 25, 26, base=2)),
-    ArrayType(ArrayType(LongType())),
+    ArrayType(LongType()),
     F.PandasUDFType.GROUPED_AGG,
 )
 hist_d_count = F.pandas_udf(
     partial(histogram, bins=np.logspace(0, 25, 26, base=2)),
-    ArrayType(ArrayType(LongType())),
+    ArrayType(LongType()),
     F.PandasUDFType.GROUPED_AGG,
 )
 
