@@ -17,20 +17,20 @@
     let closeButton = youtubePlayerBox.getElementsByClassName("topLeft");
     Array.prototype.forEach.call(closeButton, function (b){
       b.addEventListener("click",function(e){
-      hideYoutubePlayerBox()
+        hideYoutubePlayerBox()
       })
 
       b.addEventListener("mousedown",function(e){
-      e.stopPropagation()
+        e.stopPropagation()
       })
 
     });
 
-  
+
 
 
     youtubePlayerBox.addEventListener("mousedown",function(e){
-      console.log("started to drag")
+      //console.log("started to drag")
       insideClick = {
         x:e.clientX - lastPosition.x,
         y:e.clientY - lastPosition.y,
@@ -42,7 +42,7 @@
 
     Array.prototype.forEach.call(resizers, function (r){
       r.addEventListener("mousedown",function(e){
-        console.log("started to resize")
+        //console.log("started to resize")
         insideClick = {
           x:e.clientX - lastPosition.x,
           y:e.clientY - lastPosition.y,
@@ -67,19 +67,19 @@
     })
 
     function stopDragging(){
-      console.log("stopped to drag")
+      //console.log("stopped to drag")
       isDragging = false
       youtubePlayerBox.classList.remove("grabbed")
       iframe.style.pointerEvents = "auto";
     }
 
     function stopResizing(){
-      console.log("stopped to resize")
+      //console.log("stopped to resize")
       isResizing = false
       iframe.style.pointerEvents = "auto";
     }
 
-    function makeAppearYoutubePlayerBox(){
+    function makeAppearYoutubePlayerBox(videoId){
       if(lastPosition == null){
         //let documentW = document.body.clientWidth;
         //let documentH = document.body.clientHeight;
@@ -119,6 +119,12 @@
       youtubePlayerBox.style.width = lastPosition.width+"px"
       youtubePlayerBox.style.height = lastPosition.height+"px"
       youtubePlayerBox.style.display = "block"
+
+      if(videoId != undefined && videoId != null){
+        let newUrl = "https://www.youtube.com/embed/"+videoId
+        iframe.src = newUrl
+      }
+
     }
 
     function hideYoutubePlayerBox(){
@@ -153,21 +159,14 @@
       makeAppearYoutubePlayerBox()
     }
 
+    makeAppearYoutubePlayerBox("UyKgYMQ-AlQ")
+    //makeAppearYoutubePlayerBox()
 
 
-
-
-    makeAppearYoutubePlayerBox()
-
-
-
-
-
-
-  return {
-
-  }
-})();
-App.YoutubePlayer = YoutubePlayer;
-window.App = App;
+    return {
+      makeAppearYoutubePlayerBox:makeAppearYoutubePlayerBox,
+    }
+  })();
+  App.YoutubePlayer = YoutubePlayer;
+  window.App = App;
 })(window);
