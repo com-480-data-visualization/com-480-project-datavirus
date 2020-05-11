@@ -14,6 +14,20 @@
     let youtubePlayerBox = document.getElementById("youtubePlayerBox")
     let resizers = youtubePlayerBox.getElementsByClassName("resizer");
     let iframe = document.getElementById("youtubeIframe")
+    let closeButton = youtubePlayerBox.getElementsByClassName("topLeft");
+    Array.prototype.forEach.call(closeButton, function (b){
+      b.addEventListener("click",function(e){
+      hideYoutubePlayerBox()
+      })
+
+      b.addEventListener("mousedown",function(e){
+      e.stopPropagation()
+      })
+
+    });
+
+  
+
 
     youtubePlayerBox.addEventListener("mousedown",function(e){
       console.log("started to drag")
@@ -122,7 +136,7 @@
       let middleHOfWindow = lastPosition.y + lastPosition.height/2
       let isClickTop = e.clientY < middleHOfWindow
       let isClickLeft = e.clientX < middleWOfWindow
-      
+
       let anchorY = isClickTop ?  lastPosition.y + lastPosition.height : lastPosition.y
       let anchorX = isClickLeft ? lastPosition.x + lastPosition.width : lastPosition.x
 

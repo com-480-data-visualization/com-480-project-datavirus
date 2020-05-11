@@ -16,6 +16,7 @@
   width:20px;
   height: 20px;
   background-color: blue;
+
 }
 
 #youtubePlayerBox .topRight{
@@ -27,6 +28,8 @@
   top:0px;
   left:0px;
   background-color: red;
+  cursor: auto;
+  z-index: 1;
 }
 
 #youtubePlayerBox .bottomLeft{
@@ -43,6 +46,7 @@
 
 #youtubePlayerBox iframe{
   /*display: none;*/
+  position: relative;
   width:100%;
   height: 100%;
 
