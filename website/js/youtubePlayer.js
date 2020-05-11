@@ -7,13 +7,16 @@
     let insideClick = null
     const minHeight = 50
     const minWidth = 75
-    let minBorder = 25
+    const minBorder = 25
     let isDragging = false
+    let isResizing = false
 
     let youtubePlayerBox = document.getElementById("youtubePlayerBox")
+    let resizers = youtubePlayerBox.getElementsByClassName("resizer");
     let iframe = document.getElementById("youtubeIframe")
 
     youtubePlayerBox.addEventListener("mousedown",function(e){
+      console.log("started to drag")
       insideClick = {
         x:e.clientX - lastPosition.x,
         y:e.clientY - lastPosition.y,
@@ -23,21 +26,44 @@
       iframe.style.pointerEvents = "none";
     })
 
+    Array.prototype.forEach.call(resizers, function (r){
+      r.addEventListener("mousedown",function(e){
+        console.log("started to resize")
+        insideClick = {
+          x:e.clientX - lastPosition.x,
+          y:e.clientY - lastPosition.y,
+        }
+        isResizing = true
+        iframe.style.pointerEvents = "none";
+        e.stopPropagation()
+      })
+    });
+
     document.addEventListener("mouseup",function(e){
-      isDragging = false
-      youtubePlayerBox.classList.remove("grabbed")
-      iframe.style.pointerEvents = "auto";
+      stopDragging()
+      stopResizing()
     })
-
-
 
     document.addEventListener("mousemove",function(e){
       if(isDragging){
         move(e)
+      }else if(isResizing){
+        resize(e)
       }
     })
 
+    function stopDragging(){
+      console.log("stopped to drag")
+      isDragging = false
+      youtubePlayerBox.classList.remove("grabbed")
+      iframe.style.pointerEvents = "auto";
+    }
 
+    function stopResizing(){
+      console.log("stopped to resize")
+      isResizing = false
+      iframe.style.pointerEvents = "auto";
+    }
 
     function makeAppearYoutubePlayerBox(){
       if(lastPosition == null){
@@ -57,6 +83,22 @@
           height:height,
         }
         iframe.style.pointerEvents = "auto";
+      }else{
+        //size correction
+        lastPosition.width = Math.max(minWidth, lastPosition.width)
+        lastPosition.height = Math.max(minHeight, lastPosition.height)
+        //position correction
+        if(lastPosition.x > window.innerWidth - minBorder){
+          lastPosition.x = window.innerWidth - minBorder
+        }else if(lastPosition.x + lastPosition.width < minBorder){
+          lastPosition.x = minBorder - lastPosition.width
+        }
+
+        if(lastPosition.y > window.innerHeight - minBorder){
+          lastPosition.y = window.innerHeight - minBorder
+        }else if(lastPosition.y + lastPosition.height < minBorder){
+          lastPosition.y = minBorder - lastPosition.height
+        }
       }
       youtubePlayerBox.style.left = lastPosition.x+"px"
       youtubePlayerBox.style.top = lastPosition.y+"px"
@@ -70,25 +112,37 @@
     }
 
     function move(e){
-      let newX = e.clientX - insideClick.x
-      let newY = e.clientY - insideClick.y
-
-      if(newX > window.innerWidth - minBorder){
-        newX = window.innerWidth - minBorder
-      }else if(newX + lastPosition.width < minBorder){
-        newX = minBorder - lastPosition.width
-      }
-
-      if(newY > window.innerHeight - minBorder){
-        newY = window.innerHeight - minBorder
-      }else if(newY + lastPosition.height < minBorder){
-        newY = minBorder - lastPosition.height
-      }
-
-      lastPosition.x = newX
-      lastPosition.y = newY
+      lastPosition.x = e.clientX - insideClick.x
+      lastPosition.y = e.clientY - insideClick.y
       makeAppearYoutubePlayerBox()
     }
+
+    function resize(e){
+      let middleWOfWindow = lastPosition.x + lastPosition.width/2
+      let middleHOfWindow = lastPosition.y + lastPosition.height/2
+      let isClickTop = e.clientY < middleHOfWindow
+      let isClickLeft = e.clientX < middleWOfWindow
+      
+      let anchorY = isClickTop ?  lastPosition.y + lastPosition.height : lastPosition.y
+      let anchorX = isClickLeft ? lastPosition.x + lastPosition.width : lastPosition.x
+
+      let newWidth = Math.abs(e.clientX - anchorX) //+ borderX
+      let newHeight = Math.abs(e.clientY - anchorY) //+ borderY
+
+      newWidth = Math.max(minWidth, newWidth)
+      newHeight = Math.max(minHeight, newHeight)
+      lastPosition.width = newWidth
+      lastPosition.height = newHeight
+      lastPosition.x = isClickLeft ? anchorX - newWidth :lastPosition.x
+      lastPosition.y = isClickTop ? anchorY - newHeight :lastPosition.y
+
+      makeAppearYoutubePlayerBox()
+    }
+
+
+
+
+
     makeAppearYoutubePlayerBox()
 
 
