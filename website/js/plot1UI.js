@@ -393,12 +393,10 @@
         });
 
         //first we make sure that we cannot zoom too much
-        if(minNumberOfPointInScreen>0){
-          b = getCleanedInterval(b)
-          updateXBrushFromInterval(b)
-        }
+        b = getCleanedInterval(b)
         timeIntervalSelected = b
         onBrush()
+
       }
     }//end of createSlider
 
@@ -455,35 +453,6 @@
       return b
 
     }
-
-    function updateXBrushFromInterval(b){
-      let small_date = b[0]
-      let big_date = b[1]
-      //now we should adapt the brush!!
-
-      let brushSelected = sliderBox.select(".xbrush")
-      let selection = brushSelected.select(".selection")
-      let leftSlider = brushSelected.select(".handle--w")
-      let rightSlider = brushSelected.select(".handle--e")
-
-      var brushXScale = d3.scaleTime()
-      .range([0, stackedAreaMarginWidth])//length of the slider
-      .domain([smallestDate, biggestDate])
-
-      let widthForBrush = brushXScale(big_date)-brushXScale(small_date)
-      let leftSliderWidth = leftSlider.attr("width")
-      let xForLeft = brushXScale(small_date) //+ (svgWidth -sliderWidth - leftSliderWidth)/2
-      let xForRight = xForLeft + widthForBrush
-
-      selection.attr("width",widthForBrush)
-      selection.style("x", (xForLeft+leftSliderWidth/2))
-      leftSlider.style("x", xForLeft)
-      rightSlider.style("x", xForRight)
-
-    }
-
-
-
 
 
     class Chart {
