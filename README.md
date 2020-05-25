@@ -80,10 +80,10 @@ We have an early prototype online on our [Main page](https://tvaucher.github.io/
 **80% of the final grade**
 
 ### Repository
-Even though this is the class repository where our preprocessing can be found, our main repository for the visualization is [here](https://github.com/tvaucher/youtube-viz) where you can find [setup instructions](https://github.com/tvaucher/youtube-viz/blob/master/README.md) if you want to build the website locally. For usage, you can directly go on the visualization, there are some instructions.
+Even though this is the class repository where our preprocessing can be found, our main repository for the visualization is [here](https://github.com/tvaucher/youtube-viz) where you can find [setup instructions](https://github.com/tvaucher/youtube-viz/blob/master/README.md) if you want to build the website locally. For how to use the website, you can directly go on the visualization, there are some instructions.
 
 ### Screencast
-TBA
+Our screencast is available [here](https://youtu.be/6r9WGdg86io). Be sure to look at it until the very end, you'll not be disappointed.
 
 ### Process book
 Our process book is available online [here](https://tvaucher.github.io/youtube-viz/process-book/), but if you really want it in pdf format, we uploaded it as a [6-page pdf](https://tvaucher.github.io/youtube-viz/assets/pdf/process-book.pdf). We don't suggest using it as you'll miss out on the animation :wink:
